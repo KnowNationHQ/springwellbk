@@ -24,6 +24,8 @@ export function AboutSection() {
           </p>
         </div>
 
+        <img src="/images/about.svg" alt="" aria-hidden className="w-full h-48 sm:h-64 md:h-72 object-cover rounded-2xl mb-10" />
+
         <div className="grid grid-cols-3 gap-4 sm:gap-8 mb-12">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
@@ -43,6 +45,19 @@ export function AboutSection() {
                 <h3 className="font-bold text-sm mb-1">{p.title}</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">{p.desc}</p>
               </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          {[
+            { title: "Mission", desc: "To make secure, modern banking accessible to everyone and help our customers build a brighter financial future." },
+            { title: "Vision", desc: "A world where everyone has a financial plan and contributes to a stronger, more inclusive global economy." },
+            { title: "What we do", desc: "We are a modern financial institution helping people save, borrow, and grow their money with transparency and care." },
+          ].map((b) => (
+            <div key={b.title} className="p-6 rounded-2xl bg-green-50 border border-green-100">
+              <h3 className="font-bold text-green-800 mb-2">{b.title}</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">{b.desc}</p>
             </div>
           ))}
         </div>

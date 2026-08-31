@@ -10,10 +10,15 @@ interface TabsContextValue {
 
 const TabsContext = React.createContext<TabsContextValue>({ value: "", onValueChange: () => {} });
 
-function Tabs({ defaultValue, children, className, ...props }: { defaultValue: string; children: React.ReactNode; className?: string }) {
-  const [value, setValue] = React.useState(defaultValue);
+function Tabs({ defaultValue, value, onValueChange, children, className, ...props }: { defaultValue?: string; value?: string; onValueChange?: (value: string) => void; children: React.ReactNode; className?: string }) {
+  const [internal, setInternal] = React.useState(defaultValue ?? "");
+  const current = value !== undefined ? value : internal;
+  const handleChange = (v: string) => {
+    if (value === undefined) setInternal(v);
+    onValueChange?.(v);
+  };
   return (
-    <TabsContext.Provider value={{ value, onValueChange: setValue }}>
+    <TabsContext.Provider value={{ value: current, onValueChange: handleChange }}>
       <div className={className} {...props}>{children}</div>
     </TabsContext.Provider>
   );

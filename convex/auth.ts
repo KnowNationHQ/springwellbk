@@ -67,7 +67,7 @@ export const getDashboardStats = query({
     if (!user) return null;
     const transactions = await ctx.db
       .query("transactions")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user_createdAt", (q) => q.eq("userId", args.userId))
       .order("desc")
       .take(20);
     const loanApplications = await ctx.db
@@ -76,5 +76,61 @@ export const getDashboardStats = query({
       .order("desc")
       .collect();
     return { user, transactions, loanApplications };
+  },
+});
+
+// Customer-initiated transfer to another SpringWell user (by email). Moves
+// money atomically and records both sides of the transaction.
+export const transfer = mutation({
+  args: {
+    fromUserId: v.id("users"),
+    toEmail: v.string(),
+    amount: v.number(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (args.amount <= 0) throw new Error("Amount must be greater than zero");
+
+    const from = await ctx.db.get(args.fromUserId);
+    if (!from) throw new Error("Sender account not found");
+    if (from.status !== "active") throw new Error("Your account is not active");
+    if (from.balance < args.amount) throw new Error("Insufficient funds");
+
+    const to = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.toEmail.trim().toLowerCase()))
+      .unique();
+    if (!to) throw new Error("No SpringWell user found with that email");
+    if (to._id === from._id) throw new Error("Cannot transfer to your own account");
+
+    const senderName = `${from.firstName} ${from.lastName}`;
+    const note = args.description?.trim();
+    const ts = Date.now();
+
+    await ctx.db.patch(from._id, { balance: from.balance - args.amount });
+    await ctx.db.patch(to._id, { balance: to.balance + args.amount });
+
+    await ctx.db.insert("transactions", {
+      userId: from._id,
+      type: "debit",
+      amount: args.amount,
+      currency: from.currency,
+      description: note ? `Transfer to ${to.firstName} ${to.lastName} — ${note}` : `Transfer to ${to.firstName} ${to.lastName}`,
+      senderName,
+      status: "successful",
+      createdAt: ts,
+    });
+    await ctx.db.insert("transactions", {
+      userId: to._id,
+      type: "credit",
+      amount: args.amount,
+      currency: from.currency,
+      description: note ? `Transfer from ${senderName} — ${note}` : `Transfer from ${senderName}`,
+      senderName,
+      status: "successful",
+      createdAt: ts,
+    });
+
+    return { ok: true as const };
   },
 });

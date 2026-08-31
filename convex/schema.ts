@@ -15,6 +15,7 @@ export default defineSchema({
     accountType: v.union(v.literal("checking"), v.literal("savings"), v.literal("business")),
     currency: v.union(v.literal("USD"), v.literal("GBP"), v.literal("EUR")),
     balance: v.number(),
+    creditBalance: v.optional(v.number()),
     status: v.union(v.literal("active"), v.literal("suspended"), v.literal("pending")),
     role: v.union(v.literal("customer"), v.literal("admin")),
     lastLogin: v.optional(v.number()),
@@ -32,9 +33,11 @@ export default defineSchema({
     senderName: v.optional(v.string()),
     status: v.union(v.literal("successful"), v.literal("pending"), v.literal("failed")),
     backDate: v.optional(v.string()),
+    source: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
+    .index("by_user_createdAt", ["userId", "createdAt"])
     .index("by_status", ["status"])
     .index("by_createdAt", ["createdAt"]),
 
@@ -68,4 +71,13 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_status", ["status"]),
+
+  bankLinks: defineTable({
+    userId: v.id("users"),
+    institution: v.string(),
+    accessToken: v.string(),
+    lastSync: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"]),
 });

@@ -44,6 +44,7 @@ export function ContactSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-4">
+            <img src="/images/contact.svg" alt="" aria-hidden className="w-full h-40 object-cover rounded-xl" />
             {[
               { icon: Mail, label: "Email", value: "support@springwellbk.com", href: "mailto:support@springwellbk.com" },
               { icon: Phone, label: "Phone", value: "+1 (555) 123-4567", href: "tel:+15551234567" },

@@ -2,6 +2,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CreditCard, PiggyBank, Building2, ArrowRight } from "lucide-react";
 
+const offerings = [
+  { img: "/images/service-loans.svg", title: "Loans", desc: "Personal, auto, and home loans with fast approvals.", href: "/loan" },
+  { img: "/images/service-transfer.svg", title: "Fund Transfer", desc: "Move money locally and internationally in seconds.", href: "/dashboard" },
+  { img: "/images/service-net.svg", title: "Net Banking", desc: "Bank online securely from any device, 24/7.", href: "/login" },
+  { img: "/images/service-prepaid.svg", title: "Prepaid Card", desc: "Load and spend with a contactless prepaid card.", href: "/register" },
+  { img: "/images/service-mcash.svg", title: "Mcash", desc: "Tap-to-pay and mobile wallet integration.", href: "/register" },
+  { img: "/images/service-cards.svg", title: "Debit & Credit", desc: "Everyday cards with rewards and zero hidden fees.", href: "/register" },
+];
+
 const accounts = [
   {
     icon: CreditCard,
@@ -57,6 +66,26 @@ export function ServicesSection() {
               </Button>
             </div>
           ))}
+        </div>
+
+        <div className="mt-14">
+          <div className="text-center mb-8">
+            <p className="text-green-600 text-sm font-medium mb-2">Services</p>
+            <h3 className="text-xl sm:text-2xl font-bold">Everything you need in one place</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {offerings.map((o) => (
+              <Link key={o.title} href={o.href} className="group flex gap-4 p-5 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-green-300 transition-all">
+                <div className="w-11 h-11 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-green-600 transition-colors overflow-hidden">
+                  <img src={o.img} alt="" aria-hidden className="h-7 w-7 object-contain" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm mb-1">{o.title}</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">{o.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>

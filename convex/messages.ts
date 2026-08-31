@@ -24,16 +24,6 @@ export const create = mutation({
   },
 });
 
-export const updateStatus = mutation({
-  args: {
-    messageId: v.id("messages"),
-    status: v.union(v.literal("read"), v.literal("replied")),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.messageId, { status: args.status });
-  },
-});
-
 export const unreadCount = query({
   args: {},
   handler: async (ctx) => {

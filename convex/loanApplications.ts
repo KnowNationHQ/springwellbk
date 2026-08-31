@@ -44,13 +44,3 @@ export const create = mutation({
     });
   },
 });
-
-export const updateStatus = mutation({
-  args: {
-    applicationId: v.id("loanApplications"),
-    status: v.union(v.literal("approved"), v.literal("rejected")),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.applicationId, { status: args.status });
-  },
-});

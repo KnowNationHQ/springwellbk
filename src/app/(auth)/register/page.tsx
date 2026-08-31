@@ -82,7 +82,7 @@ export default function RegisterPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">First Name *</Label>
                   <Input required value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-10" />
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                 <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-10" />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Account Type *</Label>
                   <Select value={accountType} onValueChange={setAccountType}>

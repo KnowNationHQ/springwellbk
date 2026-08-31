@@ -36,8 +36,9 @@ export const create = mutation({
     }
     return await ctx.db.insert("users", {
       ...args,
-      balance: 0,
-      status: "pending",
+       balance: 0,
+       creditBalance: 0,
+       status: "pending",
       role: "customer",
       createdAt: Date.now(),
     });
@@ -50,12 +51,5 @@ export const updateBalance = mutation({
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
     await ctx.db.patch(args.userId, { balance: user.balance + args.amount });
-  },
-});
-
-export const updateStatus = mutation({
-  args: { userId: v.id("users"), status: v.union(v.literal("active"), v.literal("suspended"), v.literal("pending")) },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, { status: args.status });
   },
 });
