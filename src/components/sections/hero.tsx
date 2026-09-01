@@ -55,9 +55,6 @@ export function HeroSection() {
               <Button asChild size="lg" className="bg-white text-green-800 hover:bg-green-100">
                 <Link href="/register">{t("hero.cta1")}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-green-700">
-                <Link href="/loan">{t("hero.cta2")}</Link>
-              </Button>
             </div>
             <div className="flex items-center gap-4 mt-6 justify-center lg:justify-start text-xs text-green-300">
               <span className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> {t("hero.badge1")}</span>
