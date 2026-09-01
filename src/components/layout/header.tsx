@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, LogIn } from "lucide-react";
+import { Menu, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useT } from "@/lib/i18n";
@@ -67,7 +67,7 @@ export function Header() {
         <div className="flex items-center gap-3 md:hidden">
           <a href="mailto:support@springwellbk.com" className="text-green-200 hover:text-white text-xs transition-colors">support@springwellbk.com</a>
           <Link href="/login" aria-label={t("header.logIn")} className="text-white hover:text-green-300 transition-colors">
-            <LogIn className="h-5 w-5" />
+            <UserCircle className="h-5 w-5" />
           </Link>
         </div>
 
