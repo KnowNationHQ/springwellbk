@@ -58,12 +58,12 @@ export function ServicesSection() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {offerings.map((o) => (
-              <Link key={o.titleKey} href={o.href} className="group flex gap-4 p-5 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-green-300 transition-all">
-                <div className="w-11 h-11 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-green-600 transition-colors overflow-hidden">
-                  <img src={o.img} alt="" aria-hidden className="h-7 w-7 object-contain" />
+              <Link key={o.titleKey} href={o.href} className="group block rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-green-300 transition-all">
+                <div className="relative h-44 sm:h-52 overflow-hidden">
+                  <img src={o.img} alt="" aria-hidden className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm mb-1"><T k={o.titleKey} /></h4>
+                <div className="p-5">
+                  <h4 className="font-bold text-base mb-1"><T k={o.titleKey} /></h4>
                   <p className="text-gray-600 text-sm leading-relaxed"><T k={o.descKey} /></p>
                 </div>
               </Link>
