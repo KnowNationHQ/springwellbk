@@ -65,6 +65,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3 md:hidden">
+          <Link href="/login" className="text-green-200 hover:text-white text-xs font-medium transition-colors">{t("header.onlineBanking")}</Link>
           <a href="mailto:support@springwellbk.com" className="text-green-200 hover:text-white text-xs transition-colors">support@springwellbk.com</a>
           <Link href="/login" aria-label={t("header.logIn")} className="text-white hover:text-green-300 transition-colors">
             <UserCircle className="h-5 w-5" />
