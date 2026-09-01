@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useT } from "@/lib/i18n";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 
 const NAV = [
+  { href: "/login", labelKey: "header.onlineBanking" },
   { href: "/", labelKey: "nav.home" },
   { href: "/#about", labelKey: "nav.about" },
   { href: "/#services", labelKey: "nav.services" },
@@ -33,7 +34,6 @@ export function Header() {
             <span>+1 (555) 123-4567</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-white transition-colors">{t("header.onlineBanking")}</Link>
             <Link href="/#contact" className="hover:text-white transition-colors">{t("nav.contact")}</Link>
             <Link href="/register" className="hover:text-white transition-colors font-semibold">{t("header.openAnAccount")}</Link>
             <span className="text-green-200">Language:</span>
@@ -56,12 +56,19 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" asChild className="text-white hover:bg-green-700">
+          <Button variant="ghost" asChild className="text-white hover:bg-green-700 !rounded-full">
             <Link href="/login">{t("header.logIn")}</Link>
           </Button>
-          <Button asChild className="bg-white text-green-800 hover:bg-green-100">
+          <Button asChild className="bg-white text-green-800 hover:bg-green-100 !rounded-[5px]">
             <Link href="/register">{t("header.openAccount")}</Link>
           </Button>
+        </div>
+
+        <div className="flex items-center gap-3 md:hidden">
+          <a href="mailto:support@springwellbk.com" className="text-green-200 hover:text-white text-xs transition-colors">support@springwellbk.com</a>
+          <Link href="/login" aria-label={t("header.logIn")} className="text-white hover:text-green-300 transition-colors">
+            <LogIn className="h-5 w-5" />
+          </Link>
         </div>
 
         <Sheet>
