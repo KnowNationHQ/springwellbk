@@ -9,8 +9,9 @@ async function requireAdmin(ctx: MutationCtx, adminUserId: Id<"users">) {
   }
 }
 
-// Credit or debit a customer account. Updates the balance and records the
-// transaction in a single atomic mutation.
+// Credit or debit a customer account. Records the transaction as PENDING;
+// the balance is applied only when an admin completes it with the activation
+// code (see completeTransaction). This mirrors the reference two-step flow.
 export const creditDebit = mutation({
   args: {
     adminUserId: v.id("users"),
@@ -26,24 +27,90 @@ export const creditDebit = mutation({
 
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
-    if (args.type === "debit" && user.balance < args.amount) {
-      throw new Error("Insufficient funds");
-    }
 
     const ts = args.date ? new Date(args.date + "T12:00:00").getTime() : Date.now();
-    const newBalance = args.type === "credit" ? user.balance + args.amount : user.balance - args.amount;
-    await ctx.db.patch(args.userId, { balance: newBalance });
-
     return await ctx.db.insert("transactions", {
       userId: args.userId,
       type: args.type,
       amount: args.amount,
       currency: user.currency,
       description: args.description ?? (args.type === "credit" ? "Admin credit" : "Admin debit"),
-      status: "successful",
+      status: "pending",
       createdAt: ts,
       backDate: args.date ?? undefined,
     });
+  },
+});
+
+// Activation code required to release (complete) a pending transaction.
+// Override via Convex env var ACTIVATION_CODE in production.
+const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "SWB-ADMIN-2026";
+
+// Complete a pending transaction after verifying the admin's activation code.
+// Applies the balance change and marks the transaction successful.
+export const completeTransaction = mutation({
+  args: {
+    adminUserId: v.id("users"),
+    transactionId: v.id("transactions"),
+    activationCode: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    if (args.activationCode.trim() !== ACTIVATION_CODE) {
+      throw new Error("Invalid activation code");
+    }
+
+    const tx = await ctx.db.get(args.transactionId);
+    if (!tx) throw new Error("Transaction not found");
+    if (tx.status !== "pending") throw new Error("Transaction is not pending");
+
+    if (tx.type === "transfer") {
+      const from = await ctx.db.get(tx.userId);
+      const to = tx.counterpartyId ? await ctx.db.get(tx.counterpartyId) : null;
+      if (!from || !to) throw new Error("Account not found");
+      if (from.balance < tx.amount) throw new Error("Sender has insufficient funds");
+      await ctx.db.patch(tx.userId, { balance: from.balance - tx.amount });
+      await ctx.db.patch(tx.counterpartyId!, { balance: to.balance + tx.amount });
+      // Mark the counterpart transfer row successful too.
+      const counterpart = await ctx.db
+        .query("transactions")
+        .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("counterpartyId"), tx.userId),
+            q.eq(q.field("type"), "transfer"),
+            q.eq(q.field("status"), "pending"),
+          ),
+        )
+        .first();
+      if (counterpart) await ctx.db.patch(counterpart._id, { status: "successful" });
+    } else if (tx.type === "credit") {
+      const user = await ctx.db.get(tx.userId);
+      if (!user) throw new Error("Account not found");
+      await ctx.db.patch(tx.userId, { balance: user.balance + tx.amount });
+    } else if (tx.type === "debit") {
+      const user = await ctx.db.get(tx.userId);
+      if (!user) throw new Error("Account not found");
+      if (user.balance < tx.amount) throw new Error("Insufficient funds");
+      await ctx.db.patch(tx.userId, { balance: user.balance - tx.amount });
+    }
+
+    await ctx.db.patch(tx._id, { status: "successful" });
+    return tx._id;
+  },
+});
+
+// Backdate an existing transaction's date (admin override).
+export const backDateTransaction = mutation({
+  args: {
+    adminUserId: v.id("users"),
+    transactionId: v.id("transactions"),
+    date: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const ts = new Date(args.date + "T12:00:00").getTime();
+    await ctx.db.patch(args.transactionId, { createdAt: ts, backDate: args.date });
   },
 });
 
@@ -87,6 +154,7 @@ export const updateUser = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.adminUserId);
     const { adminUserId, userId, ...patch } = args;
+    void adminUserId;
     const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
     if (Object.keys(clean).length) await ctx.db.patch(userId, clean);
   },
@@ -106,7 +174,9 @@ export const deleteUser = mutation({
   },
 });
 
-// Admin-initiated transfer between two customer accounts.
+// Admin-initiated transfer between two customer accounts. Records both legs as
+// PENDING; balances are applied when an admin completes the transaction with
+// the activation code (see completeTransaction).
 export const transfer = mutation({
   args: {
     adminUserId: v.id("users"),
@@ -124,12 +194,9 @@ export const transfer = mutation({
     const from = await ctx.db.get(args.fromUserId);
     const to = await ctx.db.get(args.toUserId);
     if (!from || !to) throw new Error("User not found");
-    if (from.balance < args.amount) throw new Error("Insufficient funds");
 
     const ts = args.date ? new Date(args.date + "T12:00:00").getTime() : Date.now();
     const sender = `${from.firstName} ${from.lastName}`;
-    await ctx.db.patch(args.fromUserId, { balance: from.balance - args.amount });
-    await ctx.db.patch(args.toUserId, { balance: to.balance + args.amount });
     await ctx.db.insert("transactions", {
       userId: args.fromUserId,
       type: "transfer",
@@ -137,7 +204,8 @@ export const transfer = mutation({
       currency: from.currency,
       description: args.description ?? `Transfer to ${to.firstName} ${to.lastName}`,
       senderName: sender,
-      status: "successful",
+      status: "pending",
+      counterpartyId: args.toUserId,
       createdAt: ts,
       backDate: args.date ?? undefined,
     });
@@ -148,7 +216,8 @@ export const transfer = mutation({
       currency: from.currency,
       description: args.description ?? `Transfer from ${sender}`,
       senderName: sender,
-      status: "successful",
+      status: "pending",
+      counterpartyId: args.fromUserId,
       createdAt: ts,
       backDate: args.date ?? undefined,
     });
@@ -220,5 +289,16 @@ export const listMessages = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("messages").order("desc").collect();
+  },
+});
+
+export const pendingTransactions = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("transactions")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .order("desc")
+      .collect();
   },
 });

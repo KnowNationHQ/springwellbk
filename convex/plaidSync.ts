@@ -78,7 +78,7 @@ export const syncAll = internalAction({
 // this demo it returns a mock token so the flow works without credentials.
 export const createLinkToken = action({
   args: { userId: v.id("users") },
-  handler: async (_ctx, _args): Promise<{ token: string; mock: boolean }> => {
+  handler: async (): Promise<{ token: string; mock: boolean }> => {
     return { token: "mock-link-token-" + Math.random().toString(36).slice(2), mock: true };
   },
 });

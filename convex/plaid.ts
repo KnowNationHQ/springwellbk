@@ -1,6 +1,5 @@
 import { query, mutation, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
 
 export const getLinks = query({
   args: { userId: v.id("users") },

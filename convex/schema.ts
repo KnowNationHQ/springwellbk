@@ -19,6 +19,10 @@ export default defineSchema({
     status: v.union(v.literal("active"), v.literal("suspended"), v.literal("pending")),
     role: v.union(v.literal("customer"), v.literal("admin")),
     lastLogin: v.optional(v.number()),
+    otpCode: v.optional(v.string()),
+    otpExpiresAt: v.optional(v.number()),
+    resetCode: v.optional(v.string()),
+    resetExpiresAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index("by_email", ["email"])
@@ -34,6 +38,7 @@ export default defineSchema({
     status: v.union(v.literal("successful"), v.literal("pending"), v.literal("failed")),
     backDate: v.optional(v.string()),
     source: v.optional(v.string()),
+    counterpartyId: v.optional(v.id("users")),
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])

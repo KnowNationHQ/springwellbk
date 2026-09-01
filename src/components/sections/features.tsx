@@ -1,39 +1,43 @@
 import { CreditCard, Smartphone, TrendingUp } from "lucide-react";
+import { T } from "@/lib/i18n";
 
 const features = [
-  {
-    icon: CreditCard,
-    title: "Fast Transfers",
-    description: "Send and receive money instantly with zero fees on domestic transfers.",
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile Banking",
-    description: "Manage your accounts anytime, anywhere from your phone or tablet.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Grow Your Money",
-    description: "Earn competitive interest rates on savings and investment accounts.",
-  },
+  { icon: CreditCard, titleKey: "features.fastTransfers.title", descKey: "features.fastTransfers.desc" },
+  { icon: Smartphone, titleKey: "features.mobileBanking.title", descKey: "features.mobileBanking.desc" },
+  { icon: TrendingUp, titleKey: "features.growMoney.title", descKey: "features.growMoney.desc" },
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="py-12 sm:py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-10">
-          <p className="text-green-600 text-sm font-medium mb-2">Why Choose Us</p>
-          <h2 className="text-2xl sm:text-3xl font-bold">Modern Banking for Everyone</h2>
+    <section className="relative overflow-hidden bg-gradient-to-b from-white to-green-50/70 py-16 sm:py-24">
+      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-green-300/30 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-emerald-200/30 blur-3xl" />
+      <div className="relative mx-auto max-w-7xl px-4">
+        <div className="mb-12 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-green-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+            <T k="features.eyebrow" />
+          </span>
+          <h2 className="mt-4 bg-gradient-to-r from-green-800 to-green-500 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+            <T k="features.heading" />
+          </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {features.map((f) => (
-            <div key={f.title} className="text-center p-6 rounded-xl bg-gray-50 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <f.icon className="h-6 w-6 text-green-700" />
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {features.map((f, i) => (
+            <div
+              key={f.titleKey}
+              className="group relative overflow-hidden rounded-2xl border border-green-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-green-900/5"
+            >
+              <span className="absolute inset-x-8 top-0 h-1 origin-left scale-x-0 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 transition-transform duration-300 group-hover:scale-x-100" />
+              <span className="absolute right-6 top-4 select-none text-6xl font-black text-green-50/80">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-green-600 to-green-500 text-white shadow-lg shadow-green-600/20 transition-transform duration-300 group-hover:scale-110">
+                <f.icon className="h-7 w-7" />
               </div>
-              <h3 className="font-bold mb-2">{f.title}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{f.description}</p>
+              <h3 className="text-lg font-bold text-gray-900"><T k={f.titleKey} /></h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600"><T k={f.descKey} /></p>
             </div>
           ))}
         </div>

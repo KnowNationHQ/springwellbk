@@ -8,6 +8,7 @@ import { RatesSection } from "@/components/sections/rates";
 import { AboutSection } from "@/components/sections/about";
 import { ContactSection } from "@/components/sections/contact";
 import { CTASection } from "@/components/sections/cta";
+import { WhyBankSection } from "@/components/sections/why";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
         <ServicesSection />
         <RatesSection />
         <AboutSection />
+        <WhyBankSection />
         <CTASection />
         <ContactSection />
       </main>

@@ -14,25 +14,59 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function LoginPage() {
   const router = useRouter();
   const login = useMutation(api.auth.login);
+  const requestLoginCode = useMutation(api.auth.requestLoginCode);
+  const verifyLoginCode = useMutation(api.auth.verifyLoginCode);
+
+  const [mode, setMode] = useState<"password" | "otp">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [otpStep, setOtpStep] = useState<"request" | "verify">("request");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function routeAfterLogin(result: { userId: string; role: string }) {
+    localStorage.setItem("userId", result.userId);
+    router.push(result.role === "admin" ? "/admin" : "/dashboard");
+  }
+
+  async function handlePassword(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
       const result = await login({ email, password });
-      localStorage.setItem("userId", result.userId);
-      if (result.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
+      routeAfterLogin(result);
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRequestCode(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await requestLoginCode({ email });
+      setOtpStep("verify");
+    } catch (err: any) {
+      setError(err.message || "Could not send code");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await verifyLoginCode({ email, code });
+      routeAfterLogin(result);
+    } catch (err: any) {
+      setError(err.message || "Invalid or expired code");
     } finally {
       setLoading(false);
     }
@@ -51,48 +85,111 @@ export default function LoginPage() {
         <Card className="shadow-lg">
           <CardContent className="p-6 sm:p-8">
             <h2 className="text-xl font-bold text-center mb-1">Welcome Back</h2>
-            <p className="text-gray-500 text-sm text-center mb-6">Log in to your account</p>
+            <p className="text-gray-500 text-sm text-center mb-6">
+              {mode === "password"
+                ? "Log in to your account"
+                : otpStep === "request"
+                  ? "We'll email you a one-time code"
+                  : `Enter the code we sent to ${email}`}
+            </p>
 
             {error && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">{error}</div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="rounded border-gray-300" />
-                  <span className="text-gray-600">Remember me</span>
-                </label>
-                <Link href="/forgot-password" className="text-green-700 hover:underline font-medium">
-                  Forgot password?
-                </Link>
-              </div>
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
+            {mode === "password" ? (
+              <form onSubmit={handlePassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded border-gray-300" />
+                    <span className="text-gray-600">Remember me</span>
+                  </label>
+                  <Link href="/forgot-password" className="text-green-700 hover:underline font-medium">
+                    Forgot password?
+                  </Link>
+                </div>
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign In"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => { setError(""); setOtpStep("request"); setMode("otp"); }}
+                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                >
+                  Email me a login code instead
+                </button>
+              </form>
+            ) : otpStep === "request" ? (
+              <form onSubmit={handleRequestCode} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                  {loading ? "Sending..." : "Send code"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => { setError(""); setMode("password"); }}
+                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                >
+                  Back to password login
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyCode} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="code">Login code</Label>
+                  <Input
+                    id="code"
+                    inputMode="numeric"
+                    placeholder="6-digit code"
+                    required
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                  {loading ? "Verifying..." : "Verify & sign in"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => { setError(""); setCode(""); setOtpStep("request"); }}
+                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                >
+                  Use a different email
+                </button>
+              </form>
+            )}
 
             <p className="text-center text-sm text-gray-500 mt-6">
               Don&apos;t have an account?{" "}

@@ -1,7 +1,7 @@
 "use client";
 
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import { ReactNode, useMemo } from "react";
+import { ReactNode } from "react";
 
 const url = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 

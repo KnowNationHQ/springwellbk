@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 export const list = query({
   args: {},
@@ -34,7 +35,7 @@ export const create = mutation({
     if (existing) {
       throw new Error("Email already registered");
     }
-    return await ctx.db.insert("users", {
+    const userId = await ctx.db.insert("users", {
       ...args,
        balance: 0,
        creditBalance: 0,
@@ -42,6 +43,8 @@ export const create = mutation({
       role: "customer",
       createdAt: Date.now(),
     });
+    await ctx.scheduler.runAfter(0, api.email.sendWelcomeEmail, { to: args.email, firstName: args.firstName });
+    return userId;
   },
 });
 

@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, FileText, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, Menu } from "lucide-react";
+import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, FileText, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, Menu, KeyRound, CalendarClock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger } from "@/components/ui/sheet";
+import { sym } from "@/lib/format";
 
-type Modal = null | "credit" | "transfer" | "edit" | "status";
+type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -32,9 +33,12 @@ export default function AdminDashboard() {
   const transactions = useQuery(api.transactions.recent, { limit: 20 });
   const loans = useQuery(api.admin.listLoans);
   const messages = useQuery(api.admin.listMessages);
+  const pending = useQuery(api.admin.pendingTransactions);
 
   const creditDebit = useMutation(api.admin.creditDebit);
   const transfer = useMutation(api.admin.transfer);
+  const completeTransaction = useMutation(api.admin.completeTransaction);
+  const backDateTransaction = useMutation(api.admin.backDateTransaction);
   const setUserStatus = useMutation(api.admin.setUserStatus);
   const setUserRole = useMutation(api.admin.setUserRole);
   const updateUser = useMutation(api.admin.updateUser);
@@ -56,10 +60,20 @@ export default function AdminDashboard() {
 
   const [edit, setEdit] = useState({ firstName: "", lastName: "", email: "", accountType: "savings", currency: "USD", status: "active", balance: "", creditBalance: "" });
   const [statusTarget, setStatusTarget] = useState("");
+  const [completeTxn, setCompleteTxn] = useState("");
+  const [activationCode, setActivationCode] = useState("");
+  const [backdateTxn, setBackdateTxn] = useState<any>(null);
+  const [backdateValue, setBackdateValue] = useState("");
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  function togglePw(id: string) {
+    setRevealed((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
 
-  if (!userId || users === undefined || transactions === undefined || loans === undefined || messages === undefined) {
+  if (!userId || users === undefined || transactions === undefined || loans === undefined || messages === undefined || pending === undefined) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
   }
+
+  const adminUser = users.find((u: any) => u._id === userId);
 
   const customers = users.filter((u: any) =>
     u.firstName.toLowerCase().includes(search.toLowerCase()) ||
@@ -92,7 +106,7 @@ export default function AdminDashboard() {
     if (!userId || !activeUser || !creditAmount) return;
     try {
       await creditDebit({ adminUserId: userId as any, userId: activeUser._id, type: creditType, amount: Number(creditAmount), description: creditDesc || (creditType === "credit" ? "Admin credit" : "Admin debit"), date: creditDate || undefined });
-      flash(`${creditType === "credit" ? "Credit" : "Debit"} completed`);
+      flash(`${creditType === "credit" ? "Credit" : "Debit"} created — pending activation`);
       setModal(null);
     } catch (err: any) { flash(err?.message ?? "Transaction failed"); }
   }
@@ -102,7 +116,7 @@ export default function AdminDashboard() {
     if (!userId || !fromUser || !toUser || !transferAmount) return;
     try {
       await transfer({ adminUserId: userId as any, fromUserId: fromUser as any, toUserId: toUser as any, amount: Number(transferAmount), description: transferDesc || "Admin transfer", date: transferDate || undefined });
-      flash("Transfer completed");
+      flash("Transfer created — pending activation");
       setModal(null);
     } catch (err: any) { flash(err?.message ?? "Transfer failed"); }
   }
@@ -154,6 +168,36 @@ export default function AdminDashboard() {
     flash(`Message marked ${status}`);
   }
 
+  function openComplete(id?: string) {
+    setCompleteTxn(id ?? "");
+    setActivationCode("");
+    setModal("complete");
+  }
+  async function handleComplete(e: React.FormEvent) {
+    e.preventDefault();
+    if (!userId || !completeTxn || !activationCode) return;
+    try {
+      await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode });
+      flash("Transaction completed");
+      setModal(null);
+    } catch (err: any) { flash(err?.message ?? "Completion failed"); }
+  }
+
+  function openBackdate(t: any) {
+    setBackdateTxn(t);
+    setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10));
+    setModal("backdate");
+  }
+  async function handleBackdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!userId || !backdateTxn || !backdateValue) return;
+    try {
+      await backDateTransaction({ adminUserId: userId as any, transactionId: backdateTxn._id as any, date: backdateValue });
+      flash("Transaction date updated");
+      setModal(null);
+    } catch (err: any) { flash(err?.message ?? "Update failed"); }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-green-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-20">
@@ -169,13 +213,16 @@ export default function AdminDashboard() {
             <Input placeholder="Search customers..." className="pl-10 w-56 bg-green-800 border-green-700 text-white placeholder:text-green-300" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <span className="hidden sm:inline text-xs sm:text-sm text-green-200">Admin</span>
-          <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:text-green-200 hover:bg-green-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
+          {adminUser && (
+            <span className="hidden lg:inline text-xs text-green-200 border border-green-700 rounded px-2 py-0.5">{sym(adminUser.currency)}{adminUser.balance.toLocaleString()}</span>
+          )}
+          <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-green-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline ml-2">Logout</span>
           </Button>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-green-800" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-green-700" aria-label="Open menu">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
@@ -200,7 +247,7 @@ export default function AdminDashboard() {
               </nav>
               <div className="mt-auto p-3 border-t border-green-700">
                 <SheetClose asChild>
-                  <Button variant="outline" className="w-full text-white border-green-700 hover:bg-green-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
+                  <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-green-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
                 </SheetClose>
               </div>
             </SheetContent>
@@ -215,7 +262,7 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Stat icon={<Users className="h-4 w-4" />} label="Customers" value={String(nonAdmins.length)} />
-          <Stat icon={<Wallet className="h-4 w-4" />} label="Total Balance" value={`USD ${totalBalance.toLocaleString()}`} />
+          <Stat icon={<Wallet className="h-4 w-4" />} label="Total Balance" value={`$${totalBalance.toLocaleString()}`} />
           <Stat icon={<FileText className="h-4 w-4" />} label="Pending Loans" value={String(pendingLoans)} />
           <Stat icon={<MessageSquare className="h-4 w-4" />} label="Unread Msgs" value={String(unreadMsgs)} />
         </div>
@@ -225,7 +272,57 @@ export default function AdminDashboard() {
           <Button size="sm" className="bg-green-700 hover:bg-green-800 sm:w-auto w-full" onClick={() => openTransfer(null)}><Send className="h-4 w-4 mr-1" />Fund Transfer</Button>
           <Button size="sm" className="bg-green-700 hover:bg-green-800 sm:w-auto w-full" onClick={openStatus}><CheckCircle className="h-4 w-4 mr-1" />Activate</Button>
           <Button size="sm" className="bg-red-600 hover:bg-red-700 sm:w-auto w-full" onClick={openStatus}><XCircle className="h-4 w-4 mr-1" />Suspend</Button>
+          <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white sm:w-auto w-full" onClick={() => openComplete()}><KeyRound className="h-4 w-4 mr-1" />Complete</Button>
         </div>
+
+        <Card>
+          <CardContent className="p-4 md:p-6">
+            <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><KeyRound className="h-4 w-4" /> Pending Transactions ({pending.length})</h2>
+            {pending.length === 0 ? (
+              <p className="text-gray-500 text-sm">No pending transactions.</p>
+            ) : (
+              <>
+                <div className="lg:hidden space-y-3">
+                  {pending.map((t: any) => (
+                    <div key={t._id} className="border rounded-lg p-3 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">{new Date(t.createdAt).toLocaleDateString()}</span>
+                        <span className="capitalize text-xs text-gray-600">{t.type}</span>
+                      </div>
+                      <p className="text-sm font-medium">{t.description || "N/A"}</p>
+                      <p className="text-xs text-gray-500">{sym(t.currency)}{t.amount.toLocaleString()}{t.counterpartyId ? ` → ${acct({ _id: t.counterpartyId })}` : ""}</p>
+                      <Button size="sm" className="w-full bg-green-700 hover:bg-green-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="hidden lg:block">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-green-800 text-white text-xs">
+                        <th className="px-3 py-2 text-left">Date</th>
+                        <th className="px-3 py-2 text-left">Type</th>
+                        <th className="px-3 py-2 text-left">Account</th>
+                        <th className="px-3 py-2 text-left">Amount</th>
+                        <th className="px-3 py-2 text-left">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pending.map((t: any) => (
+                        <tr key={t._id} className="border-b hover:bg-gray-50">
+                          <td className="px-3 py-2 text-xs">{new Date(t.createdAt).toLocaleDateString()}</td>
+                          <td className="px-3 py-2 text-xs capitalize">{t.type}</td>
+                          <td className="px-3 py-2 text-xs font-mono">{acct(t)}</td>
+                          <td className="px-3 py-2 font-semibold text-xs">{sym(t.currency)}{t.amount.toLocaleString()}</td>
+                          <td className="px-3 py-2"><Button size="sm" className="bg-green-700 hover:bg-green-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardContent className="p-4 md:p-6">
@@ -253,11 +350,18 @@ export default function AdminDashboard() {
                     <span className="capitalize">{c.accountType}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t">
-                    <div>Credit Bal.<div className="font-semibold text-gray-700">{c.currency} {(c.creditBalance ?? 0).toLocaleString()}</div></div>
+                    <div>Credit Bal.<div className="font-semibold text-gray-700">{sym(c.currency)}{(c.creditBalance ?? 0).toLocaleString()}</div></div>
                     <div>Last Login<div className="font-semibold text-gray-700">{c.lastLogin ? new Date(c.lastLogin).toLocaleDateString() : "—"}</div></div>
                   </div>
+                  <div className="text-xs pt-1 border-t">
+                    <span className="text-gray-500">Password: </span>
+                    <span className="font-semibold text-gray-700 break-all">{revealed.has(c._id) ? c.password : "••••••••"}</span>
+                    <button type="button" className="ml-2 text-green-700 underline" onClick={() => togglePw(c._id)}>
+                      {revealed.has(c._id) ? <span className="inline-flex items-center gap-1"><EyeOff className="h-3 w-3" />Hide</span> : <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />Show</span>}
+                    </button>
+                  </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm">{c.currency} {c.balance.toLocaleString()}</span>
+                    <span className="font-bold text-sm">{sym(c.currency)}{c.balance.toLocaleString()}</span>
                     <div className="flex flex-wrap gap-1">
                       <IconBtn title="Credit/Debit" onClick={() => openCredit(c)}><ArrowUpDown className="h-3 w-3" /></IconBtn>
                       <IconBtn title="Transfer" onClick={() => openTransfer(c)}><Send className="h-3 w-3" /></IconBtn>
@@ -285,6 +389,7 @@ export default function AdminDashboard() {
                     <th className="px-3 py-2 text-left">Status</th>
                     <th className="px-3 py-2 text-left">Joined</th>
                     <th className="px-3 py-2 text-left">Last Login</th>
+                    <th className="px-3 py-2 text-left">Password</th>
                     <th className="px-3 py-2 text-left">Control</th>
                   </tr>
                 </thead>
@@ -295,12 +400,16 @@ export default function AdminDashboard() {
                       <td className="px-3 py-2 text-xs">{c.email}</td>
                       <td className="px-3 py-2 font-medium text-xs flex items-center gap-2"><div className="h-6 w-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-[10px] font-bold">{initials(c)}</div>{c.firstName} {c.lastName}</td>
                       <td className="px-3 py-2 text-xs capitalize">{c.accountType}</td>
-                      <td className="px-3 py-2 font-semibold text-xs">{c.currency} {c.balance.toLocaleString()}</td>
-                      <td className="px-3 py-2 text-xs">{c.currency} {(c.creditBalance ?? 0).toLocaleString()}</td>
+                      <td className="px-3 py-2 font-semibold text-xs">{sym(c.currency)}{c.balance.toLocaleString()}</td>
+                      <td className="px-3 py-2 text-xs">{sym(c.currency)}{(c.creditBalance ?? 0).toLocaleString()}</td>
                       <td className="px-3 py-2"><Badge variant={c.status === "active" ? "default" : c.status === "suspended" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{c.status}</Badge></td>
                       <td className="px-3 py-2 text-xs text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
-                      <td className="px-3 py-2 text-xs text-gray-500">{c.lastLogin ? new Date(c.lastLogin).toLocaleDateString() : "—"}</td>
-                      <td className="px-3 py-2">
+                       <td className="px-3 py-2 text-xs text-gray-500">{c.lastLogin ? new Date(c.lastLogin).toLocaleDateString() : "—"}</td>
+                       <td className="px-3 py-2 text-xs break-all">
+                         <span>{revealed.has(c._id) ? c.password : "••••••••"}</span>
+                         <button type="button" className="ml-1 text-green-700 underline text-[10px]" onClick={() => togglePw(c._id)}>{revealed.has(c._id) ? "Hide" : "Show"}</button>
+                       </td>
+                       <td className="px-3 py-2">
                         <div className="flex flex-wrap gap-1">
                           <IconBtn title="Credit/Debit" onClick={() => openCredit(c)}><ArrowUpDown className="h-3 w-3" /></IconBtn>
                           <IconBtn title="Transfer" onClick={() => openTransfer(c)}><Send className="h-3 w-3" /></IconBtn>
@@ -335,7 +444,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-600">
                     <span>{new Date(l.createdAt).toLocaleDateString()}</span>
-                    <span className="font-semibold">USD {l.amount.toLocaleString()}</span>
+                    <span className="font-semibold">{"$"}{l.amount.toLocaleString()}</span>
                   </div>
                   <p className="text-xs text-gray-500 capitalize">{l.purpose}</p>
                   {l.status === "pending" && (
@@ -365,7 +474,7 @@ export default function AdminDashboard() {
                     <tr key={l._id} className="border-b hover:bg-gray-50">
                       <td className="px-3 py-2 text-xs">{new Date(l.createdAt).toLocaleDateString()}</td>
                       <td className="px-3 py-2 font-medium text-xs">{l.fullName}<div className="text-gray-400">{l.email}</div></td>
-                      <td className="px-3 py-2 font-semibold text-xs">USD {l.amount.toLocaleString()}</td>
+                      <td className="px-3 py-2 font-semibold text-xs">{"$"}{l.amount.toLocaleString()}</td>
                       <td className="px-3 py-2 text-xs">{l.purpose}</td>
                       <td className="px-3 py-2"><Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge></td>
                       <td className="px-3 py-2">
@@ -462,9 +571,10 @@ export default function AdminDashboard() {
                       </div>
                       <p className="text-sm font-medium">{t.description || "N/A"}</p>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="capitalize text-gray-500">{t.type}</span>
-                        <span className="font-bold">{t.currency} {t.amount.toLocaleString()}</span>
+                        <span className="capitalize text-gray-500">{t.type}{t.senderName ? ` · ${t.senderName}` : ""}</span>
+                        <span className="font-bold">{sym(t.currency)}{t.amount.toLocaleString()}</span>
                       </div>
+                      <Button size="sm" variant="outline" className="w-full text-xs h-7" onClick={() => openBackdate(t)}><CalendarClock className="h-3 w-3 mr-1" />Back Date</Button>
                     </div>
                   ))}
                 </div>
@@ -476,8 +586,10 @@ export default function AdminDashboard() {
                         <th className="px-3 py-2 text-left">Date</th>
                         <th className="px-3 py-2 text-left">Type</th>
                         <th className="px-3 py-2 text-left">Description</th>
+                        <th className="px-3 py-2 text-left">Sender</th>
                         <th className="px-3 py-2 text-left">Amount</th>
                         <th className="px-3 py-2 text-left">Status</th>
+                        <th className="px-3 py-2 text-left">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -486,10 +598,14 @@ export default function AdminDashboard() {
                           <td className="px-3 py-2 text-xs">{new Date(t.createdAt).toLocaleDateString()}</td>
                           <td className="px-3 py-2 text-xs capitalize">{t.type}</td>
                           <td className="px-3 py-2 text-xs">{t.description || "N/A"}</td>
-                          <td className="px-3 py-2 font-semibold text-xs">{t.currency} {t.amount.toLocaleString()}</td>
+                          <td className="px-3 py-2 text-xs capitalize">{t.senderName ?? "—"}</td>
+                          <td className="px-3 py-2 font-semibold text-xs">{sym(t.currency)}{t.amount.toLocaleString()}</td>
                           <td className="px-3 py-2 flex items-center gap-1">
                             {t.backDate && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Backdated</Badge>}
                             <Badge variant={t.status === "successful" ? "default" : "destructive"} className="text-[10px] px-1.5 py-0">{t.status}</Badge>
+                          </td>
+                          <td className="px-3 py-2">
+                            <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => openBackdate(t)}><CalendarClock className="h-3 w-3 mr-1" />Back Date</Button>
                           </td>
                         </tr>
                       ))}
@@ -599,6 +715,37 @@ export default function AdminDashboard() {
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
                   <Button type="button" className="bg-green-700 hover:bg-green-800" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }}>Activate</Button>
                   <Button type="button" className="bg-red-600 hover:bg-red-700" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "suspended"); setModal(null); } }}>Suspend</Button>
+                </div>
+              </form>
+            )}
+            {modal === "complete" && (
+              <form onSubmit={handleComplete} className="p-5 space-y-3">
+                <h3 className="font-bold text-lg">Complete Transaction</h3>
+                <p className="text-sm text-gray-500">Select a pending transaction and enter the activation code to release the funds.</p>
+                <select className="border rounded px-3 py-2 text-sm w-full" value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required>
+                  <option value="">Select transaction</option>
+                  {pending.map((t: any) => (
+                    <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()} · {t.description || "N/A"}</option>
+                  ))}
+                </select>
+                <Input type="text" placeholder="Activation Code" value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
+                <div className="flex gap-2 justify-end pt-2">
+                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Complete</Button>
+                </div>
+              </form>
+            )}
+            {modal === "backdate" && (
+              <form onSubmit={handleBackdate} className="p-5 space-y-3">
+                <h3 className="font-bold text-lg">Back Date Transaction</h3>
+                {backdateTxn && <p className="text-sm text-gray-500 break-words">{backdateTxn.description || "N/A"}</p>}
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Transaction date</label>
+                  <Input type="date" value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
+                </div>
+                <div className="flex gap-2 justify-end pt-2">
+                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Update</Button>
                 </div>
               </form>
             )}

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger } from "@/components/ui/sheet";
+import { sym } from "@/lib/format";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -131,12 +132,12 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs sm:text-sm text-green-200 hidden sm:inline">{user.firstName} {user.lastName}</span>
-            <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:text-green-200 hover:bg-green-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
+            <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-green-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline ml-2">Logout</span>
             </Button>
             <SheetTrigger asChild>
-              <button className="md:hidden p-2" aria-label="Open menu">
+              <button className="md:hidden p-2 text-white hover:bg-green-700 rounded-md" aria-label="Open menu">
                 <Menu className="h-6 w-6" />
               </button>
             </SheetTrigger>
@@ -156,7 +157,7 @@ export default function DashboardPage() {
             </SheetClose>
           </nav>
           <div className="mt-auto p-3 border-t border-green-700">
-            <Button variant="outline" className="w-full text-white border-green-600 hover:bg-green-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
+            <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-green-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
           </div>
         </SheetContent>
       </Sheet>
@@ -167,7 +168,7 @@ export default function DashboardPage() {
             <p className="text-green-200 text-xs">Welcome back, {user.firstName}</p>
             <p className="text-green-200 text-xs hidden sm:block">Last sign in {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "—"}</p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{user.currency} {user.balance.toLocaleString()}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{sym(user.currency)}{user.balance.toLocaleString()}</h1>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
             <p className="text-green-200 text-xs">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account &middot; Signed in as {user.firstName} {user.lastName}</p>
             <span className="text-green-400 text-xs hidden sm:inline">•</span>
@@ -228,7 +229,7 @@ export default function DashboardPage() {
                   <h2 className="text-sm font-bold">Personal Account</h2>
                   <span className="text-xs text-gray-400">Quick view</span>
                 </div>
-                <p className="text-2xl font-bold text-green-700">{user.currency} {user.balance.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-green-700">{sym(user.currency)}{user.balance.toLocaleString()}</p>
                 <p className="text-xs text-gray-500 mt-1">Account Number &bull;••• {cardLast4}</p>
               </CardContent>
             </Card>
@@ -263,11 +264,11 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-green-50 rounded-lg p-3">
                     <p className="text-xs text-gray-500">Money In</p>
-                    <p className="font-bold text-green-700">{user.currency} {creditTotal.toLocaleString()}</p>
+                    <p className="font-bold text-green-700">{sym(user.currency)}{creditTotal.toLocaleString()}</p>
                   </div>
                   <div className="bg-red-50 rounded-lg p-3">
                     <p className="text-xs text-gray-500">Money Out</p>
-                    <p className="font-bold text-red-600">{user.currency} {debitTotal.toLocaleString()}</p>
+                    <p className="font-bold text-red-600">{sym(user.currency)}{debitTotal.toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="h-2.5 w-full rounded-full bg-red-100 overflow-hidden flex">
@@ -317,7 +318,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-red-600"}`}>
-                          {t.type === "credit" ? "+" : "-"}{t.currency} {t.amount.toLocaleString()}
+                          {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                         </span>
                       </div>
                     ))}
@@ -347,7 +348,7 @@ export default function DashboardPage() {
                             <td className="px-3 py-2 text-xs">{t.description || "N/A"}</td>
                             <td className="px-3 py-2 font-semibold text-xs">
                               <span className={t.type === "credit" ? "text-green-600" : "text-red-600"}>
-                                {t.type === "credit" ? "+" : "-"}{t.currency} {t.amount.toLocaleString()}
+                                {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                               </span>
                             </td>
                             <td className="px-3 py-2 flex items-center gap-1">
@@ -382,7 +383,7 @@ export default function DashboardPage() {
                     {loanApplications.map((l: any) => (
                       <div key={l._id} className="border rounded-lg p-3 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold">USD {l.amount.toLocaleString()}</span>
+                          <span className="font-semibold">{"$"}{l.amount.toLocaleString()}</span>
                           <Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge>
                         </div>
                         <p className="text-xs text-gray-500 capitalize">{l.purpose}</p>
@@ -405,7 +406,7 @@ export default function DashboardPage() {
                         {loanApplications.map((l: any) => (
                           <tr key={l._id} className="border-b hover:bg-gray-50">
                             <td className="px-3 py-2 text-xs">{new Date(l.createdAt).toLocaleDateString()}</td>
-                            <td className="px-3 py-2 font-semibold text-xs">USD {l.amount.toLocaleString()}</td>
+                            <td className="px-3 py-2 font-semibold text-xs">{"$"}{l.amount.toLocaleString()}</td>
                             <td className="px-3 py-2 text-xs">{l.purpose}</td>
                             <td className="px-3 py-2">
                               <Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge>
@@ -437,11 +438,11 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-green-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">Available Balance</p>
-                  <p className="font-bold text-green-700">{user.currency} {user.balance.toLocaleString()}</p>
+                  <p className="font-bold text-green-700">{sym(user.currency)}{user.balance.toLocaleString()}</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">Credit Balance</p>
-                  <p className="font-bold text-green-700">{user.currency} {(user.creditBalance ?? 0).toLocaleString()}</p>
+                  <p className="font-bold text-green-700">{sym(user.currency)}{(user.creditBalance ?? 0).toLocaleString()}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -518,7 +519,7 @@ export default function DashboardPage() {
                 <Label className="text-xs text-gray-500">Note (optional)</Label>
                 <Input className="h-10" placeholder="Dinner, rent, etc." value={transferForm.description} onChange={(e) => setTransferForm({ ...transferForm, description: e.target.value })} />
               </div>
-              <p className="text-xs text-gray-500">Available: {user.currency} {user.balance.toLocaleString()}</p>
+              <p className="text-xs text-gray-500">Available: {sym(user.currency)}{user.balance.toLocaleString()}</p>
               <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 h-10" disabled={transferBusy}>
                 {transferBusy ? "Sending..." : "Send Transfer"}
               </Button>

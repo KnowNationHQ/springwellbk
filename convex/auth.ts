@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 export const login = mutation({
   args: {
@@ -22,6 +23,110 @@ export const getCurrentUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.userId);
+  },
+});
+
+const OTP_TTL_MS = 10 * 60 * 1000;
+
+export const requestLoginCode = mutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+    // Always respond ok to avoid leaking which emails are registered.
+    if (!user) return { ok: true as const };
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + OTP_TTL_MS;
+    await ctx.db.patch(user._id, { otpCode: code, otpExpiresAt: expiresAt });
+
+    await ctx.scheduler.runAfter(0, api.email.sendOtpEmail, { to: user.email, code });
+
+    return { ok: true as const };
+  },
+});
+
+export const verifyLoginCode = mutation({
+  args: { email: v.string(), code: v.string() },
+  handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+    if (!user || !user.otpCode || !user.otpExpiresAt) {
+      throw new Error("Invalid or expired code");
+    }
+    if (Date.now() > user.otpExpiresAt) {
+      await ctx.db.patch(user._id, { otpCode: undefined, otpExpiresAt: undefined });
+      throw new Error("Invalid or expired code");
+    }
+    if (user.otpCode !== args.code.trim()) {
+      throw new Error("Invalid or expired code");
+    }
+    await ctx.db.patch(user._id, {
+      otpCode: undefined,
+      otpExpiresAt: undefined,
+      lastLogin: Date.now(),
+    });
+    return {
+      userId: user._id,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+  },
+});
+
+const RESET_TTL_MS = 30 * 60 * 1000;
+
+export const requestPasswordReset = mutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+    if (!user) return { ok: true as const };
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    await ctx.db.patch(user._id, {
+      resetCode: code,
+      resetExpiresAt: Date.now() + RESET_TTL_MS,
+    });
+    await ctx.scheduler.runAfter(0, api.email.sendPasswordResetEmail, { to: user.email, code });
+    return { ok: true as const };
+  },
+});
+
+export const resetPassword = mutation({
+  args: { email: v.string(), code: v.string(), newPassword: v.string() },
+  handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+    if (!user || !user.resetCode || !user.resetExpiresAt) {
+      throw new Error("Invalid or expired code");
+    }
+    if (Date.now() > user.resetExpiresAt) {
+      await ctx.db.patch(user._id, { resetCode: undefined, resetExpiresAt: undefined });
+      throw new Error("Invalid or expired code");
+    }
+    if (user.resetCode !== args.code.trim()) {
+      throw new Error("Invalid or expired code");
+    }
+    await ctx.db.patch(user._id, {
+      password: args.newPassword,
+      resetCode: undefined,
+      resetExpiresAt: undefined,
+    });
+    return { ok: true as const };
   },
 });
 

@@ -38,3 +38,7 @@ yarn-error.log*
 convex/_generated
 
 .vercel
+
+# typescript
+*.tsbuildinfo
+immg/

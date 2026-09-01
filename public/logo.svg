@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248 48" width="248" height="48" role="img" aria-label="SpringWell Bank">
+  <g transform="translate(0,0)">
+    <circle cx="24" cy="24" r="21" fill="none" stroke="#0f5132" stroke-width="3"/>
+    <path d="M31 17c-3-3-9-3-11 1-2 3 0 6 3 7s7 2 7 5-3 6-8 5" fill="none" stroke="#0f5132" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 9c1.6-3.2 5.4-4.2 8.4-3-1.2 3.2-4.6 5.2-8.4 3z" fill="#198754"/>
+  </g>
+  <text x="56" y="23" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#0f5132">SpringWell</text>
+  <text x="57" y="40" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="4" fill="#198754">BANK</text>
+</svg>
