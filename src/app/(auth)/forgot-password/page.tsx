@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-green-700">
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
             <Landmark className="h-7 w-7" />
             SpringWell Bank
           </Link>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">{error}</div>
             )}
             {info && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded text-sm">{info}</div>
+              <div className="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">{info}</div>
             )}
 
             {step === "email" ? (
@@ -91,11 +91,11 @@ export default function ForgotPasswordPage() {
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" placeholder="name@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
                   {loading ? "Sending..." : "Send Reset Code"}
                 </Button>
                 <div className="text-center text-sm">
-                  <Link href="/login" className="text-green-700 hover:underline">Back to Login</Link>
+                  <Link href="/login" className="text-blue-700 hover:underline">Back to Login</Link>
                 </div>
               </form>
             ) : (
@@ -116,13 +116,13 @@ export default function ForgotPasswordPage() {
                   <Label htmlFor="confirm">Confirm password</Label>
                   <Input id="confirm" type="password" placeholder="Re-enter password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
                 </div>
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
                   {loading ? "Resetting..." : "Reset Password"}
                 </Button>
                 <button
                   type="button"
                   onClick={() => { setError(""); setInfo(""); setStep("email"); }}
-                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                  className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
                   Use a different email
                 </button>

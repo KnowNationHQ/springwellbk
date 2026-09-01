@@ -3,19 +3,19 @@ import { T } from "@/lib/i18n";
 
 export function WhyBankSection() {
   return (
-    <section className="bg-green-50 py-12 sm:py-16">
+    <section className="bg-blue-50 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mb-10 text-center">
-          <p className="mb-2 text-sm font-medium text-green-600"><T k="why.eyebrow" /></p>
+          <p className="mb-2 text-sm font-medium text-blue-600"><T k="why.eyebrow" /></p>
           <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl"><T k="why.heading" /></h2>
         </div>
         <div className="grid gap-10 lg:grid-cols-2">
           <figure className="flex flex-col rounded-2xl bg-white p-8 shadow-sm">
-            <Quote className="h-8 w-8 text-green-500" />
+            <Quote className="h-8 w-8 text-blue-500" />
             <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-gray-700">
               <T k="why.quote" />
             </blockquote>
-            <figcaption className="mt-4 text-sm font-semibold text-green-700">
+            <figcaption className="mt-4 text-sm font-semibold text-blue-700">
               <T k="why.quoteName" />
             </figcaption>
           </figure>

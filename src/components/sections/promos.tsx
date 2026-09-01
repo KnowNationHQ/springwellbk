@@ -3,10 +3,10 @@ import { ArrowRight } from "lucide-react";
 import { T } from "@/lib/i18n";
 
 const promos = [
-  { eyebrowKey: "promo.checking.eyebrow", titleKey: "promo.checking.title", descKey: "promo.checking.desc", ctaKey: "promo.checking.cta", href: "/register", bg: "from-green-700 to-green-900", img: "/images/promo-checking.jpeg" },
-  { eyebrowKey: "promo.business.eyebrow", titleKey: "promo.business.title", descKey: "promo.business.desc", ctaKey: "promo.business.cta", href: "/register", bg: "from-green-600 to-green-800", img: "/images/promo-business.jpeg" },
-  { eyebrowKey: "promo.home.eyebrow", titleKey: "promo.home.title", descKey: "promo.home.desc", ctaKey: "promo.home.cta", href: "/loan", bg: "from-green-700 to-green-900", img: "/images/promo-home.jpeg" },
-  { eyebrowKey: "promo.savings.eyebrow", titleKey: "promo.savings.title", descKey: "promo.savings.desc", ctaKey: "promo.savings.cta", href: "/register", bg: "from-green-600 to-green-800", img: "/images/promo-savings.jpeg" },
+  { eyebrowKey: "promo.checking.eyebrow", titleKey: "promo.checking.title", descKey: "promo.checking.desc", ctaKey: "promo.checking.cta", href: "/register", bg: "from-blue-700 to-blue-900", img: "/images/promo-checking.jpeg" },
+  { eyebrowKey: "promo.business.eyebrow", titleKey: "promo.business.title", descKey: "promo.business.desc", ctaKey: "promo.business.cta", href: "/register", bg: "from-blue-600 to-blue-800", img: "/images/promo-business.jpeg" },
+  { eyebrowKey: "promo.home.eyebrow", titleKey: "promo.home.title", descKey: "promo.home.desc", ctaKey: "promo.home.cta", href: "/loan", bg: "from-blue-700 to-blue-900", img: "/images/promo-home.jpeg" },
+  { eyebrowKey: "promo.savings.eyebrow", titleKey: "promo.savings.title", descKey: "promo.savings.desc", ctaKey: "promo.savings.cta", href: "/register", bg: "from-blue-600 to-blue-800", img: "/images/promo-savings.jpeg" },
 ];
 
 export function PromosSection() {
@@ -14,7 +14,7 @@ export function PromosSection() {
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
-          <p className="text-green-600 text-sm font-medium mb-2"><T k="promos.eyebrow" /></p>
+          <p className="text-blue-600 text-sm font-medium mb-2"><T k="promos.eyebrow" /></p>
           <h2 className="text-2xl sm:text-3xl font-bold"><T k="promos.heading" /></h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

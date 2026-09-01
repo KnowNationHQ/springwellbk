@@ -123,7 +123,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sheet>
-        <header className="bg-green-800 text-white px-4 py-3 flex items-center justify-between">
+        <header className="bg-blue-800 text-white px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg">
               <Landmark className="h-5 w-5" />
@@ -131,48 +131,48 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs sm:text-sm text-green-200 hidden sm:inline">{user.firstName} {user.lastName}</span>
-            <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-green-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
+            <span className="text-xs sm:text-sm text-blue-200 hidden sm:inline">{user.firstName} {user.lastName}</span>
+            <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-blue-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline ml-2">Logout</span>
             </Button>
             <SheetTrigger asChild>
-              <button className="md:hidden p-2 text-white hover:bg-green-700 rounded-md" aria-label="Open menu">
+              <button className="md:hidden p-2 text-white hover:bg-blue-700 rounded-md" aria-label="Open menu">
                 <Menu className="h-6 w-6" />
               </button>
             </SheetTrigger>
           </div>
         </header>
 
-        <SheetContent side="left" className="w-[85%] max-w-sm overflow-y-auto bg-green-800 text-white border-green-700 p-0">
-          <SheetHeader className="px-4 h-14 border-b border-green-700 justify-center">
+        <SheetContent side="left" className="w-[85%] max-w-sm overflow-y-auto bg-blue-800 text-white border-blue-700 p-0">
+          <SheetHeader className="px-4 h-14 border-b border-blue-700 justify-center">
             <SheetTitle className="text-white font-bold flex items-center gap-2"><Landmark className="h-5 w-5" /> Menu</SheetTitle>
           </SheetHeader>
           <nav className="flex flex-col p-2 gap-1">
             <SheetClose asChild>
-              <a href="/loan" className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-green-700 text-sm font-medium"><CreditCard className="h-4 w-4" /> Apply for Loan</a>
+              <a href="/loan" className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-700 text-sm font-medium"><CreditCard className="h-4 w-4" /> Apply for Loan</a>
             </SheetClose>
             <SheetClose asChild>
-              <button onClick={() => document.getElementById("linked")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-green-700 text-sm font-medium"><Link2 className="h-4 w-4" /> Linked Accounts</button>
+              <button onClick={() => document.getElementById("linked")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-700 text-sm font-medium"><Link2 className="h-4 w-4" /> Linked Accounts</button>
             </SheetClose>
           </nav>
-          <div className="mt-auto p-3 border-t border-green-700">
-            <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-green-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
+          <div className="mt-auto p-3 border-t border-blue-700">
+            <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-blue-700" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
           </div>
         </SheetContent>
       </Sheet>
 
-      <div className="bg-green-700 px-4 py-6 text-white">
+      <div className="bg-blue-700 px-4 py-6 text-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-green-200 text-xs">Welcome back, {user.firstName}</p>
-            <p className="text-green-200 text-xs hidden sm:block">Last sign in {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "—"}</p>
+            <p className="text-blue-200 text-xs">Welcome back, {user.firstName}</p>
+            <p className="text-blue-200 text-xs hidden sm:block">Last sign in {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "—"}</p>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold">{sym(user.currency)}{user.balance.toLocaleString()}</h1>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-            <p className="text-green-200 text-xs">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account &middot; Signed in as {user.firstName} {user.lastName}</p>
-            <span className="text-green-400 text-xs hidden sm:inline">•</span>
-            <button onClick={() => setActiveTab("profile")} className="text-green-200 text-xs underline hover:text-white">Update profile</button>
+            <p className="text-blue-200 text-xs">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account &middot; Signed in as {user.firstName} {user.lastName}</p>
+            <span className="text-blue-400 text-xs hidden sm:inline">•</span>
+            <button onClick={() => setActiveTab("profile")} className="text-blue-200 text-xs underline hover:text-white">Update profile</button>
           </div>
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
         <Card id="linked" className="mb-6">
           <CardContent className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
                 <Building2 className="h-5 w-5" />
               </div>
               <div>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={connectBank} disabled={busy}>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={connectBank} disabled={busy}>
               <Link2 className="h-4 w-4 mr-2" /> {busy ? "Connecting..." : links && links.length > 0 ? "Sync Now" : "Connect Bank (Plaid)"}
             </Button>
           </CardContent>
@@ -201,7 +201,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <Card className="lg:col-span-1 overflow-hidden p-0">
-            <div className="rounded-2xl bg-gradient-to-br from-green-700 to-green-900 text-white p-5 h-full min-h-[200px] flex flex-col justify-between">
+            <div className="rounded-2xl bg-gradient-to-br from-blue-700 to-blue-900 text-white p-5 h-full min-h-[200px] flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold tracking-wide">SpringWell Bank</span>
                 <CreditCard className="h-6 w-6 opacity-80" />
@@ -229,7 +229,7 @@ export default function DashboardPage() {
                   <h2 className="text-sm font-bold">Personal Account</h2>
                   <span className="text-xs text-gray-400">Quick view</span>
                 </div>
-                <p className="text-2xl font-bold text-green-700">{sym(user.currency)}{user.balance.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-blue-700">{sym(user.currency)}{user.balance.toLocaleString()}</p>
                 <p className="text-xs text-gray-500 mt-1">Account Number &bull;••• {cardLast4}</p>
               </CardContent>
             </Card>
@@ -240,8 +240,8 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {actions.map((a) => {
                     const inner = (
-                      <div className="flex flex-col items-center justify-center gap-2 h-20 rounded-xl border border-gray-100 bg-gray-50 hover:bg-green-50 hover:border-green-200 transition-colors text-center px-2">
-                        <a.icon className="h-5 w-5 text-green-700" />
+                      <div className="flex flex-col items-center justify-center gap-2 h-20 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-200 transition-colors text-center px-2">
+                        <a.icon className="h-5 w-5 text-blue-700" />
                         <span className="text-xs font-medium text-gray-700">{a.label}</span>
                       </div>
                     );
@@ -262,9 +262,9 @@ export default function DashboardPage() {
                   <span className="text-xs text-gray-400">Last {transactions.length} txns</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="bg-green-50 rounded-lg p-3">
+                  <div className="bg-blue-50 rounded-lg p-3">
                     <p className="text-xs text-gray-500">Money In</p>
-                    <p className="font-bold text-green-700">{sym(user.currency)}{creditTotal.toLocaleString()}</p>
+                    <p className="font-bold text-blue-700">{sym(user.currency)}{creditTotal.toLocaleString()}</p>
                   </div>
                   <div className="bg-red-50 rounded-lg p-3">
                     <p className="text-xs text-gray-500">Money Out</p>
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="h-2.5 w-full rounded-full bg-red-100 overflow-hidden flex">
-                  <div className="h-full bg-green-600" style={{ width: `${creditPct}%` }} />
+                  <div className="h-full bg-blue-600" style={{ width: `${creditPct}%` }} />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{creditPct}% of recent flow was money in</p>
               </CardContent>
@@ -283,7 +283,7 @@ export default function DashboardPage() {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "transactions" | "loans" | "profile")} className="mb-6">
           <TabsList className="grid w-full grid-cols-3 bg-white rounded-lg p-1 shadow-sm h-auto">
             {tabs.map((tab) => (
-              <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium data-[state=active]:bg-green-700 data-[state=active]:text-white data-[state=active]:shadow">
+              <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium data-[state=active]:bg-blue-700 data-[state=active]:text-white data-[state=active]:shadow">
                 <tab.icon className="h-4 w-4" />
                 {tab.label}
               </TabsTrigger>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
                           <p className="text-sm font-medium truncate">{t.description || "N/A"}</p>
                           <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                             <span className="flex items-center gap-1">
-                              {t.type === "credit" ? <ArrowDownLeft className="h-3 w-3 text-green-600" /> : <ArrowUpRight className="h-3 w-3 text-red-600" />}
+                              {t.type === "credit" ? <ArrowDownLeft className="h-3 w-3 text-blue-600" /> : <ArrowUpRight className="h-3 w-3 text-red-600" />}
                               <span className="capitalize">{t.type}</span>
                             </span>
                             <span className="px-1">•</span>
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                             <Badge variant={t.status === "successful" ? "default" : "destructive"} className="text-[10px] px-1.5 py-0">{t.status}</Badge>
                           </div>
                         </div>
-                        <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-red-600"}`}>
+                        <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-blue-600" : "text-red-600"}`}>
                           {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                         </span>
                       </div>
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                   <div className="hidden md:block">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-green-700 text-white text-xs">
+                        <tr className="bg-blue-700 text-white text-xs">
                           <th className="px-3 py-2 text-left">Date</th>
                           <th className="px-3 py-2 text-left">Type</th>
                           <th className="px-3 py-2 text-left">Description</th>
@@ -341,13 +341,13 @@ export default function DashboardPage() {
                             <td className="px-3 py-2 text-xs">{new Date(t.createdAt).toLocaleDateString()}</td>
                             <td className="px-3 py-2">
                               <span className="flex items-center gap-1 text-xs">
-                                {t.type === "credit" ? <ArrowDownLeft className="h-3 w-3 text-green-600" /> : <ArrowUpRight className="h-3 w-3 text-red-600" />}
+                                {t.type === "credit" ? <ArrowDownLeft className="h-3 w-3 text-blue-600" /> : <ArrowUpRight className="h-3 w-3 text-red-600" />}
                                 {t.type}
                               </span>
                             </td>
                             <td className="px-3 py-2 text-xs">{t.description || "N/A"}</td>
                             <td className="px-3 py-2 font-semibold text-xs">
-                              <span className={t.type === "credit" ? "text-green-600" : "text-red-600"}>
+                              <span className={t.type === "credit" ? "text-blue-600" : "text-red-600"}>
                                 {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                               </span>
                             </td>
@@ -371,7 +371,7 @@ export default function DashboardPage() {
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Loan Applications</h2>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-xs" asChild>
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs" asChild>
                   <Link href="/loan">Apply</Link>
                 </Button>
               </div>
@@ -395,7 +395,7 @@ export default function DashboardPage() {
                   <div className="hidden md:block">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-green-700 text-white text-xs">
+                        <tr className="bg-blue-700 text-white text-xs">
                           <th className="px-3 py-2 text-left">Date</th>
                           <th className="px-3 py-2 text-left">Amount</th>
                           <th className="px-3 py-2 text-left">Purpose</th>
@@ -432,17 +432,17 @@ export default function DashboardPage() {
                     <Settings className="h-4 w-4 mr-2" /> Edit
                   </Button>
                 ) : (
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleProfileSave}>Save</Button>
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleProfileSave}>Save</Button>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-green-50 rounded-lg p-3">
+                <div className="bg-blue-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">Available Balance</p>
-                  <p className="font-bold text-green-700">{sym(user.currency)}{user.balance.toLocaleString()}</p>
+                  <p className="font-bold text-blue-700">{sym(user.currency)}{user.balance.toLocaleString()}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-3">
+                <div className="bg-blue-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">Credit Balance</p>
-                  <p className="font-bold text-green-700">{sym(user.currency)}{(user.creditBalance ?? 0).toLocaleString()}</p>
+                  <p className="font-bold text-blue-700">{sym(user.currency)}{(user.creditBalance ?? 0).toLocaleString()}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -473,7 +473,7 @@ export default function DashboardPage() {
 
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <h3 className="text-base font-bold mb-3">Security</h3>
-                {pwMsg && <p className={`text-sm mb-3 ${pwMsg.includes("success") ? "text-green-600" : "text-red-600"}`}>{pwMsg}</p>}
+                {pwMsg && <p className={`text-sm mb-3 ${pwMsg.includes("success") ? "text-blue-600" : "text-red-600"}`}>{pwMsg}</p>}
                 <form onSubmit={handlePasswordChange} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs text-gray-500">Current Password</Label>
@@ -487,7 +487,7 @@ export default function DashboardPage() {
                     <Label className="text-xs text-gray-500">Confirm New</Label>
                     <div className="flex gap-2">
                       <Input type="password" autoComplete="new-password" className="h-9 text-sm" value={pwForm.confirm} onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })} />
-                      <Button type="submit" size="sm" className="bg-green-600 hover:bg-green-700 whitespace-nowrap">Update</Button>
+                      <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">Update</Button>
                     </div>
                   </div>
                 </form>
@@ -501,7 +501,7 @@ export default function DashboardPage() {
       {transferOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4" onClick={() => setTransferOpen(false)}>
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-green-800 text-white px-5 py-4 flex items-center justify-between">
+            <div className="bg-blue-800 text-white px-5 py-4 flex items-center justify-between">
               <h3 className="font-bold">Transfer Funds</h3>
               <button onClick={() => setTransferOpen(false)} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
             </div>
@@ -520,7 +520,7 @@ export default function DashboardPage() {
                 <Input className="h-10" placeholder="Dinner, rent, etc." value={transferForm.description} onChange={(e) => setTransferForm({ ...transferForm, description: e.target.value })} />
               </div>
               <p className="text-xs text-gray-500">Available: {sym(user.currency)}{user.balance.toLocaleString()}</p>
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 h-10" disabled={transferBusy}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-10" disabled={transferBusy}>
                 {transferBusy ? "Sending..." : "Send Transfer"}
               </Button>
             </form>

@@ -68,11 +68,11 @@ export default function LoanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="bg-green-800 text-white py-10 sm:py-14">
+      <section className="bg-blue-800 text-white py-10 sm:py-14">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-green-300 text-sm mb-2">15-Minutes Transfer Upon Approval</p>
+          <p className="text-blue-300 text-sm mb-2">15-Minutes Transfer Upon Approval</p>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-            Getting <span className="text-green-400">Money</span> is now as easy as spending.
+            Getting <span className="text-blue-400">Money</span> is now as easy as spending.
           </h1>
         </div>
       </section>
@@ -82,7 +82,7 @@ export default function LoanPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
             {features.map((f) => (
               <div key={f.title} className="text-center p-5">
-                <f.icon className="h-10 w-10 mx-auto mb-3 text-green-600" />
+                <f.icon className="h-10 w-10 mx-auto mb-3 text-blue-600" />
                 <h3 className="font-bold mb-1">{f.title}</h3>
                 <p className="text-gray-600 text-sm">{f.description}</p>
               </div>
@@ -96,7 +96,7 @@ export default function LoanPage() {
             <p className="text-gray-500 text-sm mb-6">Fill out an application form</p>
 
             {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-sm mb-4">
+              <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-sm mb-4">
                 Your application has been submitted successfully!
               </div>
             )}
@@ -180,7 +180,7 @@ export default function LoanPage() {
                     <Input value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} className="h-10" />
                   </div>
 
-                  <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 h-11">Submit Application</Button>
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11">Submit Application</Button>
                 </form>
               </CardContent>
             </Card>

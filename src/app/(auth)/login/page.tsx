@@ -76,7 +76,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-green-700">
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
             <Landmark className="h-7 w-7" />
             SpringWell Bank
           </Link>
@@ -126,17 +126,17 @@ export default function LoginPage() {
                     <input type="checkbox" className="rounded border-gray-300" />
                     <span className="text-gray-600">Remember me</span>
                   </label>
-                  <Link href="/forgot-password" className="text-green-700 hover:underline font-medium">
+                  <Link href="/forgot-password" className="text-blue-700 hover:underline font-medium">
                     Forgot password?
                   </Link>
                 </div>
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
                   {loading ? "Signing in..." : "Sign In"}
                 </Button>
                 <button
                   type="button"
                   onClick={() => { setError(""); setOtpStep("request"); setMode("otp"); }}
-                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                  className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
                   Email me a login code instead
                 </button>
@@ -154,13 +154,13 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
                   {loading ? "Sending..." : "Send code"}
                 </Button>
                 <button
                   type="button"
                   onClick={() => { setError(""); setMode("password"); }}
-                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                  className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
                   Back to password login
                 </button>
@@ -178,13 +178,13 @@ export default function LoginPage() {
                     onChange={(e) => setCode(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
                   {loading ? "Verifying..." : "Verify & sign in"}
                 </Button>
                 <button
                   type="button"
                   onClick={() => { setError(""); setCode(""); setOtpStep("request"); }}
-                  className="w-full text-center text-sm text-green-700 hover:underline font-medium"
+                  className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
                   Use a different email
                 </button>
@@ -193,7 +193,7 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-gray-500 mt-6">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-green-700 hover:underline font-semibold">
+              <Link href="/register" className="text-blue-700 hover:underline font-semibold">
                 Open Account
               </Link>
             </p>

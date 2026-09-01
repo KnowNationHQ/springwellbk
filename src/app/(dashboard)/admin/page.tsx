@@ -200,7 +200,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-green-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+      <header className="bg-blue-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
             <Landmark className="h-5 w-5" />
@@ -209,45 +209,45 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-3">
           <div className="relative hidden lg:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-200" />
-            <Input placeholder="Search customers..." className="pl-10 w-56 bg-green-800 border-green-700 text-white placeholder:text-green-300" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-200" />
+            <Input placeholder="Search customers..." className="pl-10 w-56 bg-blue-800 border-blue-700 text-white placeholder:text-blue-300" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
-          <span className="hidden sm:inline text-xs sm:text-sm text-green-200">Admin</span>
+          <span className="hidden sm:inline text-xs sm:text-sm text-blue-200">Admin</span>
           {adminUser && (
-            <span className="hidden lg:inline text-xs text-green-200 border border-green-700 rounded px-2 py-0.5">{sym(adminUser.currency)}{adminUser.balance.toLocaleString()}</span>
+            <span className="hidden lg:inline text-xs text-blue-200 border border-blue-700 rounded px-2 py-0.5">{sym(adminUser.currency)}{adminUser.balance.toLocaleString()}</span>
           )}
-          <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-green-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
+          <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-blue-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline ml-2">Logout</span>
           </Button>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-green-700" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-blue-700" aria-label="Open menu">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[85%] max-w-sm overflow-y-auto bg-green-900 text-white border-green-700 p-0">
-              <SheetHeader className="px-5 h-14 border-b border-green-700 flex-row items-center justify-start gap-2 space-y-0">
+            <SheetContent side="left" className="w-[85%] max-w-sm overflow-y-auto bg-blue-900 text-white border-blue-700 p-0">
+              <SheetHeader className="px-5 h-14 border-b border-blue-700 flex-row items-center justify-start gap-2 space-y-0">
                 <Landmark className="h-5 w-5" />
                 <SheetTitle className="text-white">Menu</SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col p-3 gap-1">
                 <SheetClose asChild>
-                  <button onClick={() => document.getElementById("accounts")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-green-800 text-sm font-medium text-left"><Users className="h-4 w-4" /> Accounts</button>
+                  <button onClick={() => document.getElementById("accounts")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><Users className="h-4 w-4" /> Accounts</button>
                 </SheetClose>
                 <SheetClose asChild>
-                  <button onClick={() => document.getElementById("loans")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-green-800 text-sm font-medium text-left"><FileText className="h-4 w-4" /> Loan Applications</button>
+                  <button onClick={() => document.getElementById("loans")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><FileText className="h-4 w-4" /> Loan Applications</button>
                 </SheetClose>
                 <SheetClose asChild>
-                  <button onClick={() => document.getElementById("messages")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-green-800 text-sm font-medium text-left"><MessageSquare className="h-4 w-4" /> Messages</button>
+                  <button onClick={() => document.getElementById("messages")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><MessageSquare className="h-4 w-4" /> Messages</button>
                 </SheetClose>
                 <SheetClose asChild>
-                  <button onClick={() => document.getElementById("txns")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-green-800 text-sm font-medium text-left"><Wallet className="h-4 w-4" /> Recent Transactions</button>
+                  <button onClick={() => document.getElementById("txns")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><Wallet className="h-4 w-4" /> Recent Transactions</button>
                 </SheetClose>
               </nav>
-              <div className="mt-auto p-3 border-t border-green-700">
+              <div className="mt-auto p-3 border-t border-blue-700">
                 <SheetClose asChild>
-                  <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-green-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
+                  <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-blue-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
                 </SheetClose>
               </div>
             </SheetContent>
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         {actionMsg && (
-          <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded text-sm">{actionMsg}</div>
+          <div className="p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">{actionMsg}</div>
         )}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -268,9 +268,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          <Button size="sm" className="bg-green-700 hover:bg-green-800 sm:w-auto w-full" onClick={() => openCredit(null)}><ArrowUpDown className="h-4 w-4 mr-1" />Credit/Debit</Button>
-          <Button size="sm" className="bg-green-700 hover:bg-green-800 sm:w-auto w-full" onClick={() => openTransfer(null)}><Send className="h-4 w-4 mr-1" />Fund Transfer</Button>
-          <Button size="sm" className="bg-green-700 hover:bg-green-800 sm:w-auto w-full" onClick={openStatus}><CheckCircle className="h-4 w-4 mr-1" />Activate</Button>
+          <Button size="sm" className="bg-blue-700 hover:bg-blue-800 sm:w-auto w-full" onClick={() => openCredit(null)}><ArrowUpDown className="h-4 w-4 mr-1" />Credit/Debit</Button>
+          <Button size="sm" className="bg-blue-700 hover:bg-blue-800 sm:w-auto w-full" onClick={() => openTransfer(null)}><Send className="h-4 w-4 mr-1" />Fund Transfer</Button>
+          <Button size="sm" className="bg-blue-700 hover:bg-blue-800 sm:w-auto w-full" onClick={openStatus}><CheckCircle className="h-4 w-4 mr-1" />Activate</Button>
           <Button size="sm" className="bg-red-600 hover:bg-red-700 sm:w-auto w-full" onClick={openStatus}><XCircle className="h-4 w-4 mr-1" />Suspend</Button>
           <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white sm:w-auto w-full" onClick={() => openComplete()}><KeyRound className="h-4 w-4 mr-1" />Complete</Button>
         </div>
@@ -291,14 +291,14 @@ export default function AdminDashboard() {
                       </div>
                       <p className="text-sm font-medium">{t.description || "N/A"}</p>
                       <p className="text-xs text-gray-500">{sym(t.currency)}{t.amount.toLocaleString()}{t.counterpartyId ? ` → ${acct({ _id: t.counterpartyId })}` : ""}</p>
-                      <Button size="sm" className="w-full bg-green-700 hover:bg-green-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button>
+                      <Button size="sm" className="w-full bg-blue-700 hover:bg-blue-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button>
                     </div>
                   ))}
                 </div>
                 <div className="hidden lg:block">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-green-800 text-white text-xs">
+                      <tr className="bg-blue-800 text-white text-xs">
                         <th className="px-3 py-2 text-left">Date</th>
                         <th className="px-3 py-2 text-left">Type</th>
                         <th className="px-3 py-2 text-left">Account</th>
@@ -313,7 +313,7 @@ export default function AdminDashboard() {
                           <td className="px-3 py-2 text-xs capitalize">{t.type}</td>
                           <td className="px-3 py-2 text-xs font-mono">{acct(t)}</td>
                           <td className="px-3 py-2 font-semibold text-xs">{sym(t.currency)}{t.amount.toLocaleString()}</td>
-                          <td className="px-3 py-2"><Button size="sm" className="bg-green-700 hover:bg-green-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button></td>
+                          <td className="px-3 py-2"><Button size="sm" className="bg-blue-700 hover:bg-blue-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                 <div key={c._id} className="border rounded-lg p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">{initials(c)}</div>
+                      <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">{initials(c)}</div>
                       <div>
                         <p className="font-semibold text-sm">{c.firstName} {c.lastName}</p>
                         <p className="text-xs text-gray-500">{c.email}</p>
@@ -356,7 +356,7 @@ export default function AdminDashboard() {
                   <div className="text-xs pt-1 border-t">
                     <span className="text-gray-500">Password: </span>
                     <span className="font-semibold text-gray-700 break-all">{revealed.has(c._id) ? c.password : "••••••••"}</span>
-                    <button type="button" className="ml-2 text-green-700 underline" onClick={() => togglePw(c._id)}>
+                    <button type="button" className="ml-2 text-blue-700 underline" onClick={() => togglePw(c._id)}>
                       {revealed.has(c._id) ? <span className="inline-flex items-center gap-1"><EyeOff className="h-3 w-3" />Hide</span> : <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />Show</span>}
                     </button>
                   </div>
@@ -365,7 +365,7 @@ export default function AdminDashboard() {
                     <div className="flex flex-wrap gap-1">
                       <IconBtn title="Credit/Debit" onClick={() => openCredit(c)}><ArrowUpDown className="h-3 w-3" /></IconBtn>
                       <IconBtn title="Transfer" onClick={() => openTransfer(c)}><Send className="h-3 w-3" /></IconBtn>
-                      {c.status !== "active" && <IconBtn title="Activate" onClick={() => handleStatus(c._id, "active")}><CheckCircle className="h-3 w-3 text-green-600" /></IconBtn>}
+                      {c.status !== "active" && <IconBtn title="Activate" onClick={() => handleStatus(c._id, "active")}><CheckCircle className="h-3 w-3 text-blue-600" /></IconBtn>}
                       {c.status !== "suspended" && <IconBtn title="Suspend" onClick={() => handleStatus(c._id, "suspended")}><XCircle className="h-3 w-3 text-red-600" /></IconBtn>}
                       <IconBtn title="Edit" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></IconBtn>
                       <IconBtn title={c.role === "admin" ? "Make Customer" : "Make Admin"} onClick={() => handleRole(c._id, c.role === "admin" ? "customer" : "admin")}>{c.role === "admin" ? <UserCog className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}</IconBtn>
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
             <div className="hidden lg:block">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-green-800 text-white text-xs">
+                  <tr className="bg-blue-800 text-white text-xs">
                     <th className="px-3 py-2 text-left">Account</th>
                     <th className="px-3 py-2 text-left">Username</th>
                     <th className="px-3 py-2 text-left">Full Name</th>
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
                     <tr key={c._id} className="border-b hover:bg-gray-50">
                       <td className="px-3 py-2 font-mono text-xs">{acct(c)}</td>
                       <td className="px-3 py-2 text-xs">{c.email}</td>
-                      <td className="px-3 py-2 font-medium text-xs flex items-center gap-2"><div className="h-6 w-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-[10px] font-bold">{initials(c)}</div>{c.firstName} {c.lastName}</td>
+                      <td className="px-3 py-2 font-medium text-xs flex items-center gap-2"><div className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">{initials(c)}</div>{c.firstName} {c.lastName}</td>
                       <td className="px-3 py-2 text-xs capitalize">{c.accountType}</td>
                       <td className="px-3 py-2 font-semibold text-xs">{sym(c.currency)}{c.balance.toLocaleString()}</td>
                       <td className="px-3 py-2 text-xs">{sym(c.currency)}{(c.creditBalance ?? 0).toLocaleString()}</td>
@@ -407,13 +407,13 @@ export default function AdminDashboard() {
                        <td className="px-3 py-2 text-xs text-gray-500">{c.lastLogin ? new Date(c.lastLogin).toLocaleDateString() : "—"}</td>
                        <td className="px-3 py-2 text-xs break-all">
                          <span>{revealed.has(c._id) ? c.password : "••••••••"}</span>
-                         <button type="button" className="ml-1 text-green-700 underline text-[10px]" onClick={() => togglePw(c._id)}>{revealed.has(c._id) ? "Hide" : "Show"}</button>
+                         <button type="button" className="ml-1 text-blue-700 underline text-[10px]" onClick={() => togglePw(c._id)}>{revealed.has(c._id) ? "Hide" : "Show"}</button>
                        </td>
                        <td className="px-3 py-2">
                         <div className="flex flex-wrap gap-1">
                           <IconBtn title="Credit/Debit" onClick={() => openCredit(c)}><ArrowUpDown className="h-3 w-3" /></IconBtn>
                           <IconBtn title="Transfer" onClick={() => openTransfer(c)}><Send className="h-3 w-3" /></IconBtn>
-                          {c.status !== "active" && <IconBtn title="Activate" onClick={() => handleStatus(c._id, "active")}><CheckCircle className="h-3 w-3 text-green-600" /></IconBtn>}
+                          {c.status !== "active" && <IconBtn title="Activate" onClick={() => handleStatus(c._id, "active")}><CheckCircle className="h-3 w-3 text-blue-600" /></IconBtn>}
                           {c.status !== "suspended" && <IconBtn title="Suspend" onClick={() => handleStatus(c._id, "suspended")}><XCircle className="h-3 w-3 text-red-600" /></IconBtn>}
                           <IconBtn title="Edit" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></IconBtn>
                           <IconBtn title={c.role === "admin" ? "Make Customer" : "Make Admin"} onClick={() => handleRole(c._id, c.role === "admin" ? "customer" : "admin")}>{c.role === "admin" ? <UserCog className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}</IconBtn>
@@ -460,7 +460,7 @@ export default function AdminDashboard() {
             <div className="hidden lg:block">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-green-800 text-white text-xs">
+                  <tr className="bg-blue-800 text-white text-xs">
                     <th className="px-3 py-2 text-left">Date</th>
                     <th className="px-3 py-2 text-left">Applicant</th>
                     <th className="px-3 py-2 text-left">Amount</th>
@@ -512,7 +512,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-gray-400">{new Date(m.createdAt).toLocaleDateString()}</p>
                   <div className="flex gap-2 pt-1">
                     {m.status === "unread" && <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleMessage(m._id, "read")}>Mark read</Button>}
-                    {m.status !== "replied" && <Button size="sm" variant="outline" className="h-8 text-xs text-green-700" onClick={() => handleMessage(m._id, "replied")}>Reply</Button>}
+                    {m.status !== "replied" && <Button size="sm" variant="outline" className="h-8 text-xs text-blue-700" onClick={() => handleMessage(m._id, "replied")}>Reply</Button>}
                   </div>
                 </div>
               ))}
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
             <div className="hidden lg:block">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-green-800 text-white text-xs">
+                  <tr className="bg-blue-800 text-white text-xs">
                     <th className="px-3 py-2 text-left">Date</th>
                     <th className="px-3 py-2 text-left">From</th>
                     <th className="px-3 py-2 text-left">Subject</th>
@@ -541,7 +541,7 @@ export default function AdminDashboard() {
                       <td className="px-3 py-2">
                         <div className="flex gap-1">
                           {m.status === "unread" && <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => handleMessage(m._id, "read")}>Mark read</Button>}
-                          {m.status !== "replied" && <Button size="sm" variant="outline" className="h-7 px-2 text-xs text-green-700" onClick={() => handleMessage(m._id, "replied")}>Reply</Button>}
+                          {m.status !== "replied" && <Button size="sm" variant="outline" className="h-7 px-2 text-xs text-blue-700" onClick={() => handleMessage(m._id, "replied")}>Reply</Button>}
                         </div>
                       </td>
                     </tr>
@@ -582,7 +582,7 @@ export default function AdminDashboard() {
                 <div className="hidden md:block">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-green-800 text-white text-xs">
+                      <tr className="bg-blue-800 text-white text-xs">
                         <th className="px-3 py-2 text-left">Date</th>
                         <th className="px-3 py-2 text-left">Type</th>
                         <th className="px-3 py-2 text-left">Description</th>
@@ -641,7 +641,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex gap-2 justify-end pt-2">
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Submit</Button>
+                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Submit</Button>
                 </div>
               </form>
             )}
@@ -664,7 +664,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex gap-2 justify-end pt-2">
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Transfer</Button>
+                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Transfer</Button>
                 </div>
               </form>
             )}
@@ -699,7 +699,7 @@ export default function AdminDashboard() {
                 <Input type="number" placeholder="Credit Balance" value={edit.creditBalance} onChange={(e) => setEdit({ ...edit, creditBalance: e.target.value })} />
                 <div className="flex gap-2 justify-end pt-2">
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Save</Button>
+                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Save</Button>
                 </div>
               </form>
             )}
@@ -713,7 +713,7 @@ export default function AdminDashboard() {
                 </select>
                 <div className="flex gap-2 justify-end pt-2">
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="button" className="bg-green-700 hover:bg-green-800" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }}>Activate</Button>
+                  <Button type="button" className="bg-blue-700 hover:bg-blue-800" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }}>Activate</Button>
                   <Button type="button" className="bg-red-600 hover:bg-red-700" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "suspended"); setModal(null); } }}>Suspend</Button>
                 </div>
               </form>
@@ -731,7 +731,7 @@ export default function AdminDashboard() {
                 <Input type="text" placeholder="Activation Code" value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
                 <div className="flex gap-2 justify-end pt-2">
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Complete</Button>
+                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Complete</Button>
                 </div>
               </form>
             )}
@@ -745,7 +745,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex gap-2 justify-end pt-2">
                   <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-green-700 hover:bg-green-800">Update</Button>
+                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Update</Button>
                 </div>
               </form>
             )}
@@ -759,7 +759,7 @@ export default function AdminDashboard() {
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 flex items-center gap-3">
-      <div className="h-9 w-9 rounded-full bg-green-100 text-green-700 flex items-center justify-center">{icon}</div>
+      <div className="h-9 w-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">{icon}</div>
       <div>
         <p className="text-xs text-gray-500">{label}</p>
         <p className="font-bold text-sm">{value}</p>

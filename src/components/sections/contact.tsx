@@ -40,7 +40,7 @@ export function ContactSection() {
     <section id="contact" className="py-12 sm:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
-          <p className="text-green-600 text-sm font-medium mb-2">{t("contact.eyebrow")}</p>
+          <p className="text-blue-600 text-sm font-medium mb-2">{t("contact.eyebrow")}</p>
           <h2 className="text-2xl sm:text-3xl font-bold">{t("contact.heading")}</h2>
         </div>
 
@@ -53,13 +53,13 @@ export function ContactSection() {
               { icon: MapPin, labelKey: "contact.address", value: "123 Banking St, New York, NY 10001", href: null },
             ].map((c) => (
               <div key={c.labelKey} className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <c.icon className="h-5 w-5 text-green-700" />
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <c.icon className="h-5 w-5 text-blue-700" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">{t(c.labelKey)}</p>
                   {c.href ? (
-                    <a href={c.href} className="text-sm font-medium hover:text-green-700 transition-colors">{c.value}</a>
+                    <a href={c.href} className="text-sm font-medium hover:text-blue-700 transition-colors">{c.value}</a>
                   ) : (
                     <p className="text-sm font-medium">{c.value}</p>
                   )}
@@ -71,7 +71,7 @@ export function ContactSection() {
           <Card className="shadow-sm">
             <CardContent className="p-5 sm:p-6">
               <h3 className="font-bold text-lg mb-4">{t("contact.formTitle")}</h3>
-              {success && <p className="text-green-600 text-sm mb-4 bg-green-50 p-3 rounded">{t("contact.success")}</p>}
+              {success && <p className="text-blue-600 text-sm mb-4 bg-blue-50 p-3 rounded">{t("contact.success")}</p>}
               {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -97,7 +97,7 @@ export function ContactSection() {
                     onChange={(e) => setMessage(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 h-10">{t("contact.send")}</Button>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-10">{t("contact.send")}</Button>
               </form>
             </CardContent>
           </Card>

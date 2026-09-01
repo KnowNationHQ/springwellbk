@@ -63,7 +63,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-green-700">
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
             <Landmark className="h-7 w-7" />
             SpringWell Bank
           </Link>
@@ -76,7 +76,7 @@ export default function RegisterPage() {
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">{error}</div>
             )}
             {success && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded text-sm">
+              <div className="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">
                 Account created! Redirecting to login...
               </div>
             )}
@@ -138,14 +138,14 @@ export default function RegisterPage() {
                 <Input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-10" />
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 h-11" disabled={loading || success}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11" disabled={loading || success}>
                 {loading ? "Creating Account..." : "Open Account"}
               </Button>
             </form>
 
             <p className="text-center text-sm text-gray-500 mt-5">
               Already have an account?{" "}
-              <Link href="/login" className="text-green-700 hover:underline font-semibold">Sign In</Link>
+              <Link href="/login" className="text-blue-700 hover:underline font-semibold">Sign In</Link>
             </p>
           </CardContent>
         </Card>

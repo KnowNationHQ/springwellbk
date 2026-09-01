@@ -41,7 +41,7 @@ function TabsTrigger({ value, children, className, ...props }: { value: string; 
       aria-selected={isActive}
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-        isActive && "bg-white text-green-700 shadow-sm",
+        isActive && "bg-white text-blue-700 shadow-sm",
         className
       )}
       onClick={() => ctx.onValueChange(value)}
