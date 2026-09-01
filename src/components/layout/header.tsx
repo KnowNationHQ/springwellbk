@@ -69,9 +69,7 @@ export function Header() {
           <Link href="/login" aria-label={t("header.logIn")} className="text-white hover:text-green-300 transition-colors">
             <UserCircle className="h-5 w-5" />
           </Link>
-        </div>
-
-        <Sheet>
+          <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-green-700" aria-label="Open menu">
               <Menu className="h-6 w-6" />
@@ -111,6 +109,7 @@ export function Header() {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
       </div>
     </header>
   );
