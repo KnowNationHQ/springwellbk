@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, FileText, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, Menu, KeyRound, CalendarClock, Eye, EyeOff } from "lucide-react";
+import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, Menu, KeyRound, CalendarClock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,7 +31,6 @@ export default function AdminDashboard() {
 
   const users = useQuery(api.users.list);
   const transactions = useQuery(api.transactions.recent, { limit: 20 });
-  const loans = useQuery(api.admin.listLoans);
   const messages = useQuery(api.admin.listMessages);
   const pending = useQuery(api.admin.pendingTransactions);
 
@@ -43,8 +42,6 @@ export default function AdminDashboard() {
   const setUserRole = useMutation(api.admin.setUserRole);
   const updateUser = useMutation(api.admin.updateUser);
   const deleteUser = useMutation(api.admin.deleteUser);
-  const approveLoan = useMutation(api.admin.approveLoan);
-  const rejectLoan = useMutation(api.admin.rejectLoan);
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
 
   const [creditType, setCreditType] = useState<"credit" | "debit">("credit");
@@ -69,7 +66,7 @@ export default function AdminDashboard() {
     setRevealed((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   }
 
-  if (!userId || users === undefined || transactions === undefined || loans === undefined || messages === undefined || pending === undefined) {
+  if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
   }
 
@@ -82,7 +79,6 @@ export default function AdminDashboard() {
   );
   const nonAdmins = users.filter((u: any) => u.role !== "admin");
   const totalBalance = nonAdmins.reduce((s: number, u: any) => s + (u.balance ?? 0), 0);
-  const pendingLoans = loans.filter((l: any) => l.status === "pending").length;
   const unreadMsgs = messages.filter((m: any) => m.status === "unread").length;
 
   function flash(msg: string) {
@@ -151,16 +147,6 @@ export default function AdminDashboard() {
     if (!confirm(`Delete account ${acct(u)} (${u.email})?`)) return;
     try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Account deleted"); }
     catch (err: any) { flash(err?.message ?? "Delete failed"); }
-  }
-  async function handleApprove(id: string) {
-    if (!userId) return;
-    await approveLoan({ adminUserId: userId as any, applicationId: id as any });
-    flash("Loan approved and funds credited");
-  }
-  async function handleReject(id: string) {
-    if (!userId) return;
-    await rejectLoan({ adminUserId: userId as any, applicationId: id as any });
-    flash("Loan rejected");
   }
   async function handleMessage(id: string, status: "read" | "replied") {
     if (!userId) return;
@@ -236,9 +222,6 @@ export default function AdminDashboard() {
                   <button onClick={() => document.getElementById("accounts")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><Users className="h-4 w-4" /> Accounts</button>
                 </SheetClose>
                 <SheetClose asChild>
-                  <button onClick={() => document.getElementById("loans")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><FileText className="h-4 w-4" /> Loan Applications</button>
-                </SheetClose>
-                <SheetClose asChild>
                   <button onClick={() => document.getElementById("messages")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><MessageSquare className="h-4 w-4" /> Messages</button>
                 </SheetClose>
                 <SheetClose asChild>
@@ -260,10 +243,9 @@ export default function AdminDashboard() {
           <div className="p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">{actionMsg}</div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <Stat icon={<Users className="h-4 w-4" />} label="Customers" value={String(nonAdmins.length)} />
-          <Stat icon={<Wallet className="h-4 w-4" />} label="Total Balance" value={`$${totalBalance.toLocaleString()}`} />
-          <Stat icon={<FileText className="h-4 w-4" />} label="Pending Loans" value={String(pendingLoans)} />
+          <Stat icon={<Wallet className="h-4 w-4" />} label="Total Balance" value={`${adminUser ? sym(adminUser.currency) : "$"}${totalBalance.toLocaleString()}`} />
           <Stat icon={<MessageSquare className="h-4 w-4" />} label="Unread Msgs" value={String(unreadMsgs)} />
         </div>
 
@@ -419,71 +401,6 @@ export default function AdminDashboard() {
                           <IconBtn title={c.role === "admin" ? "Make Customer" : "Make Admin"} onClick={() => handleRole(c._id, c.role === "admin" ? "customer" : "admin")}>{c.role === "admin" ? <UserCog className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}</IconBtn>
                           <IconBtn title="Delete" onClick={() => handleDelete(c)}><Trash2 className="h-3 w-3 text-red-600" /></IconBtn>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 md:p-6">
-            <h2 id="loans" className="text-lg font-bold mb-3 flex items-center gap-2"><FileText className="h-4 w-4" /> Loan Applications ({loans.length})</h2>
-
-            <div className="lg:hidden space-y-3">
-              {loans.map((l: any) => (
-                <div key={l._id} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-semibold text-sm">{l.fullName}</p>
-                      <p className="text-xs text-gray-500">{l.email}</p>
-                    </div>
-                    <Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-gray-600">
-                    <span>{new Date(l.createdAt).toLocaleDateString()}</span>
-                    <span className="font-semibold">{"$"}{l.amount.toLocaleString()}</span>
-                  </div>
-                  <p className="text-xs text-gray-500 capitalize">{l.purpose}</p>
-                  {l.status === "pending" && (
-                    <div className="flex gap-2 pt-1">
-                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApprove(l._id)}>Approve</Button>
-                      <Button size="sm" variant="outline" className="h-8 text-xs text-red-600" onClick={() => handleReject(l._id)}>Reject</Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="hidden lg:block">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-blue-800 text-white text-xs">
-                    <th className="px-3 py-2 text-left">Date</th>
-                    <th className="px-3 py-2 text-left">Applicant</th>
-                    <th className="px-3 py-2 text-left">Amount</th>
-                    <th className="px-3 py-2 text-left">Purpose</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loans.map((l: any) => (
-                    <tr key={l._id} className="border-b hover:bg-gray-50">
-                      <td className="px-3 py-2 text-xs">{new Date(l.createdAt).toLocaleDateString()}</td>
-                      <td className="px-3 py-2 font-medium text-xs">{l.fullName}<div className="text-gray-400">{l.email}</div></td>
-                      <td className="px-3 py-2 font-semibold text-xs">{"$"}{l.amount.toLocaleString()}</td>
-                      <td className="px-3 py-2 text-xs">{l.purpose}</td>
-                      <td className="px-3 py-2"><Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge></td>
-                      <td className="px-3 py-2">
-                        {l.status === "pending" && (
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => handleApprove(l._id)}>Approve</Button>
-                            <Button size="sm" variant="outline" className="h-7 px-2 text-xs text-red-600" onClick={() => handleReject(l._id)}>Reject</Button>
-                          </div>
-                        )}
                       </td>
                     </tr>
                   ))}

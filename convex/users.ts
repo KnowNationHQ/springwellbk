@@ -18,6 +18,7 @@ export const getByEmail = query({
 
 export const create = mutation({
   args: {
+    username: v.string(),
     email: v.string(),
     password: v.string(),
     firstName: v.string(),
@@ -31,20 +32,43 @@ export const create = mutation({
     currency: v.union(v.literal("USD"), v.literal("GBP"), v.literal("EUR")),
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", args.email)).unique();
-    if (existing) {
-      throw new Error("Email already registered");
-    }
+    const existingEmail = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", args.email)).unique();
+    if (existingEmail) throw new Error("Email already registered");
+    const existingUser = await ctx.db.query("users").withIndex("by_username", (q) => q.eq("username", args.username)).unique();
+    if (existingUser) throw new Error("Username already taken");
     const userId = await ctx.db.insert("users", {
       ...args,
-       balance: 0,
-       creditBalance: 0,
-       status: "pending",
+      balance: 0,
+      creditBalance: 0,
+      status: "pending",
       role: "customer",
       createdAt: Date.now(),
     });
     await ctx.scheduler.runAfter(0, api.email.sendWelcomeEmail, { to: args.email, firstName: args.firstName });
     return userId;
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("users") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});
+
+export const migrateUsernames = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    let count = 0;
+    for (const user of users) {
+      if (!user.username) {
+        const base = user.email.split("@")[0];
+        await ctx.db.patch(user._id, { username: base });
+        count++;
+      }
+    }
+    return `Patched ${count} users with usernames`;
   },
 });
 

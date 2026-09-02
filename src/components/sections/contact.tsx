@@ -50,7 +50,7 @@ export function ContactSection() {
             {[
               { icon: Mail, labelKey: "contact.email", value: "support@springwellbk.com", href: "mailto:support@springwellbk.com" },
               { icon: Phone, labelKey: "contact.phone", value: "+1 (555) 123-4567", href: "tel:+15551234567" },
-              { icon: MapPin, labelKey: "contact.address", value: "123 Banking St, New York, NY 10001", href: null },
+              { icon: MapPin, labelKey: "contact.address", value: "3250 Pennsylvania Avenue NW", href: null },
             ].map((c) => (
               <div key={c.labelKey} className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">

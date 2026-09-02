@@ -21,6 +21,7 @@ export default function RegisterPage() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [accountType, setAccountType] = useState("");
@@ -31,6 +32,8 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!accountType) { setError("Please select an account type"); return; }
+    if (!currency) { setError("Please select a currency"); return; }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -42,6 +45,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await createUser({
+        username,
         email,
         password,
         firstName,
@@ -91,6 +95,11 @@ export default function RegisterPage() {
                   <Label className="text-xs">Last Name *</Label>
                   <Input required value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-10" />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">Username *</Label>
+                <Input required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Choose a username" className="h-10" />
               </div>
 
               <div className="space-y-1">

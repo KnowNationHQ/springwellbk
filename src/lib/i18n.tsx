@@ -2,16 +2,15 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type Locale = "en" | "es" | "fr" | "de" | "pt" | "zh" | "ar" | "af" | "sq" | "hy" | "eu" | "bn" | "bg" | "ca" | "km" | "hr" | "cs" | "da" | "nl" | "et" | "fj" | "fi" | "ka" | "el" | "gu" | "he" | "hi" | "hu" | "is" | "id" | "ga" | "it" | "ja" | "jv" | "ko" | "la" | "lv" | "lt" | "mk" | "ms" | "ml" | "mt" | "mi" | "mr" | "mn" | "ne" | "no" | "fa" | "pl" | "pa" | "qu" | "ro" | "ru" | "sm" | "sr" | "sk" | "sl" | "sw" | "sv" | "ta" | "tt" | "te" | "th" | "bo" | "to" | "tr" | "uk" | "ur" | "uz" | "vi" | "cy" | "xh";
+export type Locale = "en" | "es" | "fr" | "de" | "pt" | "zh" | "ar";
 
-export const LOCALES: Locale[] = ["en","es","fr","de","pt","zh","ar","af","sq","hy","eu","bn","bg","ca","km","hr","cs","da","nl","et","fj","fi","ka","el","gu","he","hi","hu","is","id","ga","it","ja","jv","ko","la","lv","lt","mk","ms","ml","mt","mi","mr","mn","ne","no","fa","pl","pa","qu","ro","ru","sm","sr","sk","sl","sw","sv","ta","tt","te","th","bo","to","tr","uk","ur","uz","vi","cy","xh"];
+export const LOCALES: Locale[] = ["en", "es", "fr", "de", "pt", "zh", "ar"];
 
 export const LOCALE_LABELS: Record<Locale, string> = {
-  en: "English", es: "Español", fr: "Français", de: "Deutsch", pt: "Português", zh: "Chinese (Mandarin)", ar: "العربية",
-  af: "Afrikaans", sq: "Albanian", hy: "Armenian", eu: "Basque", bn: "Bengali", bg: "Bulgarian", ca: "Catalan", km: "Cambodian", hr: "Croatian", cs: "Czech", da: "Danish", nl: "Dutch", et: "Estonian", fj: "Fiji", fi: "Finnish", ka: "Georgian", el: "Greek", gu: "Gujarati", he: "Hebrew", hi: "Hindi", hu: "Hungarian", is: "Icelandic", id: "Indonesian", ga: "Irish", it: "Italian", ja: "Japanese", jv: "Javanese", ko: "Korean", la: "Latin", lv: "Latvian", lt: "Lithuanian", mk: "Macedonian", ms: "Malay", ml: "Malayalam", mt: "Maltese", mi: "Maori", mr: "Marathi", mn: "Mongolian", ne: "Nepali", no: "Norwegian", fa: "Persian", pl: "Polish", pa: "Punjabi", qu: "Quechua", ro: "Romanian", ru: "Russian", sm: "Samoan", sr: "Serbian", sk: "Slovak", sl: "Slovenian", sw: "Swahili", sv: "Swedish", ta: "Tamil", tt: "Tatar", te: "Telugu", th: "Thai", bo: "Tibetan", to: "Tonga", tr: "Turkish", uk: "Ukranian", ur: "Urdu", uz: "Uzbek", vi: "Vietnamese", cy: "Welsh", xh: "Xhosa",
+  en: "English", es: "Español", fr: "Français", de: "Deutsch", pt: "Português", zh: "中文", ar: "العربية",
 };
 
-export const RTL_LOCALES: Locale[] = ["ar", "ur", "fa", "he"];
+export const RTL_LOCALES: Locale[] = ["ar"];
 
 type Dict = Record<string, Partial<Record<Locale, string>>>;
 
@@ -43,6 +42,7 @@ export const translations: Dict = {
   "hero.cardTitle": { en: "Online Banking", es: "Banca en línea", fr: "Banque en ligne", de: "Online-Banking", pt: "Banca online", zh: "网上银行", ar: "الخدمات المصرفية عبر الإنترنت" },
   "hero.cardSub": { en: "Sign in to access your account", es: "Inicie sesión para acceder a su cuenta", fr: "Connectez-vous pour accéder à votre compte", de: "Melden Sie sich an, um auf Ihr Konto zuzugreifen", pt: "Entre para acessar sua conta", zh: "登录以访问您的账户", ar: "سجل الدخول للوصول إلى حسابك" },
   "hero.email": { en: "Email", es: "Correo electrónico", fr: "E-mail", de: "E-Mail", pt: "E-mail", zh: "电子邮箱", ar: "البريد الإلكتروني" },
+  "hero.username": { en: "Username", es: "Nombre de usuario", fr: "Nom d'utilisateur", de: "Benutzername", pt: "Nome de usuário", zh: "用户名", ar: "اسم المستخدم" },
   "hero.password": { en: "Password", es: "Contraseña", fr: "Mot de passe", de: "Passwort", pt: "Senha", zh: "密码", ar: "كلمة المرور" },
   "hero.signIn": { en: "Sign In", es: "Iniciar sesión", fr: "Se connecter", de: "Anmelden", pt: "Entrar", zh: "登录", ar: "تسجيل الدخول" },
   "hero.signingIn": { en: "Signing in...", es: "Iniciando sesión...", fr: "Connexion...", de: "Anmelden...", pt: "Entrando...", zh: "登录中...", ar: "جارٍ تسجيل الدخول..." },

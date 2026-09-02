@@ -11,8 +11,10 @@
     "convex:deploy": "convex deploy"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-select": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.21",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "convex": "^1.17.0",
@@ -20,7 +22,6 @@
     "next": "16.3.3",
     "nodemailer": "^9.0.6",
     "plaid": "^46.0.0",
-    "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwind-merge": "^2.5.0"

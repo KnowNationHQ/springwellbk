@@ -15,11 +15,9 @@ import {
 } from "@/components/ui/sheet";
 
 const NAV = [
-  { href: "/login", labelKey: "header.onlineBanking" },
   { href: "/", labelKey: "nav.home" },
   { href: "/#about", labelKey: "nav.about" },
   { href: "/#services", labelKey: "nav.services" },
-  { href: "/loan", labelKey: "nav.loan" },
   { href: "/#contact", labelKey: "nav.contact" },
 ];
 
@@ -65,7 +63,6 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3 md:hidden">
-          <Link href="/login" className="text-blue-200 hover:text-white text-xs font-medium transition-colors">{t("header.onlineBanking")}</Link>
           <a href="mailto:support@springwellbk.com" className="text-blue-200 hover:text-white text-xs transition-colors">support@springwellbk.com</a>
           <Link href="/login" aria-label={t("header.logIn")} className="text-white hover:text-blue-300 transition-colors">
             <UserCircle className="h-5 w-5" />

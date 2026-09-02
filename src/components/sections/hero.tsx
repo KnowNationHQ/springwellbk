@@ -16,7 +16,7 @@ export function HeroSection() {
   const router = useRouter();
   const login = useMutation(api.auth.login);
   const t = useT();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export function HeroSection() {
     setError("");
     setLoading(true);
     try {
-      const result = await login({ email, password });
+      const result = await login({ username, password });
       localStorage.setItem("userId", result.userId);
       router.push(result.role === "admin" ? "/admin" : "/dashboard");
     } catch (err: any) {
@@ -71,12 +71,12 @@ export function HeroSection() {
                 {error && <p className="text-red-300 text-xs mb-3">{error}</p>}
                 <form onSubmit={handleLogin} className="space-y-3">
                   <div>
-                    <Label className="text-white text-xs">{t("hero.email")}</Label>
+                    <Label className="text-white text-xs">{t("hero.username")}</Label>
                     <Input
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      type="text"
+                      placeholder="Enter username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                       className="bg-blue-900/50 border-blue-500 text-white placeholder:text-blue-300/70 h-10"
                     />

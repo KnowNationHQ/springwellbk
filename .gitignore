@@ -36,6 +36,8 @@ yarn-error.log*
 
 # convex
 convex/_generated
+convex/*.js
+convex/*.js.map
 
 .vercel
 

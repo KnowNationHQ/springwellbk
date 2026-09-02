@@ -18,16 +18,18 @@ import { sym } from "@/lib/format";
 export default function DashboardPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"transactions" | "loans" | "profile">("transactions");
+  const [activeTab, setActiveTab] = useState<"transactions" | "profile">("transactions");
   const [editing, setEditing] = useState(false);
   const [profileFields, setProfileFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferForm, setTransferForm] = useState({ toEmail: "", amount: "", description: "" });
   const [transferError, setTransferError] = useState("");
+  const [transferSuccess, setTransferSuccess] = useState("");
   const [transferBusy, setTransferBusy] = useState(false);
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [pwMsg, setPwMsg] = useState("");
+  const [profileMsg, setProfileMsg] = useState("");
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
   const transfer = useMutation(api.auth.transfer);
@@ -61,28 +63,36 @@ export default function DashboardPage() {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-gray-500">Loading...</p></div>;
   }
 
-  const { user, transactions, loanApplications } = stats;
+  const { user, transactions } = stats;
 
   const creditTotal = transactions.filter((t: any) => t.type === "credit").reduce((s: number, t: any) => s + t.amount, 0);
   const debitTotal = transactions.filter((t: any) => t.type === "debit").reduce((s: number, t: any) => s + t.amount, 0);
   const flowTotal = creditTotal + debitTotal || 1;
   const creditPct = Math.round((creditTotal / flowTotal) * 100);
 
-  function handleProfileSave() {
-    updateProfile({ userId: userId as any, ...profileFields });
-    setEditing(false);
+  async function handleProfileSave() {
+    setProfileMsg("");
+    try {
+      await updateProfile({ userId: userId as any, ...profileFields });
+      setProfileMsg("Profile updated successfully.");
+      setEditing(false);
+    } catch (err: any) {
+      setProfileMsg(err.message || "Failed to update profile.");
+    }
   }
 
   async function handleTransfer(e: React.FormEvent) {
     e.preventDefault();
     setTransferError("");
+    setTransferSuccess("");
     setTransferBusy(true);
     try {
       const amt = parseFloat(transferForm.amount);
       if (!transferForm.toEmail || isNaN(amt) || amt <= 0) throw new Error("Enter a valid recipient email and amount");
       await transfer({ fromUserId: userId as any, toEmail: transferForm.toEmail, amount: amt, description: transferForm.description || undefined });
       setTransferForm({ toEmail: "", amount: "", description: "" });
-      setTransferOpen(false);
+      setTransferSuccess("Transfer sent successfully!");
+      setTimeout(() => { setTransferOpen(false); setTransferSuccess(""); }, 2000);
     } catch (err: any) {
       setTransferError(err.message || "Transfer failed");
     } finally {
@@ -105,7 +115,6 @@ export default function DashboardPage() {
 
   const tabs = [
     { id: "transactions" as const, label: "Transactions", icon: Clock },
-    { id: "loans" as const, label: "Loans", icon: CreditCard },
     { id: "profile" as const, label: "Profile", icon: User },
   ];
 
@@ -114,7 +123,6 @@ export default function DashboardPage() {
   const actions = [
     { label: "Transactions", icon: Clock, action: () => setActiveTab("transactions") },
     { label: "Transfer Funds", icon: ArrowUpRight, action: () => setTransferOpen(true) },
-    { label: "Loans", icon: CreditCard, action: () => setActiveTab("loans") },
     { label: "Profile", icon: User, action: () => setActiveTab("profile") },
     { label: "Messages", icon: FileText, href: "mailto:support@springwellbk.com" },
     { label: "Linked Accounts", icon: Link2, action: () => document.getElementById("linked")?.scrollIntoView({ behavior: "smooth" }) },
@@ -150,9 +158,6 @@ export default function DashboardPage() {
           </SheetHeader>
           <nav className="flex flex-col p-2 gap-1">
             <SheetClose asChild>
-              <a href="/loan" className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-700 text-sm font-medium"><CreditCard className="h-4 w-4" /> Apply for Loan</a>
-            </SheetClose>
-            <SheetClose asChild>
               <button onClick={() => document.getElementById("linked")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-700 text-sm font-medium"><Link2 className="h-4 w-4" /> Linked Accounts</button>
             </SheetClose>
           </nav>
@@ -162,17 +167,22 @@ export default function DashboardPage() {
         </SheetContent>
       </Sheet>
 
-      <div className="bg-blue-700 px-4 py-6 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-blue-200 text-xs">Welcome back, {user.firstName}</p>
-            <p className="text-blue-200 text-xs hidden sm:block">Last sign in {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "—"}</p>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{sym(user.currency)}{user.balance.toLocaleString()}</h1>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-            <p className="text-blue-200 text-xs">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account &middot; Signed in as {user.firstName} {user.lastName}</p>
-            <span className="text-blue-400 text-xs hidden sm:inline">•</span>
-            <button onClick={() => setActiveTab("profile")} className="text-blue-200 text-xs underline hover:text-white">Update profile</button>
+      <div className="bg-gradient-to-br from-blue-800 to-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl sm:text-3xl font-bold flex-shrink-0">
+              {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold truncate">{user.firstName} {user.lastName}</h1>
+              <p className="text-blue-200 text-xs sm:text-sm">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account &middot; {user.currency}</p>
+              <p className="text-blue-300 text-xs mt-0.5 hidden sm:block">Last sign in {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "—"}</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-blue-200 text-xs">Total Balance</p>
+              <p className="text-xl sm:text-2xl font-bold">{sym(user.currency)}{user.balance.toLocaleString()}</p>
+              <button onClick={() => setActiveTab("profile")} className="text-blue-300 text-xs underline hover:text-white mt-1">Update profile</button>
+            </div>
           </div>
         </div>
       </div>
@@ -280,7 +290,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "transactions" | "loans" | "profile")} className="mb-6">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "transactions" | "profile")} className="mb-6">
           <TabsList className="grid w-full grid-cols-3 bg-white rounded-lg p-1 shadow-sm h-auto">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium data-[state=active]:bg-blue-700 data-[state=active]:text-white data-[state=active]:shadow">
@@ -366,75 +376,20 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {activeTab === "loans" && (
-          <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">Loan Applications</h2>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs" asChild>
-                  <Link href="/loan">Apply</Link>
-                </Button>
-              </div>
-              {loanApplications.length === 0 ? (
-                <p className="text-gray-500 text-sm">No loan applications yet.</p>
-              ) : (
-                <>
-                  <div className="md:hidden space-y-3">
-                    {loanApplications.map((l: any) => (
-                      <div key={l._id} className="border rounded-lg p-3 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold">{"$"}{l.amount.toLocaleString()}</span>
-                          <Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge>
-                        </div>
-                        <p className="text-xs text-gray-500 capitalize">{l.purpose}</p>
-                        <p className="text-xs text-gray-400">{new Date(l.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="hidden md:block">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-blue-700 text-white text-xs">
-                          <th className="px-3 py-2 text-left">Date</th>
-                          <th className="px-3 py-2 text-left">Amount</th>
-                          <th className="px-3 py-2 text-left">Purpose</th>
-                          <th className="px-3 py-2 text-left">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {loanApplications.map((l: any) => (
-                          <tr key={l._id} className="border-b hover:bg-gray-50">
-                            <td className="px-3 py-2 text-xs">{new Date(l.createdAt).toLocaleDateString()}</td>
-                            <td className="px-3 py-2 font-semibold text-xs">{"$"}{l.amount.toLocaleString()}</td>
-                            <td className="px-3 py-2 text-xs">{l.purpose}</td>
-                            <td className="px-3 py-2">
-                              <Badge variant={l.status === "approved" ? "default" : l.status === "rejected" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{l.status}</Badge>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
         {activeTab === "profile" && (
           <Card>
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Profile</h2>
                 {!editing ? (
-                  <Button size="sm" variant="outline" onClick={() => { setEditing(true); setProfileFields({ firstName: user.firstName, lastName: user.lastName, phone: user.phone || "", address: user.address || "", city: user.city || "", state: user.state || "", zip: user.zip || "" }); }}>
+                  <Button size="sm" variant="outline" onClick={() => { setEditing(true); setProfileFields({ firstName: user.firstName, lastName: user.lastName, phone: user.phone || "", address: user.address || "", city: user.city || "", state: user.state || "", zip: user.zip || "" }); setProfileMsg(""); }}>
                     <Settings className="h-4 w-4 mr-2" /> Edit
                   </Button>
                 ) : (
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleProfileSave}>Save</Button>
                 )}
               </div>
+              {profileMsg && <p className={`text-sm mb-3 ${profileMsg.includes("success") ? "text-blue-600" : "text-red-600"}`}>{profileMsg}</p>}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-blue-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">Available Balance</p>
@@ -507,6 +462,7 @@ export default function DashboardPage() {
             </div>
             <form onSubmit={handleTransfer} className="p-5 space-y-3">
               {transferError && <p className="text-red-600 text-sm bg-red-50 p-2 rounded">{transferError}</p>}
+              {transferSuccess && <p className="text-blue-600 text-sm bg-blue-50 p-2 rounded">{transferSuccess}</p>}
               <div className="space-y-1">
                 <Label className="text-xs text-gray-500">Recipient email</Label>
                 <Input type="email" required autoComplete="email" placeholder="friend@springwellbk.com" className="h-10" value={transferForm.toEmail} onChange={(e) => setTransferForm({ ...transferForm, toEmail: e.target.value })} />

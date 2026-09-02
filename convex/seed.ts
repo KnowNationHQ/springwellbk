@@ -9,6 +9,7 @@ export const seedAdmin = mutation({
     if (existing) return "Admin already exists";
 
     await ctx.db.insert("users", {
+      username: "admin",
       email: "admin@springwellbk.com",
       password: "Admin123!@",
       firstName: "Admin",
@@ -22,7 +23,7 @@ export const seedAdmin = mutation({
       createdAt: Date.now(),
       lastLogin: 0,
     });
-    return "Admin created: admin@springwellbk.com / Admin123!@";
+    return "Admin created: admin / Admin123!@";
   },
 });
 
@@ -35,6 +36,7 @@ export const seedCustomer = mutation({
     if (existing) return "Customer already exists";
 
     await ctx.db.insert("users", {
+      username: "customer",
       email: "customer@test.com",
       password: "Test123!@",
       firstName: "John",
@@ -48,6 +50,6 @@ export const seedCustomer = mutation({
       createdAt: Date.now(),
       lastLogin: 0,
     });
-    return "Customer created: customer@test.com / Test123!@";
+    return "Customer created: customer / Test123!@";
   },
 });
