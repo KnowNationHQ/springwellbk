@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { T } from "@/lib/i18n";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const services = [
   { titleKey: "offering.loans.title", descKey: "offering.loans.desc", img: "/images/service-loans.jpeg" },
@@ -10,19 +8,10 @@ const services = [
   { titleKey: "offering.prepaid.title", descKey: "offering.prepaid.desc", img: "/images/service-prepaid.jpeg" },
   { titleKey: "offering.net.title", descKey: "offering.net.desc", img: "/images/service-net.jpeg" },
   { titleKey: "offering.mcash.title", descKey: "offering.mcash.desc", img: "/images/service-mcash.jpeg" },
+  { titleKey: "offering.cards.title", descKey: "offering.cards.desc", img: "/images/service-cards.jpeg" },
 ];
 
 export function ServicesSection() {
-  const [current, setCurrent] = useState(0);
-
-  function prev() {
-    setCurrent((c) => (c === 0 ? services.length - 1 : c - 1));
-  }
-
-  function next() {
-    setCurrent((c) => (c === services.length - 1 ? 0 : c + 1));
-  }
-
   return (
     <section id="services" className="py-12 sm:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
@@ -33,31 +22,16 @@ export function ServicesSection() {
           </p>
         </div>
 
-        <div className="relative max-w-xl mx-auto">
-          <div className="flex items-center gap-4">
-            <button onClick={prev} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex-shrink-0">
-              <ChevronLeft className="h-5 w-5 text-gray-600" />
-            </button>
-            <div className="flex-1 text-center">
-              <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-                <img src={services[current].img} alt="" className="w-full h-40 object-cover rounded-lg mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2"><T k={services[current].titleKey} /></h3>
-                <p className="text-sm text-gray-600"><T k={services[current].descKey} /></p>
-              </div>
-              <div className="flex justify-center gap-2 mt-4">
-                {services.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrent(i)}
-                    className={`w-2.5 h-2.5 rounded-full transition-colors ${i === current ? "bg-[#426FB6]" : "bg-gray-300"}`}
-                  />
-                ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((svc) => (
+            <div key={svc.titleKey} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+              <img src={svc.img} alt="" className="w-full h-56 sm:h-64 object-cover" />
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2"><T k={svc.titleKey} /></h3>
+                <p className="text-sm text-gray-600 leading-relaxed"><T k={svc.descKey} /></p>
               </div>
             </div>
-            <button onClick={next} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex-shrink-0">
-              <ChevronRight className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
+          ))}
         </div>
       </div>
     </section>

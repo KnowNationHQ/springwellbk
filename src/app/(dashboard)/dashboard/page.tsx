@@ -27,6 +27,15 @@ export default function DashboardPage() {
   const [pwMsg, setPwMsg] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [billPayOpen, setBillPayOpen] = useState(false);
+  const [transactionsOpen, setTransactionsOpen] = useState(false);
+  const [offersOpen, setOffersOpen] = useState(false);
+  const [messagesOpen, setMessagesOpen] = useState(false);
+  const [spendingOpen, setSpendingOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
+  const [openAccountOpen, setOpenAccountOpen] = useState(false);
+  const [quickView, setQuickView] = useState<string | null>(null);
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
   const transfer = useMutation(api.auth.transfer);
@@ -112,15 +121,15 @@ export default function DashboardPage() {
   }
 
   const activityItems = [
-    { label: "Alerts", icon: Bell },
-    { label: "Bill Pay", icon: DollarSign },
-    { label: "Transactions", icon: Clock },
+    { label: "Alerts", icon: Bell, action: () => setAlertsOpen(true) },
+    { label: "Bill Pay", icon: DollarSign, action: () => setBillPayOpen(true) },
+    { label: "Transactions", icon: Clock, action: () => setTransactionsOpen(true) },
     { label: "Transfer Funds", icon: ArrowUpRight, action: () => setTransferOpen(true) },
-    { label: "Special Offers", icon: Tag },
-    { label: "Messages", icon: FileText },
-    { label: "Spending & Budgeting", icon: PiggyBank },
-    { label: "Goals", icon: Target },
-    { label: "Open account", icon: UserPlus },
+    { label: "Special Offers", icon: Tag, action: () => setOffersOpen(true) },
+    { label: "Messages", icon: FileText, action: () => setMessagesOpen(true) },
+    { label: "Spending & Budgeting", icon: PiggyBank, action: () => setSpendingOpen(true) },
+    { label: "Goals", icon: Target, action: () => setGoalsOpen(true) },
+    { label: "Open account", icon: UserPlus, action: () => setOpenAccountOpen(true) },
   ];
 
   return (
@@ -202,7 +211,13 @@ export default function DashboardPage() {
           </div>
           <p style={{ margin: "0 0 4px", fontSize: 14, color: "#333" }}>Hello, Your account has been disabled due to suspicious activities from unknown location.</p>
           <p style={{ margin: "0 0 8px", fontSize: 14, color: "#333" }}>Please visit any of our branches on how to resolve this issue.</p>
-          <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Quick view</button>
+            <button onClick={() => setQuickView(quickView === "investment" ? null : "investment")} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>{quickView === "investment" ? "Hide" : "Quick view"}</button>
+            {quickView === "investment" && (
+              <div style={{ marginTop: 12, padding: 12, backgroundColor: "#f9f9f9", borderRadius: 4, border: "1px solid #eee" }}>
+                <p style={{ fontSize: 13, color: "#333", margin: "0 0 8px" }}>Investment account details will appear here once linked.</p>
+                <p style={{ fontSize: 12, color: "#666", margin: 0 }}>Connect an external investment account to view holdings, performance, and allocation.</p>
+              </div>
+            )}
         </div>
 
         {/* Personal Accounts */}
@@ -218,7 +233,17 @@ export default function DashboardPage() {
               </div>
               <p style={{ fontSize: 28, fontWeight: 700, color: "#000", margin: 0 }}>{sym(user.currency)}{user.balance.toLocaleString()}</p>
             </div>
-            <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, marginTop: 12 }}>Quick view</button>
+            <button onClick={() => setQuickView(quickView === "personal" ? null : "personal")} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, marginTop: 12 }}>{quickView === "personal" ? "Hide" : "Quick view"}</button>
+            {quickView === "personal" && (
+              <div style={{ marginTop: 12, padding: 12, backgroundColor: "#f9f9f9", borderRadius: 4, border: "1px solid #eee" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <div><p style={{ fontSize: 11, color: "#999", margin: 0 }}>Account Type</p><p style={{ fontSize: 13, margin: "2px 0 0", fontWeight: 500 }}>Checking</p></div>
+                  <div><p style={{ fontSize: 11, color: "#999", margin: 0 }}>Routing Number</p><p style={{ fontSize: 13, margin: "2px 0 0", fontWeight: 500 }}>021000021</p></div>
+                  <div><p style={{ fontSize: 11, color: "#999", margin: 0 }}>Account Status</p><p style={{ fontSize: 13, margin: "2px 0 0", fontWeight: 500, color: "#d93939" }}>Restricted</p></div>
+                  <div><p style={{ fontSize: 11, color: "#999", margin: 0 }}>Interest Rate</p><p style={{ fontSize: 13, margin: "2px 0 0", fontWeight: 500 }}>0.01% APY</p></div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -256,7 +281,13 @@ export default function DashboardPage() {
           </div>
           <div style={{ padding: "16px 20px" }}>
             <p style={{ fontSize: 14, color: "#333", margin: "0 0 8px" }}>SpringWell Bank Core checking - 9080</p>
-            <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Quick view</button>
+          <button onClick={() => setQuickView(quickView === "alert" ? null : "alert")} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>{quickView === "alert" ? "Hide" : "Quick view"}</button>
+          {quickView === "alert" && (
+            <div style={{ marginTop: 12, padding: 12, backgroundColor: "#fff", borderRadius: 4, border: "1px solid #eee" }}>
+              <p style={{ fontSize: 13, color: "#333", margin: "0 0 6px" }}><strong>Alert Details:</strong> Your account access was temporarily restricted after login attempts from an unrecognized location. To restore access, please visit a branch with valid ID or call our support line.</p>
+              <p style={{ fontSize: 12, color: "#666", margin: 0 }}>Reference: SEC-2026-0903 | Reported: {new Date().toLocaleDateString()}</p>
+            </div>
+          )}
           </div>
         </div>
 
@@ -407,13 +438,13 @@ export default function DashboardPage() {
 
           {/* Footer Links */}
           <div style={{ textAlign: "center", fontSize: 13, color: "#426FB6", marginBottom: 8 }}>
-            <a href="#" style={{ color: "#426FB6", textDecoration: "none" }}>Contact Us</a>
+            <a href="/#contact" style={{ color: "#426FB6", textDecoration: "none" }}>Contact Us</a>
             <span style={{ margin: "0 6px", color: "#999" }}>/</span>
-            <a href="#" style={{ color: "#426FB6", textDecoration: "none" }}>Find a branch or ATM</a>
+            <a href="/#about" style={{ color: "#426FB6", textDecoration: "none" }}>About SpringWell</a>
             <span style={{ margin: "0 6px", color: "#999" }}>/</span>
-            <a href="#" style={{ color: "#426FB6", textDecoration: "none" }}>Careers</a>
+            <a href="/#services" style={{ color: "#426FB6", textDecoration: "none" }}>Services</a>
             <span style={{ margin: "0 6px", color: "#999" }}>/</span>
-            <a href="#" style={{ color: "#426FB6", textDecoration: "none" }}>Disclosure & Privacy Policy</a>
+            <a href="/#contact" style={{ color: "#426FB6", textDecoration: "none" }}>Disclosure & Privacy Policy</a>
           </div>
 
           <p style={{ textAlign: "center", fontSize: 12, color: "#666", margin: "0 0 4px" }}>Phone +44 7445 182201 / NMLS ID 411068</p>
@@ -491,6 +522,232 @@ export default function DashboardPage() {
                 </form>
               </div>
               <Button onClick={handleProfileSave} style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Save Profile</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alerts Modal */}
+      {alertsOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setAlertsOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 480, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Alerts</h3>
+              <button onClick={() => setAlertsOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ padding: "24px", textAlign: "center", color: "#999" }}>
+                <Bell style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
+                <p style={{ fontSize: 14 }}>No new alerts</p>
+                <p style={{ fontSize: 12, color: "#bbb", margin: "4px 0 0" }}>You&apos;re all caught up!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bill Pay Modal */}
+      {billPayOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setBillPayOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 480, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Bill Pay</h3>
+              <button onClick={() => setBillPayOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ marginBottom: 12 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Payee Name</Label>
+                <Input placeholder="e.g. Electric Company" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number</Label>
+                <Input placeholder="Account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount</Label>
+                <Input type="number" min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Memo (optional)</Label>
+                <Input placeholder="Invoice or reference" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
+              </div>
+              <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { alert("Bill payment submitted!"); setBillPayOpen(false); }}>Submit Payment</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transactions Modal */}
+      {transactionsOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setTransactionsOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 560, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Transaction History</h3>
+              <button onClick={() => setTransactionsOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              {transactions.length === 0 ? (
+                <div style={{ padding: "24px", textAlign: "center", color: "#999" }}>
+                  <Clock style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
+                  <p style={{ fontSize: 14 }}>No transactions yet</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {transactions.map((tx: any) => (
+                    <div key={tx._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", backgroundColor: "#f9f9f9", borderRadius: 6, border: "1px solid #eee" }}>
+                      <div>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "#333" }}>{tx.description || tx.type}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: 11, color: "#999" }}>{new Date(tx.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: tx.type === "credit" ? "#16a34a" : "#d93939" }}>
+                        {tx.type === "credit" ? "+" : "-"}{sym(user.currency)}{tx.amount.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Special Offers Modal */}
+      {offersOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setOffersOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 520, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Special Offers</h3>
+              <button onClick={() => setOffersOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { title: "5% Cash Back on Dining", desc: "Use your SpringWell card at restaurants this month and earn 5% cash back.", badge: "Limited Time" },
+                { title: "0% APR for 12 Months", desc: "Open a new credit card and enjoy 0% intro APR for the first 12 months.", badge: "New" },
+                { title: "Refer a Friend, Get $50", desc: "Invite friends to SpringWell and you both earn $50 when they open an account.", badge: "Ongoing" },
+              ].map((offer, i) => (
+                <div key={i} style={{ padding: 16, border: "1px solid #eee", borderRadius: 8, backgroundColor: "#fafafa" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#333" }}>{offer.title}</h4>
+                    <span style={{ fontSize: 10, backgroundColor: "#FEDF01", color: "#000", padding: "2px 8px", borderRadius: 10, fontWeight: 600 }}>{offer.badge}</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, color: "#666", lineHeight: 1.5 }}>{offer.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Messages Modal */}
+      {messagesOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setMessagesOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 520, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Messages</h3>
+              <button onClick={() => setMessagesOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ marginBottom: 16 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>To</Label>
+                <Input placeholder="Support team" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Subject</Label>
+                <Input placeholder="How can we help?" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Message</Label>
+                <textarea placeholder="Type your message..." rows={4} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", resize: "vertical" }} />
+              </div>
+              <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { alert("Message sent!"); setMessagesOpen(false); }}>Send Message</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Spending & Budgeting Modal */}
+      {spendingOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setSpendingOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 520, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Spending & Budgeting</h3>
+              <button onClick={() => setSpendingOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Current Balance</p>
+                <p style={{ fontSize: 28, fontWeight: 700, margin: 0, color: "#333" }}>{sym(user.currency)}{user.balance.toLocaleString()}</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  { cat: "Housing", spent: 0, budget: 1500, color: "#426FB6" },
+                  { cat: "Food & Dining", spent: 0, budget: 600, color: "#16a34a" },
+                  { cat: "Transportation", spent: 0, budget: 300, color: "#f59e0b" },
+                  { cat: "Entertainment", spent: 0, budget: 200, color: "#d93939" },
+                  { cat: "Utilities", spent: 0, budget: 250, color: "#8b5cf6" },
+                ].map((b) => (
+                  <div key={b.cat}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "#333" }}>{b.cat}</span>
+                      <span style={{ fontSize: 12, color: "#999" }}>{sym(user.currency)}{b.spent} / {sym(user.currency)}{b.budget}</span>
+                    </div>
+                    <div style={{ height: 8, backgroundColor: "#eee", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(b.spent / b.budget) * 100}%`, backgroundColor: b.color, borderRadius: 4, transition: "width 0.3s" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: 11, color: "#bbb", textAlign: "center", marginTop: 16 }}>No spending data yet. Start transacting to see your budget breakdown.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Goals Modal */}
+      {goalsOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setGoalsOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 480, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Savings Goals</h3>
+              <button onClick={() => setGoalsOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ padding: "24px", textAlign: "center", color: "#999" }}>
+                <Target style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
+                <p style={{ fontSize: 14, marginBottom: 8 }}>No goals set yet</p>
+                <p style={{ fontSize: 12, color: "#bbb", margin: "0 0 16px" }}>Create a savings goal to track your progress.</p>
+                <Button style={{ padding: "10px 24px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }} onClick={() => { alert("Goal creation coming soon!"); }}>Create Goal</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Open Account Modal */}
+      {openAccountOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setOpenAccountOpen(false)}>
+          <div style={{ width: "100%", maxWidth: 480, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Open a New Account</h3>
+              <button onClick={() => setOpenAccountOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {[
+                  { name: "Checking Account", desc: "Everyday banking with no monthly fees", icon: "🏦" },
+                  { name: "Savings Account", desc: "Earn interest on your savings", icon: "💰" },
+                  { name: "Money Market", desc: "Higher rates for higher balances", icon: "📈" },
+                  { name: "Certificate of Deposit", desc: "Locked-in rates for fixed terms", icon: "🔒" },
+                ].map((acct) => (
+                  <div key={acct.name} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: "1px solid #eee", borderRadius: 8, cursor: "pointer", transition: "background-color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")} onClick={() => { alert(`${acct.name} application coming soon!`); setOpenAccountOpen(false); }}>
+                    <span style={{ fontSize: 24 }}>{acct.icon}</span>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#333" }}>{acct.name}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#999" }}>{acct.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
