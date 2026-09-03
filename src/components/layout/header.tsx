@@ -29,7 +29,6 @@ export function Header() {
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-9">
           <div className="flex items-center gap-4">
             <a href="mailto:support@springwellbk.com" className="hover:text-white transition-colors">support@springwellbk.com</a>
-            <span>+1 (555) 123-4567</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/#contact" className="hover:text-white transition-colors">{t("nav.contact")}</Link>
