@@ -24,8 +24,8 @@ const NAV = [
 export function Header() {
   const t = useT();
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#117aca] text-white">
-      <div className="hidden md:block bg-[#094775] text-blue-200 text-xs">
+    <header className="sticky top-0 z-50 w-full">
+      <div className="hidden md:block bg-[#434343] text-gray-300 text-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-9">
           <div className="flex items-center gap-4">
             <a href="mailto:support@springwellbk.com" className="hover:text-white transition-colors">support@springwellbk.com</a>
@@ -33,79 +33,85 @@ export function Header() {
           <div className="flex items-center gap-4">
             <Link href="/#contact" className="hover:text-white transition-colors">{t("nav.contact")}</Link>
             <Link href="/register" className="hover:text-white transition-colors font-semibold">{t("header.openAnAccount")}</Link>
-            <span className="text-blue-200">Language:</span>
-            <LanguageSwitcher className="bg-[#117aca] border-[#094775] text-blue-100 hover:bg-[#094775] w-32" />
+            <span className="text-gray-400">Language:</span>
+            <LanguageSwitcher className="bg-[#434343] border-[#555] text-gray-200 hover:bg-[#555] w-32" />
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex h-14 md:h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg md:text-xl">
-          <img src="/logo-white.svg" alt="SpringWell Bank" className="h-7 w-auto md:h-8" />
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {NAV.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-blue-300 transition-colors">
-              {t(link.labelKey)}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" asChild className="text-white hover:bg-[#094775] !rounded-full">
-            <Link href="/login">{t("header.logIn")}</Link>
-          </Button>
-          <Button asChild className="bg-white text-[#117aca] hover:bg-blue-50 !rounded-[5px]">
-            <Link href="/register">{t("header.openAccount")}</Link>
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-3 md:hidden">
-          <a href="mailto:support@springwellbk.com" className="text-blue-200 hover:text-white text-xs transition-colors">support@springwellbk.com</a>
-          <Link href="/login" aria-label={t("header.logIn")} className="text-white hover:text-blue-300 transition-colors">
-            <UserCircle className="h-5 w-5" />
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto flex h-14 md:h-16 items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg md:text-xl text-[#426FB6]">
+            <svg className="h-7 w-7 md:h-8 md:w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            SpringWell Bank
           </Link>
-          <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-[#094775]" aria-label="Open menu">
-              <Menu className="h-6 w-6" />
+
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
+            {NAV.map((link) => (
+              <Link key={link.href} href={link.href} className="hover:text-[#426FB6] transition-colors">
+                {t(link.labelKey)}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hidden md:flex items-center gap-3">
+            <Button asChild className="bg-[#426FB6] hover:bg-[#3560a0] text-white !rounded-[5px]">
+              <Link href="/login">{t("header.logIn")}</Link>
             </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[85%] max-w-sm overflow-y-auto bg-[#094775] text-white border-[#062e4d] p-0">
-            <SheetHeader className="px-5 h-14 border-b border-[#062e4d] flex-row items-center justify-start gap-2 space-y-0">
-              <img src="/logo-white.svg" alt="SpringWell Bank" className="h-7 w-auto" />
-              <SheetTitle className="text-white">{t("header.menu")}</SheetTitle>
-            </SheetHeader>
-            <div className="p-3 border-b border-[#062e4d]">
-              <LanguageSwitcher className="w-full bg-[#117aca] border-[#094775] text-blue-100 hover:bg-[#094775]" />
-            </div>
-            <nav className="flex flex-col p-3 gap-1">
-              {NAV.map((link) => (
-                <SheetClose asChild key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="flex items-center py-3 px-3 rounded-lg hover:bg-[#062e4d] transition-colors text-sm font-medium"
-                  >
-                    {t(link.labelKey)}
-                  </Link>
-                </SheetClose>
-              ))}
-            </nav>
-            <div className="mt-auto p-3 border-t border-[#062e4d] space-y-2">
-              <SheetClose asChild>
-                <Button asChild variant="outline" className="w-full bg-transparent border-white text-white hover:bg-[#062e4d]">
-                  <Link href="/login">{t("header.logIn")}</Link>
+          </div>
+
+          <div className="flex items-center gap-3 md:hidden">
+            <a href="mailto:support@springwellbk.com" className="text-gray-400 hover:text-[#426FB6] text-xs transition-colors">support@springwellbk.com</a>
+            <Link href="/login" aria-label={t("header.logIn")} className="text-gray-600 hover:text-[#426FB6] transition-colors">
+              <UserCircle className="h-5 w-5" />
+            </Link>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden text-gray-700 hover:bg-gray-100" aria-label="Open menu">
+                  <Menu className="h-6 w-6" />
                 </Button>
-              </SheetClose>
-              <SheetClose asChild>
-                <Button asChild className="w-full bg-white text-[#117aca] hover:bg-blue-50">
-                  <Link href="/register">{t("header.openAccount")}</Link>
-                </Button>
-              </SheetClose>
-            </div>
-          </SheetContent>
-        </Sheet>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto bg-white text-gray-900 border-gray-200 p-0">
+                <SheetHeader className="px-5 h-14 border-b border-gray-200 flex-row items-center justify-start gap-2 space-y-0">
+                  <svg className="h-6 w-6 text-[#426FB6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <SheetTitle className="text-gray-900">{t("header.menu")}</SheetTitle>
+                </SheetHeader>
+                <div className="p-3 border-b border-gray-200">
+                  <LanguageSwitcher className="w-full bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200" />
+                </div>
+                <nav className="flex flex-col p-3 gap-1">
+                  {NAV.map((link) => (
+                    <SheetClose asChild key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="flex items-center py-3 px-3 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
+                      >
+                        {t(link.labelKey)}
+                      </Link>
+                    </SheetClose>
+                  ))}
+                </nav>
+                <div className="mt-auto p-3 border-t border-gray-200 space-y-2">
+                  <SheetClose asChild>
+                    <Button asChild className="w-full bg-[#426FB6] hover:bg-[#3560a0] text-white">
+                      <Link href="/login">{t("header.logIn")}</Link>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button asChild variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
+                      <Link href="/register">{t("header.openAccount")}</Link>
+                    </Button>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>

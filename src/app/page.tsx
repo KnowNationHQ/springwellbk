@@ -18,8 +18,8 @@ export default function Home() {
         <HeroSection />
         <FeaturesSection />
         <PromosSection />
-        <ServicesSection />
         <RatesSection />
+        <ServicesSection />
         <AboutSection />
         <WhyBankSection />
         <CTASection />

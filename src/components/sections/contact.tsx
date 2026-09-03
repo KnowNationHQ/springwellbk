@@ -7,8 +7,7 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone, MessageCircle } from "lucide-react";
 
 export function ContactSection() {
   const t = useT();
@@ -37,70 +36,63 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="py-12 sm:py-16 bg-gray-50">
+    <section id="contact" className="py-12 sm:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-10">
-          <p className="text-blue-600 text-sm font-medium mb-2">{t("contact.eyebrow")}</p>
-          <h2 className="text-2xl sm:text-3xl font-bold">{t("contact.heading")}</h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <img src="/images/contact.jpeg" alt="" aria-hidden className="w-full h-40 object-cover rounded-xl" />
-            {[
-              { icon: Mail, labelKey: "contact.email", value: "support@springwellbk.com", href: "mailto:support@springwellbk.com" },
-              { icon: Phone, labelKey: "contact.phone", value: "support@springwellbk.com", href: "mailto:support@springwellbk.com" },
-              { icon: MapPin, labelKey: "contact.address", value: "3250 Pennsylvania Avenue NW", href: null },
-            ].map((c) => (
-              <div key={c.labelKey} className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <c.icon className="h-5 w-5 text-blue-700" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">{t(c.labelKey)}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {[
+                { icon: Phone, label: "Phone number", value: "+1 (555) 123-4567" },
+                { icon: Mail, label: "Email", value: "support@springwellbk.com", href: "mailto:support@springwellbk.com" },
+                { icon: MapPin, label: "Address", value: "3250 Pennsylvania Avenue NW" },
+                { icon: MessageCircle, label: "Live Chat", value: "Start now", href: "#" },
+              ].map((c) => (
+                <div key={c.label} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-10 h-10 bg-[#426FB6]/10 rounded-lg flex items-center justify-center mb-3">
+                    <c.icon className="h-5 w-5 text-[#426FB6]" />
+                  </div>
+                  <p className="text-xs text-gray-500 mb-1">{c.label}</p>
                   {c.href ? (
-                    <a href={c.href} className="text-sm font-medium hover:text-blue-700 transition-colors">{c.value}</a>
+                    <a href={c.href} className="text-sm font-medium text-gray-900 hover:text-[#426FB6] transition-colors">{c.value}</a>
                   ) : (
-                    <p className="text-sm font-medium">{c.value}</p>
+                    <p className="text-sm font-medium text-gray-900">{c.value}</p>
                   )}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <Card className="shadow-sm">
-            <CardContent className="p-5 sm:p-6">
-              <h3 className="font-bold text-lg mb-4">{t("contact.formTitle")}</h3>
-              {success && <p className="text-blue-600 text-sm mb-4 bg-blue-50 p-3 rounded">{t("contact.success")}</p>}
-              {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">{t("contact.name")}</Label>
-                    <Input required value={name} onChange={(e) => setName(e.target.value)} className="h-10" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">{t("contact.email")}</Label>
-                    <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-10" />
-                  </div>
+          <div>
+            <h3 className="font-bold text-lg mb-4 text-gray-900">Get In Touch</h3>
+            {success && <p className="text-[#426FB6] text-sm mb-4 bg-blue-50 p-3 rounded">{t("contact.success")}</p>}
+            {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <Label className="text-xs text-gray-600">{t("contact.subject")}</Label>
+                <Input required value={subject} onChange={(e) => setSubject(e.target.value)} className="h-10 border-gray-300" placeholder="Subject" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-gray-600">{t("contact.name")}</Label>
+                  <Input required value={name} onChange={(e) => setName(e.target.value)} className="h-10 border-gray-300" />
                 </div>
                 <div>
-                  <Label className="text-xs">{t("contact.subject")}</Label>
-                  <Input required value={subject} onChange={(e) => setSubject(e.target.value)} className="h-10" />
+                  <Label className="text-xs text-gray-600">{t("contact.email")}</Label>
+                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 border-gray-300" />
                 </div>
-                <div>
-                  <Label className="text-xs">{t("contact.message")}</Label>
-                  <textarea
-                    className="w-full min-h-[100px] border border-input bg-background px-3 py-2 rounded-md text-sm"
-                    required
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-10">{t("contact.send")}</Button>
-              </form>
-            </CardContent>
-          </Card>
+              </div>
+              <div>
+                <Label className="text-xs text-gray-600">{t("contact.message")}</Label>
+                <textarea
+                  className="w-full min-h-[100px] border border-gray-300 bg-white px-3 py-2 rounded-md text-sm"
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </div>
+              <Button type="submit" className="w-full bg-[#426FB6] hover:bg-[#3560a0] text-white h-10">{t("contact.send")}</Button>
+            </form>
+          </div>
         </div>
       </div>
     </section>

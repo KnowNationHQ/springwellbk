@@ -5,12 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, Menu, KeyRound, CalendarClock, Eye, EyeOff } from "lucide-react";
+import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, KeyRound, CalendarClock, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger } from "@/components/ui/sheet";
 import { sym } from "@/lib/format";
 
 type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
@@ -67,11 +65,10 @@ export default function AdminDashboard() {
   }
 
   if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
+    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><p style={{ color: "#666" }}>Loading...</p></div>;
   }
 
   const adminUser = users.find((u: any) => u._id === userId);
-
   const customers = users.filter((u: any) =>
     u.firstName.toLowerCase().includes(search.toLowerCase()) ||
     u.lastName.toLowerCase().includes(search.toLowerCase()) ||
@@ -184,222 +181,233 @@ export default function AdminDashboard() {
     } catch (err: any) { flash(err?.message ?? "Update failed"); }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <Landmark className="h-5 w-5" />
-            <span className="hidden sm:inline">SpringWell Bank</span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative hidden lg:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-200" />
-            <Input placeholder="Search customers..." className="pl-10 w-56 bg-blue-800 border-blue-700 text-white placeholder:text-blue-300" value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-          <span className="hidden sm:inline text-xs sm:text-sm text-blue-200">Admin</span>
-          {adminUser && (
-            <span className="hidden lg:inline text-xs text-blue-200 border border-blue-700 rounded px-2 py-0.5">{sym(adminUser.currency)}{adminUser.balance.toLocaleString()}</span>
-          )}
-          <Button variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-blue-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}>
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline ml-2">Logout</span>
-          </Button>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-blue-700" aria-label="Open menu">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[85%] max-w-sm overflow-y-auto bg-blue-900 text-white border-blue-700 p-0">
-              <SheetHeader className="px-5 h-14 border-b border-blue-700 flex-row items-center justify-start gap-2 space-y-0">
-                <Landmark className="h-5 w-5" />
-                <SheetTitle className="text-white">Menu</SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col p-3 gap-1">
-                <SheetClose asChild>
-                  <button onClick={() => document.getElementById("accounts")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><Users className="h-4 w-4" /> Accounts</button>
-                </SheetClose>
-                <SheetClose asChild>
-                  <button onClick={() => document.getElementById("messages")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><MessageSquare className="h-4 w-4" /> Messages</button>
-                </SheetClose>
-                <SheetClose asChild>
-                  <button onClick={() => document.getElementById("txns")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-blue-800 text-sm font-medium text-left"><Wallet className="h-4 w-4" /> Recent Transactions</button>
-                </SheetClose>
-              </nav>
-              <div className="mt-auto p-3 border-t border-blue-700">
-                <SheetClose asChild>
-                  <Button variant="outline" className="w-full bg-transparent border-white text-white hover:bg-blue-800" onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
-                </SheetClose>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </header>
+  const sectionStyle: React.CSSProperties = { backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 20 };
+  const sectionHeaderStyle: React.CSSProperties = { borderBottom: "2px solid #426FB6", padding: "12px 20px" };
+  const sectionBodyStyle: React.CSSProperties = { padding: "16px 20px" };
+  const tableHeaderStyle: React.CSSProperties = { backgroundColor: "#426FB6", color: "#fff", fontSize: 12, fontWeight: 600 };
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+  return (
+    <div style={{ backgroundColor: "#eee", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }}>
+      {/* Top Nav */}
+      <nav style={{ backgroundColor: "#434343", color: "#fff" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
+          <ul style={{ display: "flex", gap: 0, listStyle: "none", margin: 0, padding: 0, flexWrap: "wrap" }}>
+            <li style={{ padding: "12px 20px", borderBottom: "3px solid #FEDF01", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Online banking</li>
+            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer" }}>About SpringWell Bank</li>
+            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer", marginLeft: "auto" }}>
+              <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, padding: 0 }}>
+                Sign out
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      {/* Header with Logo */}
+      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Landmark style={{ color: "#426FB6", width: 32, height: 32 }} />
+            <span style={{ fontSize: 22, fontWeight: 700, color: "#426FB6", fontFamily: "'BentonSans', Arial, sans-serif" }}>SpringWell Bank</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <input
+              type="text"
+              placeholder="Search customers..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ padding: "8px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 13, width: 200, fontFamily: "inherit" }}
+            />
+            <div style={{ backgroundColor: "#FEDF01", padding: "10px 20px", borderRadius: 4, fontWeight: 700, fontSize: 14, color: "#000" }}>
+              Signed In As Admin
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Blue Sub Header */}
+      <div style={{ backgroundColor: "#426FB6", height: 50 }} />
+
+      {/* Main Content */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
+
+        {/* Profile Section */}
+        <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "30px 0 20px", flexWrap: "wrap" }}>
+          <div style={{ width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: "#ccc", flexShrink: 0 }}>
+            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 700, color: "#fff", backgroundColor: "#426FB6" }}>
+              {adminUser ? initials(adminUser) : "A"}
+            </div>
+          </div>
+          <div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: "#000" }}>Hello, {adminUser ? `${adminUser.firstName} ${adminUser.lastName}` : "Admin"}</h2>
+            <p style={{ fontSize: 14, color: "#666", margin: "0 0 4px" }}>Administrator Dashboard</p>
+            <p style={{ fontSize: 13, color: "#666", margin: 0 }}>Total customer balance: <strong>{adminUser ? sym(adminUser.currency) : "$"}{totalBalance.toLocaleString()}</strong></p>
+          </div>
+        </div>
+
+        {/* Search Bar (mobile) */}
+        <div style={{ display: "flex", marginBottom: 20, border: "1px solid #ccc", borderRadius: 4, overflow: "hidden" }}>
+          <input
+            type="text"
+            placeholder="How can we help you ?"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ flex: 1, padding: "10px 16px", border: "none", outline: "none", fontSize: 14, fontFamily: "inherit" }}
+          />
+          <button style={{ padding: "10px 16px", backgroundColor: "#eee", border: "none", borderLeft: "1px solid #ccc", cursor: "pointer" }}>
+            <Search style={{ width: 18, height: 18, color: "#666" }} />
+          </button>
+        </div>
+
+        {/* Action Message */}
         {actionMsg && (
-          <div className="p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">{actionMsg}</div>
+          <div style={{ backgroundColor: "rgba(66,111,182,0.15)", border: "1px solid rgba(66,111,182,0.3)", borderRadius: 4, padding: "12px 20px", marginBottom: 20, fontSize: 14, color: "#426FB6" }}>
+            {actionMsg}
+          </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <Stat icon={<Users className="h-4 w-4" />} label="Customers" value={String(nonAdmins.length)} />
-          <Stat icon={<Wallet className="h-4 w-4" />} label="Total Balance" value={`${adminUser ? sym(adminUser.currency) : "$"}${totalBalance.toLocaleString()}`} />
-          <Stat icon={<MessageSquare className="h-4 w-4" />} label="Unread Msgs" value={String(unreadMsgs)} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          <Button size="sm" className="bg-blue-700 hover:bg-blue-800 sm:w-auto w-full" onClick={() => openCredit(null)}><ArrowUpDown className="h-4 w-4 mr-1" />Credit/Debit</Button>
-          <Button size="sm" className="bg-blue-700 hover:bg-blue-800 sm:w-auto w-full" onClick={() => openTransfer(null)}><Send className="h-4 w-4 mr-1" />Fund Transfer</Button>
-          <Button size="sm" className="bg-blue-700 hover:bg-blue-800 sm:w-auto w-full" onClick={openStatus}><CheckCircle className="h-4 w-4 mr-1" />Activate</Button>
-          <Button size="sm" className="bg-red-600 hover:bg-red-700 sm:w-auto w-full" onClick={openStatus}><XCircle className="h-4 w-4 mr-1" />Suspend</Button>
-          <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white sm:w-auto w-full" onClick={() => openComplete()}><KeyRound className="h-4 w-4 mr-1" />Complete</Button>
-        </div>
-
-        <Card>
-          <CardContent className="p-4 md:p-6">
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><KeyRound className="h-4 w-4" /> Pending Transactions ({pending.length})</h2>
-            {pending.length === 0 ? (
-              <p className="text-gray-500 text-sm">No pending transactions.</p>
-            ) : (
-              <>
-                <div className="lg:hidden space-y-3">
-                  {pending.map((t: any) => (
-                    <div key={t._id} className="border rounded-lg p-3 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">{new Date(t.createdAt).toLocaleDateString()}</span>
-                        <span className="capitalize text-xs text-gray-600">{t.type}</span>
-                      </div>
-                      <p className="text-sm font-medium">{t.description || "N/A"}</p>
-                      <p className="text-xs text-gray-500">{sym(t.currency)}{t.amount.toLocaleString()}{t.counterpartyId ? ` → ${acct({ _id: t.counterpartyId })}` : ""}</p>
-                      <Button size="sm" className="w-full bg-blue-700 hover:bg-blue-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button>
-                    </div>
-                  ))}
+        {/* Stats Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 20 }}>
+          {[
+            { label: "Customers", value: String(nonAdmins.length), icon: Users },
+            { label: "Total Balance", value: `${adminUser ? sym(adminUser.currency) : "$"}${totalBalance.toLocaleString()}`, icon: Wallet },
+            { label: "Unread Msgs", value: String(unreadMsgs), icon: MessageSquare },
+          ].map((stat) => (
+            <div key={stat.label} style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: "16px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <stat.icon style={{ width: 24, height: 24, color: "#426FB6" }} />
+                <div>
+                  <p style={{ fontSize: 12, color: "#666", margin: 0 }}>{stat.label}</p>
+                  <p style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#000" }}>{stat.value}</p>
                 </div>
-                <div className="hidden lg:block">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-blue-800 text-white text-xs">
-                        <th className="px-3 py-2 text-left">Date</th>
-                        <th className="px-3 py-2 text-left">Type</th>
-                        <th className="px-3 py-2 text-left">Account</th>
-                        <th className="px-3 py-2 text-left">Amount</th>
-                        <th className="px-3 py-2 text-left">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pending.map((t: any) => (
-                        <tr key={t._id} className="border-b hover:bg-gray-50">
-                          <td className="px-3 py-2 text-xs">{new Date(t.createdAt).toLocaleDateString()}</td>
-                          <td className="px-3 py-2 text-xs capitalize">{t.type}</td>
-                          <td className="px-3 py-2 text-xs font-mono">{acct(t)}</td>
-                          <td className="px-3 py-2 font-semibold text-xs">{sym(t.currency)}{t.amount.toLocaleString()}</td>
-                          <td className="px-3 py-2"><Button size="sm" className="bg-blue-700 hover:bg-blue-800 text-xs" onClick={() => openComplete(t._id)}>Complete</Button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 md:p-6">
-            <h2 id="accounts" className="text-lg font-bold mb-3 flex items-center gap-2"><Users className="h-4 w-4" /> All Accounts ({customers.length})</h2>
-
-            <div className="lg:hidden space-y-3">
-              <div className="md:hidden relative mb-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input placeholder="Search customers..." className="pl-10 w-full" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
-              {customers.map((c: any) => (
-                <div key={c._id} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">{initials(c)}</div>
-                      <div>
-                        <p className="font-semibold text-sm">{c.firstName} {c.lastName}</p>
-                        <p className="text-xs text-gray-500">{c.email}</p>
-                      </div>
-                    </div>
-                    <Badge variant={c.status === "active" ? "default" : c.status === "suspended" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{c.status}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="font-mono">{acct(c)}</span>
-                    <span className="capitalize">{c.accountType}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t">
-                    <div>Credit Bal.<div className="font-semibold text-gray-700">{sym(c.currency)}{(c.creditBalance ?? 0).toLocaleString()}</div></div>
-                    <div>Last Login<div className="font-semibold text-gray-700">{c.lastLogin ? new Date(c.lastLogin).toLocaleDateString() : "—"}</div></div>
-                  </div>
-                  <div className="text-xs pt-1 border-t">
-                    <span className="text-gray-500">Password: </span>
-                    <span className="font-semibold text-gray-700 break-all">{revealed.has(c._id) ? c.password : "••••••••"}</span>
-                    <button type="button" className="ml-2 text-blue-700 underline" onClick={() => togglePw(c._id)}>
-                      {revealed.has(c._id) ? <span className="inline-flex items-center gap-1"><EyeOff className="h-3 w-3" />Hide</span> : <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />Show</span>}
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm">{sym(c.currency)}{c.balance.toLocaleString()}</span>
-                    <div className="flex flex-wrap gap-1">
-                      <IconBtn title="Credit/Debit" onClick={() => openCredit(c)}><ArrowUpDown className="h-3 w-3" /></IconBtn>
-                      <IconBtn title="Transfer" onClick={() => openTransfer(c)}><Send className="h-3 w-3" /></IconBtn>
-                      {c.status !== "active" && <IconBtn title="Activate" onClick={() => handleStatus(c._id, "active")}><CheckCircle className="h-3 w-3 text-blue-600" /></IconBtn>}
-                      {c.status !== "suspended" && <IconBtn title="Suspend" onClick={() => handleStatus(c._id, "suspended")}><XCircle className="h-3 w-3 text-red-600" /></IconBtn>}
-                      <IconBtn title="Edit" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></IconBtn>
-                      <IconBtn title={c.role === "admin" ? "Make Customer" : "Make Admin"} onClick={() => handleRole(c._id, c.role === "admin" ? "customer" : "admin")}>{c.role === "admin" ? <UserCog className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}</IconBtn>
-                      <IconBtn title="Delete" onClick={() => handleDelete(c)}><Trash2 className="h-3 w-3 text-red-600" /></IconBtn>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
+          ))}
+        </div>
 
-            <div className="hidden lg:block">
-              <table className="w-full text-sm">
+        {/* Quick Actions */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 20 }}>
+          {[
+            { label: "Credit/Debit", icon: ArrowUpDown, action: () => openCredit(null), color: "#426FB6" },
+            { label: "Fund Transfer", icon: Send, action: () => openTransfer(null), color: "#426FB6" },
+            { label: "Activate", icon: CheckCircle, action: openStatus, color: "#426FB6" },
+            { label: "Suspend", icon: XCircle, action: openStatus, color: "#d93939" },
+            { label: "Complete", icon: KeyRound, action: () => openComplete(), color: "#FEDF01" },
+          ].map((btn) => (
+            <button
+              key={btn.label}
+              onClick={btn.action}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                padding: "16px 8px",
+                border: "1px solid #eee",
+                borderRadius: 4,
+                backgroundColor: "#fff",
+                cursor: "pointer",
+                transition: "background-color 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
+            >
+              <btn.icon style={{ width: 28, height: 28, color: btn.color }} />
+              <span style={{ fontSize: 11, color: "#333", fontWeight: 500 }}>{btn.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Pending Transactions */}
+        <div style={sectionStyle}>
+          <div style={sectionHeaderStyle}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#000" }}>Pending Transactions ({pending.length})</h3>
+          </div>
+          <div style={sectionBodyStyle}>
+            {pending.length === 0 ? (
+              <p style={{ color: "#666", fontSize: 14, margin: 0 }}>No pending transactions.</p>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={tableHeaderStyle}>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Date</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Type</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Account</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Amount</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pending.map((t: any) => (
+                      <tr key={t._id} style={{ borderBottom: "1px solid #eee" }}>
+                        <td style={{ padding: "8px 12px" }}>{new Date(t.createdAt).toLocaleDateString()}</td>
+                        <td style={{ padding: "8px 12px", textTransform: "capitalize" }}>{t.type}</td>
+                        <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: 12 }}>{acct(t)}</td>
+                        <td style={{ padding: "8px 12px", fontWeight: 600 }}>{sym(t.currency)}{t.amount.toLocaleString()}</td>
+                        <td style={{ padding: "8px 12px" }}>
+                          <button onClick={() => openComplete(t._id)} style={{ padding: "4px 12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}>Complete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* All Accounts */}
+        <div style={sectionStyle}>
+          <div style={sectionHeaderStyle}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#000" }}>All Accounts ({customers.length})</h3>
+          </div>
+          <div style={sectionBodyStyle}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
-                  <tr className="bg-blue-800 text-white text-xs">
-                    <th className="px-3 py-2 text-left">Account</th>
-                    <th className="px-3 py-2 text-left">Username</th>
-                    <th className="px-3 py-2 text-left">Full Name</th>
-                    <th className="px-3 py-2 text-left">Type</th>
-                    <th className="px-3 py-2 text-left">Balance</th>
-                    <th className="px-3 py-2 text-left">Credit Bal.</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Joined</th>
-                    <th className="px-3 py-2 text-left">Last Login</th>
-                    <th className="px-3 py-2 text-left">Password</th>
-                    <th className="px-3 py-2 text-left">Control</th>
+                  <tr style={tableHeaderStyle}>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Account</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Full Name</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Type</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Balance</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Status</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Password</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Control</th>
                   </tr>
                 </thead>
                 <tbody>
                   {customers.map((c: any) => (
-                    <tr key={c._id} className="border-b hover:bg-gray-50">
-                      <td className="px-3 py-2 font-mono text-xs">{acct(c)}</td>
-                      <td className="px-3 py-2 text-xs">{c.email}</td>
-                      <td className="px-3 py-2 font-medium text-xs flex items-center gap-2"><div className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">{initials(c)}</div>{c.firstName} {c.lastName}</td>
-                      <td className="px-3 py-2 text-xs capitalize">{c.accountType}</td>
-                      <td className="px-3 py-2 font-semibold text-xs">{sym(c.currency)}{c.balance.toLocaleString()}</td>
-                      <td className="px-3 py-2 text-xs">{sym(c.currency)}{(c.creditBalance ?? 0).toLocaleString()}</td>
-                      <td className="px-3 py-2"><Badge variant={c.status === "active" ? "default" : c.status === "suspended" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">{c.status}</Badge></td>
-                      <td className="px-3 py-2 text-xs text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
-                       <td className="px-3 py-2 text-xs text-gray-500">{c.lastLogin ? new Date(c.lastLogin).toLocaleDateString() : "—"}</td>
-                       <td className="px-3 py-2 text-xs break-all">
-                         <span>{revealed.has(c._id) ? c.password : "••••••••"}</span>
-                         <button type="button" className="ml-1 text-blue-700 underline text-[10px]" onClick={() => togglePw(c._id)}>{revealed.has(c._id) ? "Hide" : "Show"}</button>
-                       </td>
-                       <td className="px-3 py-2">
-                        <div className="flex flex-wrap gap-1">
-                          <IconBtn title="Credit/Debit" onClick={() => openCredit(c)}><ArrowUpDown className="h-3 w-3" /></IconBtn>
-                          <IconBtn title="Transfer" onClick={() => openTransfer(c)}><Send className="h-3 w-3" /></IconBtn>
-                          {c.status !== "active" && <IconBtn title="Activate" onClick={() => handleStatus(c._id, "active")}><CheckCircle className="h-3 w-3 text-blue-600" /></IconBtn>}
-                          {c.status !== "suspended" && <IconBtn title="Suspend" onClick={() => handleStatus(c._id, "suspended")}><XCircle className="h-3 w-3 text-red-600" /></IconBtn>}
-                          <IconBtn title="Edit" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></IconBtn>
-                          <IconBtn title={c.role === "admin" ? "Make Customer" : "Make Admin"} onClick={() => handleRole(c._id, c.role === "admin" ? "customer" : "admin")}>{c.role === "admin" ? <UserCog className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}</IconBtn>
-                          <IconBtn title="Delete" onClick={() => handleDelete(c)}><Trash2 className="h-3 w-3 text-red-600" /></IconBtn>
+                    <tr key={c._id} style={{ borderBottom: "1px solid #eee" }}>
+                      <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: 12 }}>{acct(c)}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "#426FB6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{initials(c)}</div>
+                          {c.firstName} {c.lastName}
+                        </div>
+                      </td>
+                      <td style={{ padding: "8px 12px", textTransform: "capitalize" }}>{c.accountType}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600 }}>{sym(c.currency)}{c.balance.toLocaleString()}</td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: c.status === "active" ? "#d4edda" : c.status === "suspended" ? "#f8d7da" : "#fff3cd", color: c.status === "active" ? "#155724" : c.status === "suspended" ? "#721c24" : "#856404" }}>
+                          {c.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <span style={{ fontFamily: "monospace", fontSize: 12 }}>{revealed.has(c._id) ? c.password : "••••••••"}</span>
+                        <button type="button" onClick={() => togglePw(c._id)} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 11, marginLeft: 6 }}>
+                          {revealed.has(c._id) ? "Hide" : "Show"}
+                        </button>
+                      </td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                          <button title="Credit/Debit" onClick={() => openCredit(c)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><ArrowUpDown style={{ width: 12, height: 12 }} /></button>
+                          <button title="Transfer" onClick={() => openTransfer(c)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><Send style={{ width: 12, height: 12 }} /></button>
+                          {c.status !== "active" && <button title="Activate" onClick={() => handleStatus(c._id, "active")} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><CheckCircle style={{ width: 12, height: 12, color: "#28a745" }} /></button>}
+                          {c.status !== "suspended" && <button title="Suspend" onClick={() => handleStatus(c._id, "suspended")} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><XCircle style={{ width: 12, height: 12, color: "#d93939" }} /></button>}
+                          <button title="Edit" onClick={() => openEdit(c)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><Pencil style={{ width: 12, height: 12 }} /></button>
+                          <button title="Delete" onClick={() => handleDelete(c)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><Trash2 style={{ width: 12, height: 12, color: "#d93939" }} /></button>
                         </div>
                       </td>
                     </tr>
@@ -407,58 +415,41 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardContent className="p-4 md:p-6">
-            <h2 id="messages" className="text-lg font-bold mb-3 flex items-center gap-2"><MessageSquare className="h-4 w-4" /> Messages ({messages.length})</h2>
-
-            <div className="lg:hidden space-y-3">
-              {messages.map((m: any) => (
-                <div key={m._id} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-semibold text-sm">{m.name}</p>
-                      <p className="text-xs text-gray-500">{m.email}</p>
-                    </div>
-                    <Badge variant={m.status === "unread" ? "destructive" : m.status === "replied" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">{m.status}</Badge>
-                  </div>
-                  <p className="text-sm font-medium">{m.subject ?? "N/A"}</p>
-                  <p className="text-xs text-gray-600">{m.message}</p>
-                  <p className="text-xs text-gray-400">{new Date(m.createdAt).toLocaleDateString()}</p>
-                  <div className="flex gap-2 pt-1">
-                    {m.status === "unread" && <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleMessage(m._id, "read")}>Mark read</Button>}
-                    {m.status !== "replied" && <Button size="sm" variant="outline" className="h-8 text-xs text-blue-700" onClick={() => handleMessage(m._id, "replied")}>Reply</Button>}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="hidden lg:block">
-              <table className="w-full text-sm">
+        {/* Messages */}
+        <div style={sectionStyle}>
+          <div style={sectionHeaderStyle}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#000" }}>Messages ({messages.length})</h3>
+          </div>
+          <div style={sectionBodyStyle}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
-                  <tr className="bg-blue-800 text-white text-xs">
-                    <th className="px-3 py-2 text-left">Date</th>
-                    <th className="px-3 py-2 text-left">From</th>
-                    <th className="px-3 py-2 text-left">Subject</th>
-                    <th className="px-3 py-2 text-left">Message</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Actions</th>
+                  <tr style={tableHeaderStyle}>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Date</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>From</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Subject</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Status</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {messages.map((m: any) => (
-                    <tr key={m._id} className="border-b hover:bg-gray-50">
-                      <td className="px-3 py-2 text-xs">{new Date(m.createdAt).toLocaleDateString()}</td>
-                      <td className="px-3 py-2 font-medium text-xs">{m.name}<div className="text-gray-400">{m.email}</div></td>
-                      <td className="px-3 py-2 text-xs">{m.subject ?? "N/A"}</td>
-                      <td className="px-3 py-2 text-xs max-w-[220px] truncate">{m.message}</td>
-                      <td className="px-3 py-2"><Badge variant={m.status === "unread" ? "destructive" : m.status === "replied" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">{m.status}</Badge></td>
-                      <td className="px-3 py-2">
-                        <div className="flex gap-1">
-                          {m.status === "unread" && <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => handleMessage(m._id, "read")}>Mark read</Button>}
-                          {m.status !== "replied" && <Button size="sm" variant="outline" className="h-7 px-2 text-xs text-blue-700" onClick={() => handleMessage(m._id, "replied")}>Reply</Button>}
+                    <tr key={m._id} style={{ borderBottom: "1px solid #eee" }}>
+                      <td style={{ padding: "8px 12px" }}>{new Date(m.createdAt).toLocaleDateString()}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600 }}>{m.name}<div style={{ color: "#666", fontSize: 11 }}>{m.email}</div></td>
+                      <td style={{ padding: "8px 12px" }}>{m.subject ?? "N/A"}</td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: m.status === "unread" ? "#f8d7da" : m.status === "replied" ? "#d4edda" : "#fff3cd", color: m.status === "unread" ? "#721c24" : m.status === "replied" ? "#155724" : "#856404" }}>
+                          {m.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          {m.status === "unread" && <button onClick={() => handleMessage(m._id, "read")} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}>Mark read</button>}
+                          {m.status !== "replied" && <button onClick={() => handleMessage(m._id, "replied")} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11, color: "#426FB6" }}>Reply</button>}
                         </div>
                       </td>
                     </tr>
@@ -466,227 +457,219 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardContent className="p-4 md:p-6">
-            <h2 id="txns" className="text-lg font-bold mb-3 flex items-center gap-2"><ArrowUpDown className="h-4 w-4" /> Recent Transactions</h2>
+        {/* Recent Transactions */}
+        <div style={sectionStyle}>
+          <div style={sectionHeaderStyle}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#000" }}>Recent Transactions</h3>
+          </div>
+          <div style={sectionBodyStyle}>
             {transactions.length === 0 ? (
-              <p className="text-gray-500 text-sm">No transactions yet.</p>
+              <p style={{ color: "#666", fontSize: 14, margin: 0 }}>No transactions yet.</p>
             ) : (
-              <>
-                <div className="md:hidden space-y-3">
-                  {transactions.map((t: any) => (
-                    <div key={t._id} className="border rounded-lg p-3 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">{new Date(t.createdAt).toLocaleDateString()}</span>
-                        <div className="flex items-center gap-1">
-                          {t.backDate && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Backdated</Badge>}
-                          <Badge variant={t.status === "successful" ? "default" : "destructive"} className="text-[10px] px-1.5 py-0">{t.status}</Badge>
-                        </div>
-                      </div>
-                      <p className="text-sm font-medium">{t.description || "N/A"}</p>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="capitalize text-gray-500">{t.type}{t.senderName ? ` · ${t.senderName}` : ""}</span>
-                        <span className="font-bold">{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                      </div>
-                      <Button size="sm" variant="outline" className="w-full text-xs h-7" onClick={() => openBackdate(t)}><CalendarClock className="h-3 w-3 mr-1" />Back Date</Button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="hidden md:block">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-blue-800 text-white text-xs">
-                        <th className="px-3 py-2 text-left">Date</th>
-                        <th className="px-3 py-2 text-left">Type</th>
-                        <th className="px-3 py-2 text-left">Description</th>
-                        <th className="px-3 py-2 text-left">Sender</th>
-                        <th className="px-3 py-2 text-left">Amount</th>
-                        <th className="px-3 py-2 text-left">Status</th>
-                        <th className="px-3 py-2 text-left">Action</th>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={tableHeaderStyle}>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Date</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Type</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Description</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Amount</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Status</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((t: any) => (
+                      <tr key={t._id} style={{ borderBottom: "1px solid #eee" }}>
+                        <td style={{ padding: "8px 12px" }}>{new Date(t.createdAt).toLocaleDateString()}</td>
+                        <td style={{ padding: "8px 12px", textTransform: "capitalize" }}>{t.type}</td>
+                        <td style={{ padding: "8px 12px" }}>{t.description || "N/A"}</td>
+                        <td style={{ padding: "8px 12px", fontWeight: 600 }}>{sym(t.currency)}{t.amount.toLocaleString()}</td>
+                        <td style={{ padding: "8px 12px" }}>
+                          <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: t.status === "successful" ? "#d4edda" : "#f8d7da", color: t.status === "successful" ? "#155724" : "#721c24" }}>
+                            {t.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: "8px 12px" }}>
+                          <button onClick={() => openBackdate(t)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><CalendarClock style={{ width: 12, height: 12, marginRight: 4 }} />Back Date</button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.map((t: any) => (
-                        <tr key={t._id} className="border-b hover:bg-gray-50">
-                          <td className="px-3 py-2 text-xs">{new Date(t.createdAt).toLocaleDateString()}</td>
-                          <td className="px-3 py-2 text-xs capitalize">{t.type}</td>
-                          <td className="px-3 py-2 text-xs">{t.description || "N/A"}</td>
-                          <td className="px-3 py-2 text-xs capitalize">{t.senderName ?? "—"}</td>
-                          <td className="px-3 py-2 font-semibold text-xs">{sym(t.currency)}{t.amount.toLocaleString()}</td>
-                          <td className="px-3 py-2 flex items-center gap-1">
-                            {t.backDate && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Backdated</Badge>}
-                            <Badge variant={t.status === "successful" ? "default" : "destructive"} className="text-[10px] px-1.5 py-0">{t.status}</Badge>
-                          </td>
-                          <td className="px-3 py-2">
-                            <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => openBackdate(t)}><CalendarClock className="h-3 w-3 mr-1" />Back Date</Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
-          </CardContent>
-        </Card>
-      </main>
+          </div>
+        </div>
 
+        {/* Disclaimer */}
+        <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, margin: "16px 0" }}>
+          For checking, savings, and money market accounts, the balance may reflect transaction that have not yet posted to your account. For credit card Gold option and Gold reserve accounts, the balance may not reflect recent transactions or pending payments.
+        </p>
+
+        {/* Secure Area Bar */}
+        <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Secure Area</span>
+          <div style={{ display: "flex", gap: 20 }}>
+            <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>En Espanol</button>
+            <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{ backgroundColor: "#eee", borderTop: "1px solid #ddd" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "40px 20px", textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Phone +44 7445 182201 / NMLS ID 411068</p>
+          <p style={{ fontSize: 12, color: "#666", margin: 0 }}>Copyright &copy; 2026 SpringWell Bank. All Rights Reserved.</p>
+        </div>
+      </div>
+
+      {/* Modals */}
       {modal && (
-        <div className="fixed inset-0 bg-black/40 z-30 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            {modal === "credit" && (
-              <form onSubmit={handleCredit} className="p-5 space-y-3">
-                <h3 className="font-bold text-lg">Credit / Debit Account</h3>
-                <p className="text-sm text-gray-500">{activeUser ? `${activeUser.firstName} ${activeUser.lastName} (${activeUser.email})` : "Select a customer"}</p>
-                <select className="border rounded px-3 py-2 text-sm w-full" value={activeUser?._id ?? ""} onChange={(e) => { const u = users.find((x: any) => x._id === e.target.value); setActiveUser(u); }}>
-                  <option value="">Select user</option>
-                  {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({u.email})</option>)}
-                </select>
-                <select className="border rounded px-3 py-2 text-sm w-full" value={creditType} onChange={(e) => setCreditType(e.target.value as "credit" | "debit")}>
-                  <option value="credit">Credit</option>
-                  <option value="debit">Debit</option>
-                </select>
-                <Input type="number" placeholder="Amount" value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)} required />
-                <Input placeholder="Description" value={creditDesc} onChange={(e) => setCreditDesc(e.target.value)} />
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Transaction date (backdate supported)</label>
-                  <Input type="date" value={creditDate} onChange={(e) => setCreditDate(e.target.value)} />
-                </div>
-                <div className="flex gap-2 justify-end pt-2">
-                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Submit</Button>
-                </div>
-              </form>
-            )}
-            {modal === "transfer" && (
-              <form onSubmit={handleTransfer} className="p-5 space-y-3">
-                <h3 className="font-bold text-lg">Fund Transfer</h3>
-                <select className="border rounded px-3 py-2 text-sm w-full" value={fromUser} onChange={(e) => setFromUser(e.target.value)} required>
-                  <option value="">From account</option>
-                  {users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName} {u.lastName}</option>)}
-                </select>
-                <select className="border rounded px-3 py-2 text-sm w-full" value={toUser} onChange={(e) => setToUser(e.target.value)} required>
-                  <option value="">To account</option>
-                  {users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName} {u.lastName}</option>)}
-                </select>
-                <Input type="number" placeholder="Amount" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} required />
-                <Input placeholder="Description" value={transferDesc} onChange={(e) => setTransferDesc(e.target.value)} />
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Transaction date (backdate supported)</label>
-                  <Input type="date" value={transferDate} onChange={(e) => setTransferDate(e.target.value)} />
-                </div>
-                <div className="flex gap-2 justify-end pt-2">
-                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Transfer</Button>
-                </div>
-              </form>
-            )}
-            {modal === "edit" && (
-              <form onSubmit={handleEdit} className="p-5 space-y-3">
-                <h3 className="font-bold text-lg">Edit Account</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input placeholder="First name" value={edit.firstName} onChange={(e) => setEdit({ ...edit, firstName: e.target.value })} />
-                  <Input placeholder="Last name" value={edit.lastName} onChange={(e) => setEdit({ ...edit, lastName: e.target.value })} />
-                </div>
-                <Input placeholder="Email" value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
-                <div className="grid grid-cols-2 gap-2">
-                  <select className="border rounded px-3 py-2 text-sm" value={edit.accountType} onChange={(e) => setEdit({ ...edit, accountType: e.target.value })}>
-                    <option value="checking">Checking</option>
-                    <option value="savings">Savings</option>
-                    <option value="business">Business</option>
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setModal(null)}>
+          <div style={{ width: "100%", maxWidth: 480, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+                {modal === "credit" && "Credit / Debit Account"}
+                {modal === "transfer" && "Fund Transfer"}
+                {modal === "edit" && "Edit Account"}
+                {modal === "status" && "Change Account Status"}
+                {modal === "complete" && "Complete Transaction"}
+                {modal === "backdate" && "Back Date Transaction"}
+              </h3>
+              <button onClick={() => setModal(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              {modal === "credit" && (
+                <form onSubmit={handleCredit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <p style={{ fontSize: 13, color: "#666", margin: 0 }}>{activeUser ? `${activeUser.firstName} ${activeUser.lastName} (${activeUser.email})` : "Select a customer"}</p>
+                  <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={activeUser?._id ?? ""} onChange={(e) => { const u = users.find((x: any) => x._id === e.target.value); setActiveUser(u); }}>
+                    <option value="">Select user</option>
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({u.email})</option>)}
                   </select>
-                  <select className="border rounded px-3 py-2 text-sm" value={edit.currency} onChange={(e) => setEdit({ ...edit, currency: e.target.value })}>
-                    <option value="USD">USD</option>
-                    <option value="GBP">GBP</option>
-                    <option value="EUR">EUR</option>
+                  <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={creditType} onChange={(e) => setCreditType(e.target.value as "credit" | "debit")}>
+                    <option value="credit">Credit</option>
+                    <option value="debit">Debit</option>
                   </select>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <select className="border rounded px-3 py-2 text-sm" value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}>
-                    <option value="active">active</option>
-                    <option value="suspended">suspended</option>
-                    <option value="pending">pending</option>
+                  <input type="number" placeholder="Amount" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)} required />
+                  <input placeholder="Description" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={creditDesc} onChange={(e) => setCreditDesc(e.target.value)} />
+                  <div>
+                    <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Transaction date</label>
+                    <input type="date" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, width: "100%" }} value={creditDate} onChange={(e) => setCreditDate(e.target.value)} />
+                  </div>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                    <button type="button" onClick={() => setModal(null)} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                    <button type="submit" style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Submit</button>
+                  </div>
+                </form>
+              )}
+              {modal === "transfer" && (
+                <form onSubmit={handleTransfer} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={fromUser} onChange={(e) => setFromUser(e.target.value)} required>
+                    <option value="">From account</option>
+                    {users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName} {u.lastName}</option>)}
                   </select>
-                  <Input type="number" placeholder="Balance" value={edit.balance} onChange={(e) => setEdit({ ...edit, balance: e.target.value })} />
+                  <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={toUser} onChange={(e) => setToUser(e.target.value)} required>
+                    <option value="">To account</option>
+                    {users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName} {u.lastName}</option>)}
+                  </select>
+                  <input type="number" placeholder="Amount" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} required />
+                  <input placeholder="Description" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={transferDesc} onChange={(e) => setTransferDesc(e.target.value)} />
+                  <div>
+                    <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Transaction date</label>
+                    <input type="date" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, width: "100%" }} value={transferDate} onChange={(e) => setTransferDate(e.target.value)} />
+                  </div>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                    <button type="button" onClick={() => setModal(null)} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                    <button type="submit" style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Transfer</button>
+                  </div>
+                </form>
+              )}
+              {modal === "edit" && (
+                <form onSubmit={handleEdit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <input placeholder="First name" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.firstName} onChange={(e) => setEdit({ ...edit, firstName: e.target.value })} />
+                    <input placeholder="Last name" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.lastName} onChange={(e) => setEdit({ ...edit, lastName: e.target.value })} />
+                  </div>
+                  <input placeholder="Email" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.accountType} onChange={(e) => setEdit({ ...edit, accountType: e.target.value })}>
+                      <option value="checking">Checking</option>
+                      <option value="savings">Savings</option>
+                      <option value="business">Business</option>
+                    </select>
+                    <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.currency} onChange={(e) => setEdit({ ...edit, currency: e.target.value })}>
+                      <option value="USD">USD</option>
+                      <option value="GBP">GBP</option>
+                      <option value="EUR">EUR</option>
+                    </select>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}>
+                      <option value="active">active</option>
+                      <option value="suspended">suspended</option>
+                      <option value="pending">pending</option>
+                    </select>
+                    <input type="number" placeholder="Balance" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.balance} onChange={(e) => setEdit({ ...edit, balance: e.target.value })} />
+                  </div>
+                  <input type="number" placeholder="Credit Balance" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={edit.creditBalance} onChange={(e) => setEdit({ ...edit, creditBalance: e.target.value })} />
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                    <button type="button" onClick={() => setModal(null)} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                    <button type="submit" style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Save</button>
+                  </div>
+                </form>
+              )}
+              {modal === "status" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <p style={{ fontSize: 13, color: "#666", margin: 0 }}>Select an account to activate or suspend.</p>
+                  <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={statusTarget} onChange={(e) => setStatusTarget(e.target.value)} required>
+                    <option value="">Select account</option>
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({u.email})</option>)}
+                  </select>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                    <button type="button" onClick={() => setModal(null)} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                    <button disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: statusTarget ? 1 : 0.5 }}>Activate</button>
+                    <button disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "suspended"); setModal(null); } }} style={{ padding: "8px 16px", backgroundColor: "#d93939", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: statusTarget ? 1 : 0.5 }}>Suspend</button>
+                  </div>
                 </div>
-                <Input type="number" placeholder="Credit Balance" value={edit.creditBalance} onChange={(e) => setEdit({ ...edit, creditBalance: e.target.value })} />
-                <div className="flex gap-2 justify-end pt-2">
-                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Save</Button>
-                </div>
-              </form>
-            )}
-            {modal === "status" && (
-              <form className="p-5 space-y-3" onSubmit={(e) => e.preventDefault()}>
-                <h3 className="font-bold text-lg">Change Account Status</h3>
-                <p className="text-sm text-gray-500">Select an account to activate or suspend.</p>
-                <select className="border rounded px-3 py-2 text-sm w-full" value={statusTarget} onChange={(e) => setStatusTarget(e.target.value)} required>
-                  <option value="">Select account</option>
-                  {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({u.email})</option>)}
-                </select>
-                <div className="flex gap-2 justify-end pt-2">
-                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="button" className="bg-blue-700 hover:bg-blue-800" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }}>Activate</Button>
-                  <Button type="button" className="bg-red-600 hover:bg-red-700" disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "suspended"); setModal(null); } }}>Suspend</Button>
-                </div>
-              </form>
-            )}
-            {modal === "complete" && (
-              <form onSubmit={handleComplete} className="p-5 space-y-3">
-                <h3 className="font-bold text-lg">Complete Transaction</h3>
-                <p className="text-sm text-gray-500">Select a pending transaction and enter the activation code to release the funds.</p>
-                <select className="border rounded px-3 py-2 text-sm w-full" value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required>
-                  <option value="">Select transaction</option>
-                  {pending.map((t: any) => (
-                    <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()} · {t.description || "N/A"}</option>
-                  ))}
-                </select>
-                <Input type="text" placeholder="Activation Code" value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
-                <div className="flex gap-2 justify-end pt-2">
-                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Complete</Button>
-                </div>
-              </form>
-            )}
-            {modal === "backdate" && (
-              <form onSubmit={handleBackdate} className="p-5 space-y-3">
-                <h3 className="font-bold text-lg">Back Date Transaction</h3>
-                {backdateTxn && <p className="text-sm text-gray-500 break-words">{backdateTxn.description || "N/A"}</p>}
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Transaction date</label>
-                  <Input type="date" value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
-                </div>
-                <div className="flex gap-2 justify-end pt-2">
-                  <Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-                  <Button type="submit" className="bg-blue-700 hover:bg-blue-800">Update</Button>
-                </div>
-              </form>
-            )}
+              )}
+              {modal === "complete" && (
+                <form onSubmit={handleComplete} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <p style={{ fontSize: 13, color: "#666", margin: 0 }}>Select a pending transaction and enter the activation code.</p>
+                  <select style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required>
+                    <option value="">Select transaction</option>
+                    {pending.map((t: any) => (
+                      <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>
+                    ))}
+                  </select>
+                  <input type="text" placeholder="Activation Code" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                    <button type="button" onClick={() => setModal(null)} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                    <button type="submit" style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Complete</button>
+                  </div>
+                </form>
+              )}
+              {modal === "backdate" && (
+                <form onSubmit={handleBackdate} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {backdateTxn && <p style={{ fontSize: 13, color: "#666", margin: 0 }}>{backdateTxn.description || "N/A"}</p>}
+                  <div>
+                    <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Transaction date</label>
+                    <input type="date" style={{ padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, width: "100%" }} value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
+                  </div>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                    <button type="button" onClick={() => setModal(null)} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                    <button type="submit" style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Update</button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-4 flex items-center gap-3">
-      <div className="h-9 w-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">{icon}</div>
-      <div>
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="font-bold text-sm">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function IconBtn({ title, onClick, children }: { title: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <Button size="sm" variant="outline" title={title} className="h-7 w-7 p-0" onClick={onClick}>{children}</Button>
   );
 }
