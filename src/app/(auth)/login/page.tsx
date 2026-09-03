@@ -18,7 +18,7 @@ export default function LoginPage() {
   const verifyLoginCode = useMutation(api.auth.verifyLoginCode);
 
   const [mode, setMode] = useState<"password" | "otp">("password");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [otpStep, setOtpStep] = useState<"request" | "verify">("request");
@@ -35,10 +35,10 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const result = await login({ username, password });
+      const result = await login({ email, password });
       routeAfterLogin(result);
     } catch (err: any) {
-      setError(err.message || "Invalid username or password");
+      setError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await requestLoginCode({ username });
+      await requestLoginCode({ email });
       setOtpStep("verify");
     } catch (err: any) {
       setError(err.message || "Could not send code");
@@ -63,7 +63,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const result = await verifyLoginCode({ username, code });
+      const result = await verifyLoginCode({ email, code });
       routeAfterLogin(result);
     } catch (err: any) {
       setError(err.message || "Invalid or expired code");
@@ -100,14 +100,14 @@ export default function LoginPage() {
             {mode === "password" ? (
               <form onSubmit={handlePassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="email">Email or Username</Label>
                   <Input
-                    id="username"
+                    id="email"
                     type="text"
-                    placeholder="Enter username"
+                    placeholder="Enter email or username"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -144,14 +144,14 @@ export default function LoginPage() {
             ) : otpStep === "request" ? (
               <form onSubmit={handleRequestCode} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="email">Email or Username</Label>
                   <Input
-                    id="username"
+                    id="email"
                     type="text"
-                    placeholder="Enter username"
+                    placeholder="Enter email or username"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
@@ -186,7 +186,7 @@ export default function LoginPage() {
                   onClick={() => { setError(""); setCode(""); setOtpStep("request"); }}
                   className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
-                  Use a different username
+                  Use a different email
                 </button>
               </form>
             )}

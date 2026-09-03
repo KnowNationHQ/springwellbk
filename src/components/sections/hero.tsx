@@ -15,7 +15,7 @@ export function HeroSection() {
   const router = useRouter();
   const login = useMutation(api.auth.login);
   const t = useT();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export function HeroSection() {
     setError("");
     setLoading(true);
     try {
-      const result = await login({ username, password });
+      const result = await login({ email, password });
       localStorage.setItem("userId", result.userId);
       router.push(result.role === "admin" ? "/admin" : "/dashboard");
     } catch (err: any) {
@@ -67,9 +67,9 @@ export function HeroSection() {
                     <Label className="text-gray-700 text-xs">{t("hero.username")}</Label>
                     <Input
                       type="text"
-                      placeholder="Enter username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter email or username"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       className="border-gray-300 h-10"
                     />
