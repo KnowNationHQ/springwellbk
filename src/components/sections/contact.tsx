@@ -38,8 +38,13 @@ export function ContactSection() {
   return (
     <section id="contact" className="py-12 sm:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-10">
+          <p className="text-xs font-bold tracking-wide text-[#426FB6] mb-2">{t("contact.eyebrow")}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("contact.heading")}</h2>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div>
+            <img src="/images/contact.jpeg" alt="Contact SpringWell Bank" className="rounded-2xl w-full h-48 object-cover mb-6 shadow" />
             <div className="grid grid-cols-2 gap-4 mb-8">
               {[
                 { icon: Phone, label: "Phone number", value: "+1 (555) 123-4567" },
