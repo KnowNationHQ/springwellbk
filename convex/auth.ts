@@ -47,16 +47,15 @@ export const removeProfileImage = mutation({
 
 export const login = mutation({
   args: {
-    email: v.string(),
+    username: v.string(),
     password: v.string(),
   },
   handler: async (ctx, args) => {
-    const email = args.email.trim().toLowerCase();
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
-    if (!user) throw new Error("No account found with this email");
+    if (!user) throw new Error("No account found with this username");
     if (user.password !== args.password) throw new Error("Incorrect password");
     await ctx.db.patch(user._id, { lastLogin: Date.now() });
     return { userId: user._id, role: user.role, firstName: user.firstName, lastName: user.lastName };
@@ -73,12 +72,11 @@ export const getCurrentUser = query({
 const OTP_TTL_MS = 10 * 60 * 1000;
 
 export const requestLoginCode = mutation({
-  args: { email: v.string() },
+  args: { username: v.string() },
   handler: async (ctx, args) => {
-    const email = args.email.trim().toLowerCase();
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
     if (!user) return { ok: true as const };
 
@@ -93,12 +91,11 @@ export const requestLoginCode = mutation({
 });
 
 export const verifyLoginCode = mutation({
-  args: { email: v.string(), code: v.string() },
+  args: { username: v.string(), code: v.string() },
   handler: async (ctx, args) => {
-    const email = args.email.trim().toLowerCase();
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
     if (!user || !user.otpCode || !user.otpExpiresAt) {
       throw new Error("Invalid or expired code");
