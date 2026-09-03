@@ -2,6 +2,49 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const saveProfileImage = mutation({
+  args: {
+    userId: v.id("users"),
+    imageId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+    if (user.imageId) {
+      await ctx.storage.delete(user.imageId as any);
+    }
+    await ctx.db.patch(args.userId, { imageId: args.imageId });
+  },
+});
+
+export const getImageUrl = query({
+  args: { imageId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.imageId);
+  },
+});
+
+export const removeProfileImage = mutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+    if (user.imageId) {
+      await ctx.storage.delete(user.imageId as any);
+    }
+    await ctx.db.patch(args.userId, { imageId: undefined });
+  },
+});
+
 export const login = mutation({
   args: {
     username: v.string(),

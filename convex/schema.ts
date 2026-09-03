@@ -24,6 +24,7 @@ export default defineSchema({
     otpExpiresAt: v.optional(v.number()),
     resetCode: v.optional(v.string()),
     resetExpiresAt: v.optional(v.number()),
+    imageId: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_username", ["username"])

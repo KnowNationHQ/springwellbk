@@ -302,3 +302,46 @@ export const pendingTransactions = query({
       .collect();
   },
 });
+
+export const generateUploadUrl = mutation({
+  args: {
+    adminUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const setUserImage = mutation({
+  args: {
+    adminUserId: v.id("users"),
+    userId: v.id("users"),
+    imageId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+    if (user.imageId) {
+      await ctx.storage.delete(user.imageId as any);
+    }
+    await ctx.db.patch(args.userId, { imageId: args.imageId });
+  },
+});
+
+export const removeUserImage = mutation({
+  args: {
+    adminUserId: v.id("users"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+    if (user.imageId) {
+      await ctx.storage.delete(user.imageId as any);
+    }
+    await ctx.db.patch(args.userId, { imageId: undefined });
+  },
+});

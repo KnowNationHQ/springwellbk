@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sym } from "@/lib/format";
+import { ProfileImageUpload } from "@/components/profile-image-upload";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -31,6 +32,9 @@ export default function DashboardPage() {
   const transfer = useMutation(api.auth.transfer);
   const linkBank = useMutation(api.plaid.linkBank);
   const syncUser = useAction(api.plaidSync.syncUser);
+  const generateUploadUrl = useMutation(api.auth.generateUploadUrl);
+  const saveProfileImage = useMutation(api.auth.saveProfileImage);
+  const removeProfileImage = useMutation(api.auth.removeProfileImage);
   const links = useQuery(api.plaid.getLinks, userId ? { userId: userId as any } : "skip");
 
   async function connectBank() {
@@ -157,11 +161,17 @@ export default function DashboardPage() {
 
         {/* Profile Section */}
         <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "30px 0 20px", flexWrap: "wrap" }}>
-          <div style={{ width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: "#ccc", flexShrink: 0 }}>
-            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 700, color: "#fff", backgroundColor: "#426FB6" }}>
-              {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-            </div>
-          </div>
+          <ProfileImageUpload
+            userId={userId}
+            imageId={user.imageId}
+            firstName={user.firstName}
+            lastName={user.lastName}
+            onImageSaved={() => {}}
+            generateUploadUrl={generateUploadUrl}
+            saveImage={saveProfileImage}
+            removeImage={removeProfileImage}
+            size="lg"
+          />
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: "#000" }}>Hello, {user.firstName} {user.lastName}</h2>
             <div style={{ display: "flex", gap: 16, fontSize: 14 }}>

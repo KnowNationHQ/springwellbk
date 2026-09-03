@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { sym } from "@/lib/format";
+import { ProfileImageUpload } from "@/components/profile-image-upload";
 
 type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
 
@@ -41,6 +42,9 @@ export default function AdminDashboard() {
   const updateUser = useMutation(api.admin.updateUser);
   const deleteUser = useMutation(api.admin.deleteUser);
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
+  const adminGenerateUploadUrl = useMutation(api.admin.generateUploadUrl);
+  const setUserImage = useMutation(api.admin.setUserImage);
+  const removeUserImage = useMutation(api.admin.removeUserImage);
 
   const [creditType, setCreditType] = useState<"credit" | "debit">("credit");
   const [creditAmount, setCreditAmount] = useState("");
@@ -233,11 +237,17 @@ export default function AdminDashboard() {
 
         {/* Profile Section */}
         <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "30px 0 20px", flexWrap: "wrap" }}>
-          <div style={{ width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: "#ccc", flexShrink: 0 }}>
-            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 700, color: "#fff", backgroundColor: "#426FB6" }}>
-              {adminUser ? initials(adminUser) : "A"}
-            </div>
-          </div>
+          <ProfileImageUpload
+            userId={userId}
+            imageId={adminUser?.imageId}
+            firstName={adminUser?.firstName ?? "Admin"}
+            lastName={adminUser?.lastName ?? ""}
+            onImageSaved={() => {}}
+            generateUploadUrl={() => adminGenerateUploadUrl({ adminUserId: userId as any })}
+            saveImage={(args: any) => setUserImage({ adminUserId: userId as any, userId: args.userId, imageId: args.imageId })}
+            removeImage={(args: any) => removeUserImage({ adminUserId: userId as any, userId: args.userId })}
+            size="lg"
+          />
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: "#000" }}>Hello, {adminUser ? `${adminUser.firstName} ${adminUser.lastName}` : "Admin"}</h2>
             <p style={{ fontSize: 14, color: "#666", margin: "0 0 4px" }}>Administrator Dashboard</p>
