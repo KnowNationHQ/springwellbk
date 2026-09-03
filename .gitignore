@@ -44,3 +44,9 @@ convex/*.js.map
 # typescript
 *.tsbuildinfo
 immg/
+
+audit/
+audit-*.js
+test-results/
+launch-chrome.bat
+audit Responsiveness.py
