@@ -39,7 +39,7 @@ export function HeroSection() {
     <section className="relative bg-[#426FB6] overflow-hidden">
       <img src="/images/hero.jpeg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-20" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#426FB6]/90 via-[#426FB6]/70 to-[#426FB6]/50" />
-      <div className="relative max-w-7xl mx-auto px-4 py-16 sm:py-20 md:py-28">
+      <div className="relative max-w-7xl mx-auto px-4 py-24 sm:py-32 md:py-40 lg:py-48">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="text-center lg:text-left">
             <p className="text-gray-300 text-sm font-medium mb-3">{t("hero.eyebrow")}</p>
