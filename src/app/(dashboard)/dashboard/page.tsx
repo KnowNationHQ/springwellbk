@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Landmark, LogOut, ArrowUpRight, ArrowDownLeft, Clock, CreditCard, User, FileText, Settings, Menu, Link2, Building2, Search, Bell, DollarSign, Repeat, Tag, MessageSquare, PiggyBank, Target, UserPlus, Shield, AlertTriangle } from "lucide-react";
+import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,77 +188,11 @@ export default function DashboardPage() {
         }
       `}</style>
 
-      {/* Top Nav */}
-      <nav style={{ backgroundColor: "#434343", color: "#fff", position: "relative" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <ul className={`portal-nav ${mobileMenuOpen ? "open" : ""}`}>
-            <li style={{ borderBottom: "3px solid #FEDF01", fontWeight: 600 }} onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Online banking</li>
-            <li onClick={() => { router.push("/#about"); setMobileMenuOpen(false); }}>About SpringWell Bank</li>
-            <li style={{ marginLeft: "auto" }}>
-              <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, padding: 0 }}>
-                Sign out
-              </button>
-            </li>
-          </ul>
-          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <Menu style={{ width: 24, height: 24 }} />
-          </button>
-        </div>
-      </nav>
-
-      {/* Header with Logo */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
-        <div className="portal-header" style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 20px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Landmark style={{ color: "#426FB6", width: 32, height: 32 }} />
-            <span style={{ fontSize: 22, fontWeight: 700, color: "#426FB6", fontFamily: "'BentonSans', Arial, sans-serif" }}>SpringWell Bank</span>
-          </div>
-          <div style={{ backgroundColor: "#FEDF01", padding: "10px 20px", borderRadius: 4, fontWeight: 700, fontSize: 14, color: "#000" }}>
-            Signed In As {user.firstName} {user.lastName}
-          </div>
-        </div>
-      </div>
-
-      {/* Blue Sub Header */}
-      <div style={{ backgroundColor: "#426FB6", height: 50 }} />
+      {/* Navigation */}
+      <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} />
 
       {/* Main Content */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
-
-        {/* Profile Section */}
-        <div className="portal-profile">
-          <ProfileImageUpload
-            userId={userId}
-            imageId={user.imageId}
-            firstName={user.firstName}
-            lastName={user.lastName}
-            onImageSaved={() => { window.location.reload(); }}
-            generateUploadUrl={generateUploadUrl}
-            saveImage={saveProfileImage}
-            removeImage={removeProfileImage}
-            size="lg"
-          />
-          <div>
-            <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: "#000" }}>Hello, {user.firstName} {user.lastName}</h2>
-            <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
-              <button onClick={openProfile} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, fontWeight: 500 }}>Update profile</button>
-              <span style={{ color: "#ccc" }}>|</span>
-              <button onClick={openProfile} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, fontWeight: 500 }}>Security center</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div style={{ display: "flex", marginBottom: 20, border: "1px solid #ccc", borderRadius: 4, overflow: "hidden" }}>
-          <input
-            type="text"
-            placeholder="How can we help you ?"
-            style={{ flex: 1, padding: "10px 16px", border: "none", outline: "none", fontSize: 14, fontFamily: "inherit" }}
-          />
-          <button style={{ padding: "10px 16px", backgroundColor: "#eee", border: "none", borderLeft: "1px solid #ccc", cursor: "pointer" }}>
-            <Search style={{ width: 18, height: 18, color: "#666" }} />
-          </button>
-        </div>
 
         {/* Account Disabled Alert */}
         <div style={{ backgroundColor: "rgba(217, 57, 57, 0.15)", border: "1px solid rgba(217, 57, 57, 0.3)", borderRadius: 4, padding: "12px 20px", marginBottom: 20 }}>

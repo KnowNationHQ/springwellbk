@@ -5,14 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, ArrowRightLeft, Globe, ArrowRight, CheckCircle, Loader2, Menu, LogOut } from "lucide-react";
+import { Landmark, ArrowRightLeft, Globe, User, ArrowRight, CheckCircle, Loader2, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Header } from "@/components/layout/header";
+import { BankNav } from "@/components/layout/bank-nav";
 
-type TransferType = null | "domestic" | "international";
+type TransferType = null | "domestic" | "international" | "business";
 
 export default function TransferPage() {
   const router = useRouter();
@@ -37,6 +37,7 @@ export default function TransferPage() {
     currency: "USD",
     description: "",
   });
+  const [businessForm, setBusinessForm] = useState({ businessName: "", businessEmail: "", amount: "", description: "" });
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -47,7 +48,7 @@ export default function TransferPage() {
   const currentUser = users?.find((u: any) => u._id === userId);
 
   if (!userId || users === undefined) {
-    return <div style={{ backgroundColor: "#f5f5f5", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 className="animate-spin h-8 w-8 text-[#426FB6]" /></div>;
+    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 className="animate-spin h-8 w-8 text-[#426FB6]" /></div>;
   }
 
   async function handleDomestic(e: React.FormEvent) {
@@ -94,230 +95,228 @@ export default function TransferPage() {
     }
   }
 
+  async function handleBusiness(e: React.FormEvent) {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    const amt = parseFloat(businessForm.amount);
+    if (!businessForm.businessEmail || isNaN(amt) || amt <= 0) { setError("Enter a valid business email and amount"); return; }
+    if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
+    setLoading(true);
+    try {
+      await transfer({
+        fromUserId: userId as any,
+        toEmail: businessForm.businessEmail,
+        amount: amt,
+        description: businessForm.description || `Payment to ${businessForm.businessName}`,
+      });
+      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName || businessForm.businessEmail}`);
+      setBusinessForm({ businessName: "", businessEmail: "", amount: "", description: "" });
+    } catch (err: any) {
+      setError(err.message || "Transfer failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div style={{ backgroundColor: "#f5f5f5", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }}>
-      {/* Nav */}
-      <nav style={{ backgroundColor: "#434343", color: "#fff" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 44 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Landmark style={{ color: "#FEDF01", width: 20, height: 20 }} />
-            <span style={{ fontWeight: 700, fontSize: 14 }}>SpringWell Bank</span>
-          </div>
-          <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
-            <Link href="/dashboard" style={{ color: "#ccc", textDecoration: "none" }}>Dashboard</Link>
-            <Link href="/transfer" style={{ color: "#FEDF01", textDecoration: "none", fontWeight: 600 }}>Transfer</Link>
-            <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: 13 }}>Sign out</button>
-          </div>
-        </div>
-      </nav>
+    <div style={{ backgroundColor: "#eee", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }}>
+      {/* Navigation */}
+      <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} />
 
-      {/* Blue bar */}
-      <div style={{ backgroundColor: "#426FB6", height: 6 }} />
-
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "30px 20px" }}>
-        {/* Back link */}
-        <Link href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#426FB6", fontSize: 14, marginBottom: 20, textDecoration: "none" }}>
-          ← Back to Dashboard
-        </Link>
-
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: "#000", marginBottom: 4 }}>Transfer Money</h1>
-        <p style={{ color: "#666", fontSize: 14, marginBottom: 30 }}>Send money domestically or internationally in seconds.</p>
-
-        {/* Balance card */}
-        <div style={{ backgroundColor: "#426FB6", borderRadius: 12, padding: "20px 24px", marginBottom: 30, color: "#fff" }}>
-          <p style={{ fontSize: 12, opacity: 0.8, margin: "0 0 4px" }}>Available Balance</p>
-          <p style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>
-            {currentUser?.currency === "EUR" ? "€" : currentUser?.currency === "GBP" ? "£" : "$"}
-            {(currentUser?.balance ?? 0).toLocaleString()}
-          </p>
-        </div>
+      {/* Main content */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "30px 20px" }}>
 
         {/* Error / Success */}
         {error && (
-          <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "12px 16px", marginBottom: 20, color: "#dc2626", fontSize: 14 }}>
+          <div style={{ backgroundColor: "#fff", border: "1px solid #fecaca", borderRadius: 4, padding: "12px 20px", marginBottom: 20, color: "#dc2626", fontSize: 14 }}>
             {error}
           </div>
         )}
         {success && (
-          <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: "12px 16px", marginBottom: 20, color: "#16a34a", fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
-            <CheckCircle size={16} /> {success}
+          <div style={{ backgroundColor: "#fff", border: "1px solid #bbf7d0", borderRadius: 4, padding: "12px 20px", marginBottom: 20, color: "#16a34a", fontSize: 14 }}>
+            {success}
           </div>
         )}
 
-        {/* Transfer Type Selection */}
+        {/* Transfer Type Selection - matches reference exactly */}
         {!transferType && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            <button
-              onClick={() => setTransferType("domestic")}
-              style={{
-                backgroundColor: "#fff",
-                border: "2px solid #e5e7eb",
-                borderRadius: 16,
-                padding: "40px 24px",
-                cursor: "pointer",
-                textAlign: "center",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#426FB6"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.transform = "translateY(0)"; }}
-            >
-              <div style={{ width: 56, height: 56, borderRadius: "50%", backgroundColor: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                <ArrowRightLeft size={28} style={{ color: "#426FB6" }} />
+          <>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#000", marginBottom: 24 }}>I want to transfer money...</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 30 }}>
+              {/* Domestic */}
+              <div
+                onClick={() => setTransferType("domestic")}
+                style={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #ddd",
+                  borderRadius: 4,
+                  padding: "30px 20px 20px",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 220,
+                  transition: "box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>Domestic Bank Transfer</h3>
+                <div style={{ flex: 1 }} />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                  </div>
+                  <ArrowRightLeft size={20} style={{ color: "#999" }} />
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                  </div>
+                </div>
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>Domestic Transfer</h3>
-              <p style={{ fontSize: 13, color: "#666", margin: 0 }}>Send to another SpringWell user instantly</p>
-            </button>
 
-            <button
-              onClick={() => setTransferType("international")}
-              style={{
-                backgroundColor: "#fff",
-                border: "2px solid #e5e7eb",
-                borderRadius: 16,
-                padding: "40px 24px",
-                cursor: "pointer",
-                textAlign: "center",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#426FB6"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.transform = "translateY(0)"; }}
-            >
-              <div style={{ width: 56, height: 56, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                <Globe size={28} style={{ color: "#ca8a04" }} />
+              {/* International */}
+              <div
+                onClick={() => setTransferType("international")}
+                style={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #ddd",
+                  borderRadius: 4,
+                  padding: "30px 20px 20px",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 220,
+                  transition: "box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>International Bank Transfer</h3>
+                <div style={{ flex: 1 }} />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                  </div>
+                  <ArrowRightLeft size={20} style={{ color: "#999" }} />
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Building2 size={22} style={{ color: "#ca8a04" }} />
+                  </div>
+                </div>
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>International Transfer</h3>
-              <p style={{ fontSize: 13, color: "#666", margin: 0 }}>Send to any bank worldwide</p>
-            </button>
-          </div>
+
+              {/* Business */}
+              <div
+                onClick={() => setTransferType("business")}
+                style={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #ddd",
+                  borderRadius: 4,
+                  padding: "30px 20px 20px",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 220,
+                  transition: "box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>To someone else or a business</h3>
+                <div style={{ flex: 1 }} />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                  </div>
+                  <ArrowRightLeft size={20} style={{ color: "#999" }} />
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <User size={22} style={{ color: "#426FB6" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {/* Domestic Form */}
         {transferType === "domestic" && (
-          <Card style={{ border: "1px solid #e5e7eb", borderRadius: 16 }}>
-            <CardContent style={{ padding: "30px 24px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <ArrowRightLeft size={20} style={{ color: "#426FB6" }} />
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#000" }}>Domestic Transfer</h2>
-                    <p style={{ fontSize: 12, color: "#666", margin: 0 }}>To another SpringWell user</p>
-                  </div>
-                </div>
-                <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "1px solid #ddd", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#666" }}>← Back</button>
-              </div>
-
-              <form onSubmit={handleDomestic} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 30 }}>
+            <div style={{ backgroundColor: "#426FB6", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Domestic Bank Transfer</h3>
+              <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <form onSubmit={handleDomestic} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Transfer to another SpringWell user by email</p>
                 <div>
-                  <Label htmlFor="dom-to" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Recipient Email *</Label>
-                  <Input
-                    id="dom-to"
-                    type="email"
-                    required
-                    placeholder="friend@springwellbk.com"
-                    value={domesticForm.toEmail}
-                    onChange={(e) => setDomesticForm({ ...domesticForm, toEmail: e.target.value })}
-                    style={{ height: 44 }}
-                  />
+                  <Label htmlFor="dom-to" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Email *</Label>
+                  <Input id="dom-to" type="email" required placeholder="friend@springwellbk.com" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.toEmail} onChange={(e) => setDomesticForm({ ...domesticForm, toEmail: e.target.value })} />
                 </div>
                 <div>
-                  <Label htmlFor="dom-amount" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Amount (USD) *</Label>
-                  <Input
-                    id="dom-amount"
-                    type="number"
-                    required
-                    min="0.01"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={domesticForm.amount}
-                    onChange={(e) => setDomesticForm({ ...domesticForm, amount: e.target.value })}
-                    style={{ height: 44 }}
-                  />
+                  <Label htmlFor="dom-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
+                  <Input id="dom-amount" type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.amount} onChange={(e) => setDomesticForm({ ...domesticForm, amount: e.target.value })} />
                 </div>
                 <div>
-                  <Label htmlFor="dom-desc" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Description</Label>
-                  <Input
-                    id="dom-desc"
-                    placeholder="What's this for?"
-                    value={domesticForm.description}
-                    onChange={(e) => setDomesticForm({ ...domesticForm, description: e.target.value })}
-                    style={{ height: 44 }}
-                  />
+                  <Label htmlFor="dom-desc" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Description</Label>
+                  <Input id="dom-desc" placeholder="What's this for?" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.description} onChange={(e) => setDomesticForm({ ...domesticForm, description: e.target.value })} />
                 </div>
-                <Button type="submit" disabled={loading} style={{ backgroundColor: "#426FB6", color: "#fff", height: 48, fontSize: 15, fontWeight: 700, borderRadius: 10, marginTop: 8 }}>
-                  {loading ? <Loader2 className="animate-spin mr-2" size={18} /> : <ArrowRight size={18} className="mr-2" />}
-                  {loading ? "Sending..." : "Send Transfer"}
-                </Button>
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                  <Button type="submit" disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                    {loading ? "Sending..." : "Send Transfer"}
+                  </Button>
+                </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* International Form */}
         {transferType === "international" && (
-          <Card style={{ border: "1px solid #e5e7eb", borderRadius: 16 }}>
-            <CardContent style={{ padding: "30px 24px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Globe size={20} style={{ color: "#ca8a04" }} />
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#000" }}>International Transfer</h2>
-                    <p style={{ fontSize: 12, color: "#666", margin: 0 }}>To any bank account worldwide</p>
-                  </div>
-                </div>
-                <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "1px solid #ddd", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#666" }}>← Back</button>
-              </div>
-
-              <form onSubmit={handleInternational} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 30 }}>
+            <div style={{ backgroundColor: "#426FB6", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>International Bank Transfer</h3>
+              <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <form onSubmit={handleInternational} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to any bank account worldwide</p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <Label htmlFor="intl-name" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Recipient Name *</Label>
-                    <Input id="intl-name" required placeholder="Full name" value={intlForm.recipientName} onChange={(e) => setIntlForm({ ...intlForm, recipientName: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
+                    <Input id="intl-name" required placeholder="Full name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientName} onChange={(e) => setIntlForm({ ...intlForm, recipientName: e.target.value })} />
                   </div>
                   <div>
-                    <Label htmlFor="intl-bank" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Bank Name *</Label>
-                    <Input id="intl-bank" required placeholder="Bank name" value={intlForm.recipientBank} onChange={(e) => setIntlForm({ ...intlForm, recipientBank: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-bank" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Bank Name *</Label>
+                    <Input id="intl-bank" required placeholder="Bank name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientBank} onChange={(e) => setIntlForm({ ...intlForm, recipientBank: e.target.value })} />
                   </div>
                 </div>
-
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <Label htmlFor="intl-routing" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Routing Number</Label>
-                    <Input id="intl-routing" placeholder="ABA / Routing" value={intlForm.routingNumber} onChange={(e) => setIntlForm({ ...intlForm, routingNumber: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-routing" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
+                    <Input id="intl-routing" placeholder="ABA / Routing" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.routingNumber} onChange={(e) => setIntlForm({ ...intlForm, routingNumber: e.target.value })} />
                   </div>
                   <div>
-                    <Label htmlFor="intl-account" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Account Number</Label>
-                    <Input id="intl-account" placeholder="Account number" value={intlForm.accountNumber} onChange={(e) => setIntlForm({ ...intlForm, accountNumber: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number</Label>
+                    <Input id="intl-account" placeholder="Account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.accountNumber} onChange={(e) => setIntlForm({ ...intlForm, accountNumber: e.target.value })} />
                   </div>
                 </div>
-
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <Label htmlFor="intl-iban" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>IBAN (for international)</Label>
-                    <Input id="intl-iban" placeholder="GB29NWBK60161331926819" value={intlForm.iban} onChange={(e) => setIntlForm({ ...intlForm, iban: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-iban" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>IBAN</Label>
+                    <Input id="intl-iban" placeholder="GB29NWBK60161331926819" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.iban} onChange={(e) => setIntlForm({ ...intlForm, iban: e.target.value })} />
                   </div>
                   <div>
-                    <Label htmlFor="intl-swift" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>SWIFT / BIC Code</Label>
-                    <Input id="intl-swift" placeholder="NWBKGB2L" value={intlForm.swiftCode} onChange={(e) => setIntlForm({ ...intlForm, swiftCode: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-swift" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>SWIFT / BIC Code</Label>
+                    <Input id="intl-swift" placeholder="NWBKGB2L" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.swiftCode} onChange={(e) => setIntlForm({ ...intlForm, swiftCode: e.target.value })} />
                   </div>
                 </div>
-
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
                   <div>
-                    <Label htmlFor="intl-amount" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Amount *</Label>
-                    <Input id="intl-amount" type="number" required min="0.01" step="0.01" placeholder="0.00" value={intlForm.amount} onChange={(e) => setIntlForm({ ...intlForm, amount: e.target.value })} style={{ height: 44 }} />
+                    <Label htmlFor="intl-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount *</Label>
+                    <Input id="intl-amount" type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.amount} onChange={(e) => setIntlForm({ ...intlForm, amount: e.target.value })} />
                   </div>
                   <div>
-                    <Label htmlFor="intl-currency" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Currency</Label>
-                    <select
-                      id="intl-currency"
-                      value={intlForm.currency}
-                      onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })}
-                      style={{ height: 44, width: "100%", border: "1px solid #e5e7eb", borderRadius: 6, padding: "0 12px", fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}
-                    >
+                    <Label htmlFor="intl-currency" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Currency</Label>
+                    <select id="intl-currency" value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                       <option value="GBP">GBP</option>
@@ -328,44 +327,84 @@ export default function TransferPage() {
                     </select>
                   </div>
                 </div>
-
                 <div>
-                  <Label htmlFor="intl-desc" style={{ fontSize: 12, color: "#666", marginBottom: 4, display: "block" }}>Purpose / Note</Label>
-                  <Input id="intl-desc" placeholder="Invoice payment, family support, etc." value={intlForm.description} onChange={(e) => setIntlForm({ ...intlForm, description: e.target.value })} style={{ height: 44 }} />
+                  <Label htmlFor="intl-desc" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Purpose / Note</Label>
+                  <Input id="intl-desc" placeholder="Invoice payment, family support, etc." style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.description} onChange={(e) => setIntlForm({ ...intlForm, description: e.target.value })} />
                 </div>
-
-                <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "14px 16px", fontSize: 13, color: "#475569" }}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 600 }}>⏱ Processing Time</p>
-                  <p style={{ margin: 0 }}>International transfers are processed within 1–3 business days. SWIFT/IBAN details are verified before execution.</p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                  <Button type="submit" disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                    {loading ? "Processing..." : "Send International Transfer"}
+                  </Button>
                 </div>
-
-                <Button type="submit" disabled={loading} className="hover:opacity-90" style={{ backgroundColor: "#ca8a04", color: "#fff", height: 48, fontSize: 15, fontWeight: 700, borderRadius: 10, marginTop: 8 }}>
-                  {loading ? <Loader2 className="animate-spin mr-2" size={18} /> : <Globe size={18} className="mr-2" />}
-                  {loading ? "Processing..." : "Send International Transfer"}
-                </Button>
               </form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Info section */}
-        {!transferType && (
-          <div style={{ marginTop: 40 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-              {[
-                { icon: "🔒", title: "Secure & Encrypted", desc: "256-bit encryption protects every transfer" },
-                { icon: "⚡", title: "Instant Domestic", desc: "SpringWell-to-SpringWell transfers are instant" },
-                { icon: "🌍", title: "200+ Countries", desc: "Send money to over 200 countries worldwide" },
-              ].map((item) => (
-                <div key={item.title} style={{ backgroundColor: "#fff", borderRadius: 12, padding: "20px 16px", border: "1px solid #e5e7eb", textAlign: "center" }}>
-                  <div style={{ fontSize: 28, marginBottom: 8 }}>{item.icon}</div>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#000" }}>{item.title}</h4>
-                  <p style={{ fontSize: 12, color: "#666", margin: 0 }}>{item.desc}</p>
-                </div>
-              ))}
             </div>
           </div>
         )}
+
+        {/* Business Form */}
+        {transferType === "business" && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 30 }}>
+            <div style={{ backgroundColor: "#426FB6", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>To Someone Else or a Business</h3>
+              <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <form onSubmit={handleBusiness} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to another person or business</p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <Label htmlFor="biz-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Business / Recipient Name *</Label>
+                    <Input id="biz-name" required placeholder="Business or person name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessName} onChange={(e) => setBusinessForm({ ...businessForm, businessName: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="biz-email" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Email *</Label>
+                    <Input id="biz-email" type="email" required placeholder="recipient@email.com" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessEmail} onChange={(e) => setBusinessForm({ ...businessForm, businessEmail: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="biz-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
+                  <Input id="biz-amount" type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.amount} onChange={(e) => setBusinessForm({ ...businessForm, amount: e.target.value })} />
+                </div>
+                <div>
+                  <Label htmlFor="biz-desc" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Description</Label>
+                  <Input id="biz-desc" placeholder="Invoice #, payment for..." style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.description} onChange={(e) => setBusinessForm({ ...businessForm, description: e.target.value })} />
+                </div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                  <Button type="submit" disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                    {loading ? "Sending..." : "Send Payment"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Disclaimer */}
+        <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, margin: "16px 0" }}>
+          For checking, savings, and money market accounts, the balance may reflect transaction that have not yet posted to your account. For credit card Gold option and Gold reserve accounts, the balance may not reflect recent transactions or pending payments.
+        </p>
+
+        {/* Last sign in */}
+        <p style={{ fontSize: 13, color: "#666", margin: "0 0 20px" }}>Last sign in {new Date().toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })} {new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
+
+        {/* Secure bar */}
+        <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Secure Area</span>
+          <div style={{ display: "flex", gap: 20 }}>
+            <Link href="/dashboard" style={{ color: "#426FB6", fontSize: 14 }}>Back to Dashboard</Link>
+            <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{ backgroundColor: "#eee", borderTop: "1px solid #ddd" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "40px 20px", textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Phone +44 7445 182201 / NMLS ID 411068</p>
+          <p style={{ fontSize: 12, color: "#666", margin: 0 }}>Copyright &copy; 2026 SpringWell Bank. All Rights Reserved.</p>
+        </div>
       </div>
     </div>
   );
