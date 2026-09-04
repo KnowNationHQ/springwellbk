@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, KeyRound, CalendarClock, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, KeyRound, CalendarClock, Eye, EyeOff, AlertTriangle, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ export default function AdminDashboard() {
   const [actionMsg, setActionMsg] = useState("");
   const [modal, setModal] = useState<Modal>(null);
   const [activeUser, setActiveUser] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -192,24 +193,60 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ backgroundColor: "#eee", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }}>
+      <style>{`
+        .admin-nav { display: flex; gap: 0; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        .admin-nav li { padding: 12px 20px; font-size: 14px; cursor: pointer; }
+        .admin-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .admin-profile { display: flex; align-items: center; gap: 20px; padding: 30px 0 20px; flex-wrap: wrap; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .quick-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .admin-modal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.5); padding: 20px; }
+        .admin-modal-box { width: 100%; max-width: 480px; background-color: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        .mobile-menu-btn { display: none; background: none; border: none; color: #fff; cursor: pointer; padding: 8px; }
+        .table-wrap { overflow-x: auto; }
+        .mobile-card { display: none; }
+        @media (max-width: 640px) {
+          .admin-nav { display: none; }
+          .admin-nav.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #434343; z-index: 100; }
+          .admin-nav.open li { padding: 14px 20px; border-bottom: 1px solid #555; }
+          .mobile-menu-btn { display: block; }
+          .admin-header { flex-direction: column; align-items: flex-start; }
+          .admin-profile { flex-direction: column; text-align: center; gap: 12px; }
+          .stats-grid { grid-template-columns: 1fr; }
+          .quick-grid { grid-template-columns: repeat(2, 1fr); }
+          .admin-modal-overlay { padding: 0; align-items: stretch; }
+          .admin-modal-box { max-width: 100%; border-radius: 0; max-height: 100vh; }
+          .table-wrap table { font-size: 12px; }
+          .table-wrap th, .table-wrap td { padding: 6px 8px !important; }
+          .mobile-card { display: block; }
+          .desktop-table { display: none; }
+        }
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .quick-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+      `}</style>
+
       {/* Top Nav */}
-      <nav style={{ backgroundColor: "#434343", color: "#fff" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
-          <ul style={{ display: "flex", gap: 0, listStyle: "none", margin: 0, padding: 0, flexWrap: "wrap" }}>
-            <li style={{ padding: "12px 20px", borderBottom: "3px solid #FEDF01", fontWeight: 600, fontSize: 14, cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Online banking</li>
-            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer" }} onClick={() => router.push("/#about")}>About SpringWell Bank</li>
-            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer", marginLeft: "auto" }}>
+      <nav style={{ backgroundColor: "#434343", color: "#fff", position: "relative" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <ul className={`admin-nav ${mobileMenuOpen ? "open" : ""}`}>
+            <li style={{ borderBottom: "3px solid #FEDF01", fontWeight: 600 }} onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Online banking</li>
+            <li onClick={() => { router.push("/#about"); setMobileMenuOpen(false); }}>About SpringWell Bank</li>
+            <li style={{ marginLeft: "auto" }}>
               <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, padding: 0 }}>
                 Sign out
               </button>
             </li>
           </ul>
+          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <Menu style={{ width: 24, height: 24 }} />
+          </button>
         </div>
       </nav>
 
       {/* Header with Logo */}
       <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div className="admin-header" style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Landmark style={{ color: "#426FB6", width: 32, height: 32 }} />
             <span style={{ fontSize: 22, fontWeight: 700, color: "#426FB6", fontFamily: "'BentonSans', Arial, sans-serif" }}>SpringWell Bank</span>
@@ -236,7 +273,7 @@ export default function AdminDashboard() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
 
         {/* Profile Section */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "30px 0 20px", flexWrap: "wrap" }}>
+        <div className="admin-profile">
           <ProfileImageUpload
             userId={userId}
             imageId={adminUser?.imageId}
@@ -277,7 +314,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Stats Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 20 }}>
+        <div className="stats-grid" style={{ marginBottom: 20 }}>
           {[
             { label: "Customers", value: String(nonAdmins.length), icon: Users },
             { label: "Total Balance", value: `${adminUser ? sym(adminUser.currency) : "$"}${totalBalance.toLocaleString()}`, icon: Wallet },
@@ -296,7 +333,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 20 }}>
+        <div className="quick-grid" style={{ marginBottom: 20 }}>
           {[
             { label: "Credit/Debit", icon: ArrowUpDown, action: () => openCredit(null), color: "#426FB6" },
             { label: "Fund Transfer", icon: Send, action: () => openTransfer(null), color: "#426FB6" },
@@ -338,8 +375,10 @@ export default function AdminDashboard() {
             {pending.length === 0 ? (
               <p style={{ color: "#666", fontSize: 14, margin: 0 }}>No pending transactions.</p>
             ) : (
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <>
+                {/* Desktop Table */}
+                <div className="table-wrap desktop-table">
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={tableHeaderStyle}>
                       <th style={{ padding: "8px 12px", textAlign: "left" }}>Date</th>
@@ -363,7 +402,21 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+                </div>
+                {/* Mobile Cards */}
+                <div className="mobile-card" style={{ flexDirection: "column", gap: 12 }}>
+                  {pending.map((t: any) => (
+                    <div key={t._id} style={{ padding: 16, backgroundColor: "#f9f9f9", borderRadius: 8, border: "1px solid #eee" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                        <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: "#fff3cd", color: "#856404" }}>{t.type}</span>
+                      </div>
+                      <p style={{ fontSize: 12, color: "#666", margin: "0 0 4px" }}>{acct(t)} · {new Date(t.createdAt).toLocaleDateString()}</p>
+                      <button onClick={() => openComplete(t._id)} style={{ marginTop: 8, padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer", width: "100%" }}>Complete</button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -374,7 +427,8 @@ export default function AdminDashboard() {
             <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#000" }}>All Accounts ({customers.length})</h3>
           </div>
           <div style={sectionBodyStyle}>
-            <div style={{ overflowX: "auto" }}>
+            {/* Desktop Table */}
+            <div className="table-wrap desktop-table">
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr style={tableHeaderStyle}>
@@ -425,6 +479,34 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+            {/* Mobile Cards */}
+            <div className="mobile-card" style={{ flexDirection: "column", gap: 12 }}>
+              {customers.map((c: any) => (
+                <div key={c._id} style={{ padding: 16, backgroundColor: "#f9f9f9", borderRadius: 8, border: "1px solid #eee" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: "50%", backgroundColor: "#426FB6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>{initials(c)}</div>
+                      <div>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{c.firstName} {c.lastName}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: "#666", fontFamily: "monospace" }}>{acct(c)}</p>
+                      </div>
+                    </div>
+                    <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: c.status === "active" ? "#d4edda" : c.status === "suspended" ? "#f8d7da" : "#fff3cd", color: c.status === "active" ? "#155724" : c.status === "suspended" ? "#721c24" : "#856404" }}>{c.status}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, color: "#666" }}>{c.accountType}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700 }}>{sym(c.currency)}{c.balance.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    <button onClick={() => openCredit(c)} style={{ flex: 1, padding: "6px 4px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}>Credit</button>
+                    <button onClick={() => openTransfer(c)} style={{ flex: 1, padding: "6px 4px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}>Transfer</button>
+                    <button onClick={() => openEdit(c)} style={{ flex: 1, padding: "6px 4px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}>Edit</button>
+                    {c.status !== "active" && <button onClick={() => handleStatus(c._id, "active")} style={{ flex: 1, padding: "6px 4px", border: "1px solid #28a745", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11, color: "#28a745" }}>Activate</button>}
+                    {c.status !== "suspended" && <button onClick={() => handleStatus(c._id, "suspended")} style={{ flex: 1, padding: "6px 4px", border: "1px solid #d93939", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11, color: "#d93939" }}>Suspend</button>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -434,7 +516,8 @@ export default function AdminDashboard() {
             <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#000" }}>Messages ({messages.length})</h3>
           </div>
           <div style={sectionBodyStyle}>
-            <div style={{ overflowX: "auto" }}>
+            {/* Desktop Table */}
+            <div className="table-wrap desktop-table">
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr style={tableHeaderStyle}>
@@ -467,6 +550,25 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+            {/* Mobile Cards */}
+            <div className="mobile-card" style={{ flexDirection: "column", gap: 12 }}>
+              {messages.length === 0 ? (
+                <p style={{ color: "#666", fontSize: 14, margin: 0 }}>No messages.</p>
+              ) : messages.map((m: any) => (
+                <div key={m._id} style={{ padding: 16, backgroundColor: "#f9f9f9", borderRadius: 8, border: "1px solid #eee" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</span>
+                    <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: m.status === "unread" ? "#f8d7da" : m.status === "replied" ? "#d4edda" : "#fff3cd", color: m.status === "unread" ? "#721c24" : m.status === "replied" ? "#155724" : "#856404" }}>{m.status}</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#666", margin: "0 0 4px" }}>{m.email}</p>
+                  <p style={{ fontSize: 13, margin: "0 0 8px" }}>{m.subject ?? "N/A"}</p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {m.status === "unread" && <button onClick={() => handleMessage(m._id, "read")} style={{ flex: 1, padding: "6px 4px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}>Mark read</button>}
+                    {m.status !== "replied" && <button onClick={() => handleMessage(m._id, "replied")} style={{ flex: 1, padding: "6px 4px", border: "1px solid #426FB6", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11, color: "#426FB6" }}>Reply</button>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -479,38 +581,55 @@ export default function AdminDashboard() {
             {transactions.length === 0 ? (
               <p style={{ color: "#666", fontSize: 14, margin: 0 }}>No transactions yet.</p>
             ) : (
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                  <thead>
-                    <tr style={tableHeaderStyle}>
-                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Date</th>
-                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Type</th>
-                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Description</th>
-                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Amount</th>
-                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Status</th>
-                      <th style={{ padding: "8px 12px", textAlign: "left" }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((t: any) => (
-                      <tr key={t._id} style={{ borderBottom: "1px solid #eee" }}>
-                        <td style={{ padding: "8px 12px" }}>{new Date(t.createdAt).toLocaleDateString()}</td>
-                        <td style={{ padding: "8px 12px", textTransform: "capitalize" }}>{t.type}</td>
-                        <td style={{ padding: "8px 12px" }}>{t.description || "N/A"}</td>
-                        <td style={{ padding: "8px 12px", fontWeight: 600 }}>{sym(t.currency)}{t.amount.toLocaleString()}</td>
-                        <td style={{ padding: "8px 12px" }}>
-                          <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: t.status === "successful" ? "#d4edda" : "#f8d7da", color: t.status === "successful" ? "#155724" : "#721c24" }}>
-                            {t.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: "8px 12px" }}>
-                          <button onClick={() => openBackdate(t)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><CalendarClock style={{ width: 12, height: 12, marginRight: 4 }} />Back Date</button>
-                        </td>
+              <>
+                {/* Desktop Table */}
+                <div className="table-wrap desktop-table">
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                    <thead>
+                      <tr style={tableHeaderStyle}>
+                        <th style={{ padding: "8px 12px", textAlign: "left" }}>Date</th>
+                        <th style={{ padding: "8px 12px", textAlign: "left" }}>Type</th>
+                        <th style={{ padding: "8px 12px", textAlign: "left" }}>Description</th>
+                        <th style={{ padding: "8px 12px", textAlign: "left" }}>Amount</th>
+                        <th style={{ padding: "8px 12px", textAlign: "left" }}>Status</th>
+                        <th style={{ padding: "8px 12px", textAlign: "left" }}>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {transactions.map((t: any) => (
+                        <tr key={t._id} style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "8px 12px" }}>{new Date(t.createdAt).toLocaleDateString()}</td>
+                          <td style={{ padding: "8px 12px", textTransform: "capitalize" }}>{t.type}</td>
+                          <td style={{ padding: "8px 12px" }}>{t.description || "N/A"}</td>
+                          <td style={{ padding: "8px 12px", fontWeight: 600 }}>{sym(t.currency)}{t.amount.toLocaleString()}</td>
+                          <td style={{ padding: "8px 12px" }}>
+                            <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: t.status === "successful" ? "#d4edda" : "#f8d7da", color: t.status === "successful" ? "#155724" : "#721c24" }}>
+                              {t.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: "8px 12px" }}>
+                            <button onClick={() => openBackdate(t)} style={{ padding: "4px 8px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 11 }}><CalendarClock style={{ width: 12, height: 12, marginRight: 4 }} />Back Date</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Mobile Cards */}
+                <div className="mobile-card" style={{ flexDirection: "column", gap: 12 }}>
+                  {transactions.map((t: any) => (
+                    <div key={t._id} style={{ padding: 16, backgroundColor: "#f9f9f9", borderRadius: 8, border: "1px solid #eee" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                        <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600, backgroundColor: t.status === "successful" ? "#d4edda" : "#f8d7da", color: t.status === "successful" ? "#155724" : "#721c24" }}>{t.status}</span>
+                      </div>
+                      <p style={{ fontSize: 12, color: "#666", margin: "0 0 4px" }}>{t.type} · {new Date(t.createdAt).toLocaleDateString()}</p>
+                      <p style={{ fontSize: 13, margin: "0 0 8px" }}>{t.description || "N/A"}</p>
+                      <button onClick={() => openBackdate(t)} style={{ width: "100%", padding: "8px 16px", border: "1px solid #ddd", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 12 }}>Back Date</button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -540,8 +659,8 @@ export default function AdminDashboard() {
 
       {/* Modals */}
       {modal && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: 20 }} onClick={() => setModal(null)}>
-          <div style={{ width: "100%", maxWidth: 480, backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+        <div className="admin-modal-overlay" onClick={() => setModal(null)}>
+          <div className="admin-modal-box" onClick={(e) => e.stopPropagation()}>
             <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
                 {modal === "credit" && "Credit / Debit Account"}
