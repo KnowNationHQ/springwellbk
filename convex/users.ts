@@ -80,3 +80,15 @@ export const updateBalance = mutation({
     await ctx.db.patch(args.userId, { balance: user.balance + args.amount });
   },
 });
+
+export const fixAdminRole = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const admin = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", "admin@springwellbk.com")).unique();
+    if (admin && admin.role !== "admin") {
+      await ctx.db.patch(admin._id, { role: "admin" });
+      return "Fixed admin role";
+    }
+    return "Admin role already correct";
+  },
+});
