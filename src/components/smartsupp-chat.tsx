@@ -8,7 +8,7 @@ export function SmartsuppChat() {
     if (document.getElementById("smartsupp-loader")) return;
 
     (window as any)._smartsupp = (window as any)._smartsupp || {};
-    (window as any)._smartsupp.key = "e83d93296f556f603cf7296ac95c29eb37a780cb";
+    (window as any)._smartsupp.key = "222e75a5a32a4becf57f4c7222d71f616c9e313a";
 
     (window as any).smartsupp = (window as any).smartsupp || function (...args: any[]) {
       ((window as any).smartsupp._ = (window as any).smartsupp._ || []).push(args);
@@ -20,7 +20,7 @@ export function SmartsuppChat() {
     s.type = "text/javascript";
     s.charset = "utf-8";
     s.async = true;
-    s.src = "https://www.smartsuppchat.com/loader.js?";
+    s.src = "//www.smartsuppchat.com/loader.js?";
     (document.head || document.body).appendChild(s);
   }, []);
 
