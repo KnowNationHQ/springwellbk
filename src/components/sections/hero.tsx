@@ -37,7 +37,7 @@ export function HeroSection() {
 
   return (
     <section className="relative bg-[#426FB6] overflow-hidden">
-      <img src="/images/hero.jpeg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-20" />
+      <img src="/images/hero.jpeg" alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover opacity-20" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#426FB6]/90 via-[#426FB6]/70 to-[#426FB6]/50" />
       <div className="relative max-w-7xl mx-auto px-4 py-24 sm:py-32 md:py-40 lg:py-48">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -60,12 +60,13 @@ export function HeroSection() {
           <div className="w-full max-w-sm mx-auto lg:mx-0 lg:ml-auto">
             <Card className="bg-white shadow-xl border-0">
               <CardContent className="p-6">
-                <h3 className="text-lg font-bold mb-4 text-gray-900">{t("hero.cardTitle")}</h3>
+                <h2 className="text-lg font-bold mb-4 text-gray-900">{t("hero.cardTitle")}</h2>
                 {error && <p className="text-red-600 text-xs mb-3">{error}</p>}
                 <form onSubmit={handleLogin} className="space-y-3">
                   <div>
-                    <Label className="text-gray-700 text-xs">{t("hero.username")}</Label>
+                    <Label htmlFor="hero-username" className="text-gray-700 text-xs">{t("hero.username")}</Label>
                     <Input
+                      id="hero-username"
                       type="text"
                       placeholder="Enter username"
                       value={username}
@@ -75,8 +76,9 @@ export function HeroSection() {
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-700 text-xs">{t("hero.password")}</Label>
+                    <Label htmlFor="hero-password" className="text-gray-700 text-xs">{t("hero.password")}</Label>
                     <Input
+                      id="hero-password"
                       type="password"
                       placeholder="Enter password"
                       value={password}

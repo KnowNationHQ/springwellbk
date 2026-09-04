@@ -73,22 +73,23 @@ export function ContactSection() {
             {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <Label className="text-xs text-gray-600">{t("contact.subject")}</Label>
-                <Input required value={subject} onChange={(e) => setSubject(e.target.value)} className="h-10 border-gray-300" placeholder="Subject" />
+                <Label htmlFor="contact-subject" className="text-xs text-gray-600">{t("contact.subject")}</Label>
+                <Input id="contact-subject" required value={subject} onChange={(e) => setSubject(e.target.value)} className="h-10 border-gray-300" placeholder="Subject" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-gray-600">{t("contact.name")}</Label>
-                  <Input required value={name} onChange={(e) => setName(e.target.value)} className="h-10 border-gray-300" />
+                  <Label htmlFor="contact-name" className="text-xs text-gray-600">{t("contact.name")}</Label>
+                  <Input id="contact-name" required value={name} onChange={(e) => setName(e.target.value)} className="h-10 border-gray-300" />
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-600">{t("contact.email")}</Label>
-                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 border-gray-300" />
+                  <Label htmlFor="contact-email" className="text-xs text-gray-600">{t("contact.email")}</Label>
+                  <Input id="contact-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 border-gray-300" />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-gray-600">{t("contact.message")}</Label>
+                <Label htmlFor="contact-message" className="text-xs text-gray-600">{t("contact.message")}</Label>
                 <textarea
+                  id="contact-message"
                   className="w-full min-h-[100px] border border-gray-300 bg-white px-3 py-2 rounded-md text-sm"
                   required
                   value={message}

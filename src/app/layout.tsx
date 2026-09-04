@@ -18,6 +18,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" as="image" href="/images/hero.jpeg" fetchPriority="high" />
+      </head>
       <body className="antialiased min-h-screen flex flex-col">
         <ConvexClientProvider>
           <LocaleProvider>{children}</LocaleProvider>

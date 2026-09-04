@@ -16,10 +16,10 @@ export function PromosSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {promos.map((p) => (
             <div key={p.titleKey} className="rounded-xl overflow-hidden bg-white border border-gray-200 flex flex-col">
-              <img src={p.img} alt="" aria-hidden className="w-full h-40 object-cover" />
+              <img src={p.img} alt="" aria-hidden="true" className="w-full h-40 object-cover" />
               <div className="p-5 flex flex-col flex-1">
                 <p className="text-xs font-bold tracking-wide text-[#426FB6] mb-1"><T k={p.eyebrowKey} /></p>
-                <h3 className="font-bold text-base mb-2 leading-snug text-gray-900"><T k={p.titleKey} /></h3>
+                <h2 className="font-bold text-base mb-2 leading-snug text-gray-900"><T k={p.titleKey} /></h2>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4 flex-1"><T k={p.descKey} /></p>
                 <Link href={p.href} className="inline-flex items-center gap-1 text-sm font-semibold text-[#426FB6] hover:gap-2 transition-all">
                   <T k={p.ctaKey} /> <ArrowRight className="h-4 w-4" />

@@ -13,7 +13,7 @@ export function FeaturesSection() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {features.map((f) => (
             <div key={f.titleKey} className="p-6 rounded-xl border border-gray-200 bg-white">
-              <h3 className="font-bold text-lg mb-2 text-gray-900"><T k={f.titleKey} /></h3>
+              <h2 className="font-bold text-lg mb-2 text-gray-900"><T k={f.titleKey} /></h2>
               <p className="text-sm leading-relaxed text-gray-600"><T k={f.descKey} /></p>
             </div>
           ))}
