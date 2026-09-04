@@ -64,6 +64,21 @@ export default function DashboardPage() {
     setUserId(id);
   }, [router]);
 
+  const anyModalOpen = editing || transferOpen || alertsOpen || billPayOpen || transactionsOpen || offersOpen || messagesOpen || spendingOpen || goalsOpen || openAccountOpen;
+  useEffect(() => {
+    if (!anyModalOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setEditing(false); setTransferOpen(false); setAlertsOpen(false);
+        setBillPayOpen(false); setTransactionsOpen(false); setOffersOpen(false);
+        setMessagesOpen(false); setSpendingOpen(false); setGoalsOpen(false);
+        setOpenAccountOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [anyModalOpen]);
+
   const stats = useQuery(
     api.auth.getDashboardStats,
     userId ? { userId: userId as any } : "skip"
@@ -126,16 +141,23 @@ export default function DashboardPage() {
     }
   }
 
+  function closeAllModals() {
+    setEditing(false); setTransferOpen(false); setAlertsOpen(false);
+    setBillPayOpen(false); setTransactionsOpen(false); setOffersOpen(false);
+    setMessagesOpen(false); setSpendingOpen(false); setGoalsOpen(false);
+    setOpenAccountOpen(false);
+  }
+
   const activityItems = [
-    { label: "Alerts", icon: Bell, action: () => setAlertsOpen(true) },
-    { label: "Bill Pay", icon: DollarSign, action: () => setBillPayOpen(true) },
-    { label: "Transactions", icon: Clock, action: () => setTransactionsOpen(true) },
-    { label: "Transfer Funds", icon: ArrowUpRight, action: () => setTransferOpen(true) },
-    { label: "Special Offers", icon: Tag, action: () => setOffersOpen(true) },
-    { label: "Messages", icon: FileText, action: () => setMessagesOpen(true) },
-    { label: "Spending & Budgeting", icon: PiggyBank, action: () => setSpendingOpen(true) },
-    { label: "Goals", icon: Target, action: () => setGoalsOpen(true) },
-    { label: "Open account", icon: UserPlus, action: () => setOpenAccountOpen(true) },
+    { label: "Alerts", icon: Bell, action: () => { closeAllModals(); setAlertsOpen(true); } },
+    { label: "Bill Pay", icon: DollarSign, action: () => { closeAllModals(); setBillPayOpen(true); } },
+    { label: "Transactions", icon: Clock, action: () => { closeAllModals(); setTransactionsOpen(true); } },
+    { label: "Transfer Funds", icon: ArrowUpRight, action: () => { closeAllModals(); setTransferOpen(true); } },
+    { label: "Special Offers", icon: Tag, action: () => { closeAllModals(); setOffersOpen(true); } },
+    { label: "Messages", icon: FileText, action: () => { closeAllModals(); setMessagesOpen(true); } },
+    { label: "Spending & Budgeting", icon: PiggyBank, action: () => { closeAllModals(); setSpendingOpen(true); } },
+    { label: "Goals", icon: Target, action: () => { closeAllModals(); setGoalsOpen(true); } },
+    { label: "Open account", icon: UserPlus, action: () => { closeAllModals(); setOpenAccountOpen(true); } },
   ];
 
   return (

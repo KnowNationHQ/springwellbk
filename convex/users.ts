@@ -44,7 +44,9 @@ export const create = mutation({
       role: "customer",
       createdAt: Date.now(),
     });
-    await ctx.scheduler.runAfter(0, api.email.sendWelcomeEmail, { to: args.email, firstName: args.firstName });
+    try {
+      await ctx.scheduler.runAfter(0, api.email.sendWelcomeEmail, { to: args.email, firstName: args.firstName });
+    } catch (_) {}
     return userId;
   },
 });
