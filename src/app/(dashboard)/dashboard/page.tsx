@@ -209,7 +209,7 @@ export default function DashboardPage() {
             imageId={user.imageId}
             firstName={user.firstName}
             lastName={user.lastName}
-            onImageSaved={() => {}}
+            onImageSaved={() => { window.location.reload(); }}
             generateUploadUrl={generateUploadUrl}
             saveImage={saveProfileImage}
             removeImage={removeProfileImage}
@@ -537,7 +537,24 @@ export default function DashboardPage() {
             </div>
             <div style={{ padding: 20 }}>
               {profileMsg && <p style={{ color: profileMsg.includes("success") ? "#426FB6" : "#d93939", fontSize: 13, marginBottom: 12 }}>{profileMsg}</p>}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              
+              {/* Profile Image in Modal */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                <ProfileImageUpload
+                  userId={userId}
+                  imageId={user.imageId}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
+                  onImageSaved={() => { window.location.reload(); }}
+                  generateUploadUrl={generateUploadUrl}
+                  saveImage={saveProfileImage}
+                  removeImage={removeProfileImage}
+                  size="md"
+                />
+              </div>
+
+              {/* Profile Fields - responsive grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
                 {[
                   { label: "First Name", key: "firstName" },
                   { label: "Last Name", key: "lastName" },
