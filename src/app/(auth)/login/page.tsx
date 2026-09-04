@@ -92,9 +92,9 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
-            <Landmark className="h-7 w-7" />
-            SpringWell Bank
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
+            <Landmark className="h-7 w-7" style={{ color: "#fff" }} />
+            <span style={{ color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>SpringWell Bank</span>
           </Link>
         </div>
 
