@@ -196,8 +196,8 @@ export default function AdminDashboard() {
       <nav style={{ backgroundColor: "#434343", color: "#fff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
           <ul style={{ display: "flex", gap: 0, listStyle: "none", margin: 0, padding: 0, flexWrap: "wrap" }}>
-            <li style={{ padding: "12px 20px", borderBottom: "3px solid #FEDF01", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Online banking</li>
-            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer" }}>About SpringWell Bank</li>
+            <li style={{ padding: "12px 20px", borderBottom: "3px solid #FEDF01", fontWeight: 600, fontSize: 14, cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Online banking</li>
+            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer" }} onClick={() => router.push("/#about")}>About SpringWell Bank</li>
             <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer", marginLeft: "auto" }}>
               <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, padding: 0 }}>
                 Sign out
@@ -524,7 +524,7 @@ export default function AdminDashboard() {
         <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
           <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Secure Area</span>
           <div style={{ display: "flex", gap: 20 }}>
-            <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>En Espanol</button>
+            <button onClick={() => alert("Spanish language support coming soon!")} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>En Espanol</button>
             <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Sign out</button>
           </div>
         </div>
