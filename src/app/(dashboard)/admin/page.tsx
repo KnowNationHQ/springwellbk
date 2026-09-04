@@ -29,6 +29,13 @@ export default function AdminDashboard() {
     setUserId(id);
   }, [router]);
 
+  useEffect(() => {
+    if (!modal) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setModal(null); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [modal]);
+
   const users = useQuery(api.users.list);
   const transactions = useQuery(api.transactions.recent, { limit: 20 });
   const messages = useQuery(api.admin.listMessages);
