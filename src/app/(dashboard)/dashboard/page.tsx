@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [openAccountOpen, setOpenAccountOpen] = useState(false);
   const [quickView, setQuickView] = useState<string | null>(null);
+  const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
   const transfer = useMutation(api.auth.transfer);
@@ -88,6 +89,11 @@ export default function DashboardPage() {
     }
   }
 
+  function openProfile() {
+    setProfileFields({ firstName: user.firstName, lastName: user.lastName, phone: user.phone || "", address: user.address || "" });
+    setEditing(true);
+  }
+
   async function handleTransfer(e: React.FormEvent) {
     e.preventDefault();
     setTransferError("");
@@ -138,8 +144,8 @@ export default function DashboardPage() {
       <nav style={{ backgroundColor: "#434343", color: "#fff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
           <ul style={{ display: "flex", gap: 0, listStyle: "none", margin: 0, padding: 0, flexWrap: "wrap" }}>
-            <li style={{ padding: "12px 20px", borderBottom: "3px solid #FEDF01", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Online banking</li>
-            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer" }}>About SpringWell Bank</li>
+            <li style={{ padding: "12px 20px", borderBottom: "3px solid #FEDF01", fontWeight: 600, fontSize: 14, cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Online banking</li>
+            <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer" }} onClick={() => router.push("/#about")}>About SpringWell Bank</li>
             <li style={{ padding: "12px 20px", fontSize: 14, cursor: "pointer", marginLeft: "auto" }}>
               <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, padding: 0 }}>
                 Sign out
@@ -184,9 +190,9 @@ export default function DashboardPage() {
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: "#000" }}>Hello, {user.firstName} {user.lastName}</h2>
             <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
-              <button onClick={() => setEditing(true)} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, fontWeight: 500 }}>Update profile</button>
+              <button onClick={openProfile} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, fontWeight: 500 }}>Update profile</button>
               <span style={{ color: "#ccc" }}>|</span>
-              <button onClick={() => setEditing(true)} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, fontWeight: 500 }}>Security center</button>
+              <button onClick={openProfile} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0, fontWeight: 500 }}>Security center</button>
             </div>
           </div>
         </div>
@@ -267,7 +273,16 @@ export default function DashboardPage() {
                   <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0" }}>
                     {t.type === "credit" ? "CREDIT" : "FUND TRANSFER"} @ {t.description || "N/A"}
                   </p>
-                  <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 12, padding: 0, marginTop: 4 }}>Tap for more details</button>
+                  <button onClick={() => setExpandedTx(expandedTx === t._id ? null : t._id)} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 12, padding: 0, marginTop: 4 }}>{expandedTx === t._id ? "Hide details" : "Tap for more details"}</button>
+                  {expandedTx === t._id && (
+                    <div style={{ marginTop: 8, padding: 10, backgroundColor: "#f9f9f9", borderRadius: 4, border: "1px solid #eee" }}>
+                      <p style={{ fontSize: 12, color: "#333", margin: "0 0 4px" }}>Transaction ID: {t._id}</p>
+                      <p style={{ fontSize: 12, color: "#333", margin: "0 0 4px" }}>Type: {t.type === "credit" ? "Credit (Deposit)" : "Debit (Transfer)"}</p>
+                      <p style={{ fontSize: 12, color: "#333", margin: "0 0 4px" }}>Amount: {sym(t.currency)}{t.amount.toLocaleString()}</p>
+                      <p style={{ fontSize: 12, color: "#333", margin: "0 0 4px" }}>Date: {new Date(t.createdAt).toLocaleString()}</p>
+                      {t.description && <p style={{ fontSize: 12, color: "#333", margin: 0 }}>Note: {t.description}</p>}
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -387,7 +402,7 @@ export default function DashboardPage() {
         <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
           <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Secure Area</span>
           <div style={{ display: "flex", gap: 20 }}>
-            <button style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>En Espanol</button>
+            <button onClick={() => alert("Spanish language support coming soon!")} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>En Espanol</button>
             <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Sign out</button>
           </div>
         </div>
@@ -403,7 +418,7 @@ export default function DashboardPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 30 }}>
             <input type="text" placeholder="FULLNAME" style={{ padding: "12px 16px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit" }} />
             <input type="email" placeholder="EMAIL" style={{ padding: "12px 16px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit" }} />
-            <button style={{ padding: "14px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer", letterSpacing: 1 }}>SIGN UP</button>
+            <button style={{ padding: "14px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer", letterSpacing: 1 }} onClick={() => alert("Thank you for subscribing!")}>SIGN UP</button>
           </div>
 
           {/* Download App */}
@@ -438,13 +453,13 @@ export default function DashboardPage() {
 
           {/* Footer Links */}
           <div style={{ textAlign: "center", fontSize: 13, color: "#426FB6", marginBottom: 8 }}>
-            <a href="/#contact" style={{ color: "#426FB6", textDecoration: "none" }}>Contact Us</a>
+            <a href="/" style={{ color: "#426FB6", textDecoration: "none" }}>Contact Us</a>
             <span style={{ margin: "0 6px", color: "#999" }}>/</span>
             <a href="/#about" style={{ color: "#426FB6", textDecoration: "none" }}>About SpringWell</a>
             <span style={{ margin: "0 6px", color: "#999" }}>/</span>
             <a href="/#services" style={{ color: "#426FB6", textDecoration: "none" }}>Services</a>
             <span style={{ margin: "0 6px", color: "#999" }}>/</span>
-            <a href="/#contact" style={{ color: "#426FB6", textDecoration: "none" }}>Disclosure & Privacy Policy</a>
+            <a href="/" style={{ color: "#426FB6", textDecoration: "none" }}>Disclosure & Privacy Policy</a>
           </div>
 
           <p style={{ textAlign: "center", fontSize: 12, color: "#666", margin: "0 0 4px" }}>Phone +44 7445 182201 / NMLS ID 411068</p>
@@ -571,7 +586,7 @@ export default function DashboardPage() {
                 <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Memo (optional)</Label>
                 <Input placeholder="Invoice or reference" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
               </div>
-              <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { alert("Bill payment submitted!"); setBillPayOpen(false); }}>Submit Payment</Button>
+              <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { setBillPayOpen(false); }}>Submit Payment</Button>
             </div>
           </div>
         </div>
@@ -659,7 +674,7 @@ export default function DashboardPage() {
                 <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Message</Label>
                 <textarea placeholder="Type your message..." rows={4} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", resize: "vertical" }} />
               </div>
-              <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { alert("Message sent!"); setMessagesOpen(false); }}>Send Message</Button>
+              <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { setMessagesOpen(false); }}>Send Message</Button>
             </div>
           </div>
         </div>
@@ -716,7 +731,7 @@ export default function DashboardPage() {
                 <Target style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
                 <p style={{ fontSize: 14, marginBottom: 8 }}>No goals set yet</p>
                 <p style={{ fontSize: 12, color: "#bbb", margin: "0 0 16px" }}>Create a savings goal to track your progress.</p>
-                <Button style={{ padding: "10px 24px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }} onClick={() => { alert("Goal creation coming soon!"); }}>Create Goal</Button>
+                <Button style={{ padding: "10px 24px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }} onClick={() => { setGoalsOpen(false); }}>Create Goal</Button>
               </div>
             </div>
           </div>
@@ -739,7 +754,7 @@ export default function DashboardPage() {
                   { name: "Money Market", desc: "Higher rates for higher balances", icon: "📈" },
                   { name: "Certificate of Deposit", desc: "Locked-in rates for fixed terms", icon: "🔒" },
                 ].map((acct) => (
-                  <div key={acct.name} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: "1px solid #eee", borderRadius: 8, cursor: "pointer", transition: "background-color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")} onClick={() => { alert(`${acct.name} application coming soon!`); setOpenAccountOpen(false); }}>
+                  <div key={acct.name} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: "1px solid #eee", borderRadius: 8, cursor: "pointer", transition: "background-color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")} onClick={() => { setOpenAccountOpen(false); }}>
                     <span style={{ fontSize: 24 }}>{acct.icon}</span>
                     <div>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#333" }}>{acct.name}</p>
