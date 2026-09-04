@@ -73,8 +73,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 16px",
+        backgroundImage: "url(/images/about.jpeg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        position: "relative",
+      }}
+    >
+      {/* Dark overlay */}
+      <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.55)" }} />
+
+      <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
             <Landmark className="h-7 w-7" />
@@ -82,7 +98,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-2xl" style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(10px)" }}>
           <CardContent className="p-6 sm:p-8">
             <h2 className="text-xl font-bold text-center mb-1">Welcome Back</h2>
             <p className="text-gray-500 text-sm text-center mb-6">

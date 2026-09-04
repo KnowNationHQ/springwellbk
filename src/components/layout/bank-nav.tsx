@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Landmark, Menu, Search, HelpCircle, ChevronDown } from "lucide-react";
+import { UserAvatar } from "@/components/user-avatar";
 
 interface BankNavProps {
   user: {
@@ -44,8 +45,6 @@ export function BankNav({ user, activePage }: BankNavProps) {
     localStorage.removeItem("userId");
     router.push("/login");
   }
-
-  const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
 
   return (
     <>
@@ -154,17 +153,7 @@ export function BankNav({ user, activePage }: BankNavProps) {
       <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd", padding: "12px 0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ width: 50, height: 50, borderRadius: "50%", backgroundColor: "#426FB6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, overflow: "hidden" }}>
-              {user.imageId ? (
-                <img
-                  src={`/api/storage/${user.imageId}`}
-                  alt={user.firstName}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                initials
-              )}
-            </div>
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={50} />
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#000" }}>Hello, {user.firstName} {user.lastName}</h2>
               <Link href="/dashboard" style={{ color: "#426FB6", fontSize: 14, textDecoration: "none" }}>Update profile</Link>
