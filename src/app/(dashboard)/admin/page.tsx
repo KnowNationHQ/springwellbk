@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { sym } from "@/lib/format";
 import { ProfileImageUpload } from "@/components/profile-image-upload";
+import { UserAvatar } from "@/components/user-avatar";
 
 type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
 
@@ -454,7 +455,7 @@ export default function AdminDashboard() {
                       <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: 12 }}>{acct(c)}</td>
                       <td style={{ padding: "8px 12px", fontWeight: 600 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "#426FB6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{initials(c)}</div>
+                          <UserAvatar imageId={c.imageId} firstName={c.firstName} lastName={c.lastName} size={28} />
                           {c.firstName} {c.lastName}
                         </div>
                       </td>
@@ -492,7 +493,7 @@ export default function AdminDashboard() {
                 <div key={c._id} style={{ padding: 16, backgroundColor: "#f9f9f9", borderRadius: 8, border: "1px solid #eee" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: "50%", backgroundColor: "#426FB6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>{initials(c)}</div>
+                      <UserAvatar imageId={c.imageId} firstName={c.firstName} lastName={c.lastName} size={32} />
                       <div>
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{c.firstName} {c.lastName}</p>
                         <p style={{ margin: 0, fontSize: 11, color: "#666", fontFamily: "monospace" }}>{acct(c)}</p>
