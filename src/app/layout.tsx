@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </ConvexClientProvider>
         <Script id="smartsupp" strategy="afterInteractive">
           {`var _smartsupp = _smartsupp || {};
-_smartsupp.key = '222e75a5a32a4becf57f4c7222d71f616c9e313a';
+_smartsupp.key = 'e83d93296f556f603cf7296ac95c29eb37a780cb';
 window.smartsupp||(function(d) {
   var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
   s=d.getElementsByTagName('script')[0];c=d.createElement('script');
