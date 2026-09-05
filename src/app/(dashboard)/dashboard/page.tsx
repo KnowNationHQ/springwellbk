@@ -262,25 +262,45 @@ export default function DashboardPage() {
             <h3 className="text-sm font-bold text-gray-900 m-0">My Card</h3>
           </div>
           <div className="p-4">
-            <div className="w-full max-w-[340px] h-[200px] rounded-2xl bg-gradient-to-br from-[#1a3a5c] via-[#2a5a8c] to-[#1a3a5c] p-5 flex flex-col justify-between text-white shadow-lg mx-auto">
-              <div className="flex justify-between items-start">
-                <div className="w-8 h-6 bg-white/30 rounded" />
-                <span className="text-lg font-bold italic text-[#FEDF01]">VISA</span>
-              </div>
-              <div>
-                <p className="text-base tracking-widest font-mono font-semibold m-0 mb-3">{cardNumber}</p>
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-[9px] tracking-wide m-0 opacity-70">CARD HOLDER</p>
-                    <p className="text-xs font-bold m-0">{user.firstName} {user.lastName}</p>
+            <div className="w-full max-w-[340px] h-[200px] mx-auto [perspective:800px] cursor-pointer group">
+              <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                {/* Front */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1a3a5c] via-[#2a5a8c] to-[#1a3a5c] p-5 flex flex-col justify-between text-white shadow-lg [backface-visibility:hidden]">
+                  <div className="flex justify-between items-start">
+                    <div className="w-8 h-6 bg-white/30 rounded" />
+                    <span className="text-lg font-bold italic text-[#FEDF01]">VISA</span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[9px] tracking-wide m-0 opacity-70">EXPIRES</p>
-                    <p className="text-xs font-bold m-0">10/2028</p>
+                  <div>
+                    <p className="text-base tracking-widest font-mono font-semibold m-0 mb-3">{cardNumber}</p>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-[9px] tracking-wide m-0 opacity-70">CARD HOLDER</p>
+                        <p className="text-xs font-bold m-0">{user.firstName} {user.lastName}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] tracking-wide m-0 opacity-70">EXPIRES</p>
+                        <p className="text-xs font-bold m-0">10/2028</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Back */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#2a5a8c] via-[#1a3a5c] to-[#0f2a44] shadow-lg [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div className="w-full h-10 bg-black/40 mt-5" />
+                  <div className="px-5 mt-5">
+                    <div className="bg-white/20 rounded px-3 py-2 flex items-center justify-between">
+                      <span className="text-[9px] tracking-wide opacity-70">CCV</span>
+                      <span className="text-lg font-bold tracking-widest font-mono">***</span>
+                    </div>
+                    <p className="text-[9px] opacity-50 mt-3 text-center">Hover to reveal · For security, CCV is hidden</p>
+                  </div>
+                  <div className="absolute bottom-5 right-5">
+                    <span className="text-lg font-bold italic text-white/60">VISA</span>
                   </div>
                 </div>
               </div>
             </div>
+            <p className="text-[11px] text-gray-400 text-center mt-2 m-0">Hover card to flip</p>
           </div>
         </section>
 
