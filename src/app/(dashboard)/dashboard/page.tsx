@@ -184,17 +184,6 @@ export default function DashboardPage() {
     <div className="bg-gray-100 min-h-screen font-sans">
       <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} onOpenProfile={() => setActiveModal("profile")} />
 
-      {/* Profile Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center gap-5">
-          <ProfileImageUpload userId={userId} imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} onImageSaved={() => window.location.reload()} generateUploadUrl={generateUploadUrl} saveImage={saveProfileImage} removeImage={removeProfileImage} size="lg" />
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 m-0">Welcome, {user.firstName} {user.lastName}</h1>
-            <p className="text-sm text-gray-500 m-0 mt-1">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account · {cardNumber}</p>
-          </div>
-        </div>
-      </div>
-
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Balance Card */}
         <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
