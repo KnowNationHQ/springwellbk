@@ -145,7 +145,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       <div className="hidden md:block bg-white border-b border-gray-300 py-3">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={140} />
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={180} />
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-bold m-0 text-black">Hello, Springwell</h2>
               <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
@@ -166,7 +166,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       {/* Row 4: Profile Row — mobile */}
       <div className="md:hidden bg-white border-b border-gray-300 py-3 px-4">
         <div className="flex items-center gap-3">
-          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={80} />
+          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={100} />
           <div className="flex-1 min-w-0">
             <h2 className="text-base font-bold m-0 text-black truncate">Hello, Springwell</h2>
             <div className="flex items-center gap-3 mt-0.5">
