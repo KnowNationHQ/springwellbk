@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, Search, HelpCircle, ChevronDown } from "lucide-react";
+import { Menu, X, Search, HelpCircle, ChevronDown, LogOut } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
 
 interface BankNavProps {
@@ -13,7 +13,6 @@ interface BankNavProps {
     email: string;
     imageId?: string;
   };
-  activePage?: string;
 }
 
 const PRIMARY_NAV = [
@@ -48,98 +47,124 @@ export function BankNav({ user }: BankNavProps) {
 
   return (
     <>
-      {/* Row 1: Primary Navigation */}
-      <nav style={{ backgroundColor: "#434343", color: "#fff" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 36 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 0, flexWrap: "wrap" }}>
+      {/* Row 1: Primary Navigation — desktop */}
+      <nav className="hidden md:block bg-[#434343] text-white">
+        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-9">
+          <div className="flex items-center gap-0">
             {PRIMARY_NAV.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                style={{
-                  color: item.active ? "#FEDF01" : "#fff",
-                  textDecoration: "none",
-                  fontSize: 13,
-                  padding: "8px 14px",
-                  borderBottom: item.active ? "2px solid #FEDF01" : "2px solid transparent",
-                  fontWeight: item.active ? 700 : 400,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                }}
+                className={`px-3.5 py-2 text-[13px] no-underline border-b-2 ${
+                  item.active
+                    ? "text-[#FEDF01] border-[#FEDF01] font-bold"
+                    : "text-white border-transparent"
+                } flex items-center gap-1`}
               >
                 {item.label}
-                {item.hasDropdown && <ChevronDown size={12} style={{ opacity: 0.7 }} />}
+                {item.hasDropdown && <ChevronDown size={12} className="opacity-70" />}
               </Link>
             ))}
           </div>
-          <button
-            onClick={handleSignOut}
-            style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 13, padding: "8px 0" }}
-            className="desktop-hide"
-          >
-            Sign out
-          </button>
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 6 }}
-            className="mobile-only"
-          >
-            <Menu size={20} />
-          </button>
         </div>
       </nav>
 
-      {/* Row 2: Logo Bar */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 30 }} />
+      {/* Row 1: Primary Navigation — mobile */}
+      <nav className="md:hidden bg-[#434343] text-white">
+        <div className="px-4 flex items-center justify-between h-11">
+          <Link href="/dashboard" className="text-white no-underline font-bold text-sm">Menu</Link>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="text-white p-1"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        {mobileOpen && (
+          <div className="bg-[#333] border-t border-[#555]">
+            {PRIMARY_NAV.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`block px-5 py-3.5 text-sm no-underline border-b border-[#444] ${
+                  item.active ? "text-[#FEDF01] font-bold" : "text-white"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <button
+              onClick={handleSignOut}
+              className="w-full text-left px-5 py-3.5 text-sm text-red-400 border-b border-[#444]"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* Row 2: Logo Bar — desktop */}
+      <div className="hidden md:block bg-white border-b border-gray-300">
+        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between py-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2 no-underline">
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-[30px]" />
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <a href="#" style={{ color: "#333", fontSize: 14, textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-              <HelpCircle size={16} style={{ color: "#426FB6" }} /> Help & Support
+          <div className="flex items-center gap-5">
+            <a href="#" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
+              <HelpCircle size={16} className="text-[#426FB6]" /> Help & Support
             </a>
-            <a href="#" style={{ color: "#333", fontSize: 14, textDecoration: "none" }}>&gt; Contact Us</a>
-            <div style={{ position: "relative" }}>
+            <a href="#" className="text-[#333] text-sm no-underline">&gt; Contact Us</a>
+            <div className="relative">
               <button
                 onClick={() => setSignOutOpen(!signOutOpen)}
-                style={{ background: "none", border: "none", color: "#333", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", gap: 4, padding: "6px 0" }}
+                className="flex items-center gap-1 text-[14px] p-1.5"
               >
-                <span style={{ color: "#426FB6", fontWeight: 600 }}>Sign Out</span> <ChevronDown size={14} />
+                <span className="text-[#426FB6] font-semibold">Sign Out</span> <ChevronDown size={14} />
               </button>
               {signOutOpen && (
-                <div style={{ position: "absolute", right: 0, top: "100%", backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: 8, minWidth: 160, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 100 }}>
-                  <button onClick={handleSignOut} style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 12px", border: "none", background: "none", cursor: "pointer", fontSize: 14, color: "#333" }}>Sign Out</button>
+                <div className="absolute right-0 top-full bg-white border border-gray-300 rounded p-2 min-w-[160px] shadow-lg z-50">
+                  <button onClick={handleSignOut} className="block w-full text-left px-3 py-2 text-sm text-[#333]">Sign Out</button>
                 </div>
               )}
             </div>
-            <div style={{ backgroundColor: "#FEDF01", padding: "8px 16px", borderRadius: 4, fontWeight: 700, fontSize: 13, color: "#000", whiteSpace: "nowrap" }}>
+            <div className="bg-[#FEDF01] px-4 py-2 rounded font-bold text-[13px] text-black whitespace-nowrap">
               Signed In As {user.firstName} {user.lastName}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Row 3: Sub Navigation */}
-      <div style={{ backgroundColor: "#426FB6" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", gap: 0, overflowX: "auto" }}>
+      {/* Row 2: Logo Bar — mobile */}
+      <div className="md:hidden bg-white border-b border-gray-300">
+        <div className="px-4 flex items-center justify-between py-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2 no-underline">
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-[28px]" />
+          </Link>
+          <div className="flex items-center gap-3">
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={32} />
+            <button
+              onClick={handleSignOut}
+              className="text-[#426FB6] text-sm font-semibold p-0 bg-transparent border-none cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Sub Navigation — desktop */}
+      <div className="hidden md:block bg-[#426FB6]">
+        <div className="max-w-[1200px] mx-auto px-5 flex items-center overflow-x-auto">
           {SUB_NAV.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                style={{
-                  color: "#fff",
-                  textDecoration: "none",
-                  fontSize: 13,
-                  fontWeight: isActive ? 700 : 400,
-                  padding: "14px 16px",
-                  whiteSpace: "nowrap",
-                  borderBottom: isActive ? "3px solid #fff" : "3px solid transparent",
-                  letterSpacing: 0.5,
-                }}
+                className={`text-white no-underline text-[13px] whitespace-nowrap px-4 py-3.5 border-b-[3px] tracking-[0.5px] ${
+                  isActive ? "font-bold border-white" : "font-normal border-transparent"
+                }`}
               >
                 {item.label}
               </Link>
@@ -148,44 +173,61 @@ export function BankNav({ user }: BankNavProps) {
         </div>
       </div>
 
-      {/* Row 4: Profile Row */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd", padding: "12px 0" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      {/* Row 3: Sub Navigation — mobile horizontal scroll */}
+      <div className="md:hidden bg-[#426FB6]">
+        <div className="flex items-center overflow-x-auto scrollbar-hide">
+          {SUB_NAV.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`text-white no-underline text-[11px] whitespace-nowrap px-3 py-3 border-b-[3px] tracking-[0.5px] shrink-0 ${
+                  isActive ? "font-bold border-white" : "font-normal border-transparent"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Row 4: Profile Row — desktop */}
+      <div className="hidden md:block bg-white border-b border-gray-300 py-3">
+        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={50} />
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#000" }}>Hello, {user.firstName} {user.lastName}</h2>
-              <Link href="/dashboard" style={{ color: "#426FB6", fontSize: 14, textDecoration: "none" }}>Update profile</Link>
-              <Link href="/dashboard" style={{ color: "#426FB6", fontSize: 14, textDecoration: "none" }}>Security center</Link>
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-bold m-0 text-black">Hello, {user.firstName} {user.lastName}</h2>
+              <Link href="/dashboard" className="text-[#426FB6] text-sm no-underline">Update profile</Link>
+              <Link href="/dashboard" className="text-[#426FB6] text-sm no-underline">Security center</Link>
             </div>
           </div>
-          <div style={{ position: "relative" }}>
+          <div className="relative">
             <input
               type="text"
               placeholder="How can we help you?"
-              style={{
-                padding: "8px 36px 8px 12px",
-                border: "1px solid #ccc",
-                borderRadius: 4,
-                fontSize: 14,
-                width: 220,
-                fontFamily: "inherit",
-                color: "#999",
-              }}
+              className="py-2 pr-9 pl-3 border border-gray-300 rounded text-sm w-[220px] font-[inherit] text-gray-500"
             />
-            <Search size={16} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#999" }} />
+            <Search size={16} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
         </div>
       </div>
 
-      <style jsx>{`
-        .desktop-hide { display: none; }
-        .mobile-only { display: none; }
-        @media (max-width: 768px) {
-          .desktop-hide { display: block; }
-          .mobile-only { display: block; }
-        }
-      `}</style>
+      {/* Row 4: Profile Row — mobile */}
+      <div className="md:hidden bg-white border-b border-gray-300 py-3 px-4">
+        <div className="flex items-center gap-3">
+          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={40} />
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-bold m-0 text-black truncate">Hello, {user.firstName} {user.lastName}</h2>
+            <div className="flex items-center gap-3 mt-0.5">
+              <Link href="/dashboard" className="text-[#426FB6] text-xs no-underline">Update profile</Link>
+              <Link href="/dashboard" className="text-[#426FB6] text-xs no-underline">Security center</Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
