@@ -208,11 +208,11 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">State</Label>
-                  <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="e.g. California" className="h-10" />
+                  <Input value={state} onChange={(e) => setState(e.target.value)} className="h-10" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Country</Label>
-                  <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. United States" className="h-10" />
+                  <Input value={country} onChange={(e) => setCountry(e.target.value)} className="h-10" />
                 </div>
               </div>
 
