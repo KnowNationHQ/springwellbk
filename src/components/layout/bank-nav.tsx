@@ -131,7 +131,6 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
             <img src="/logo.svg" alt="SpringWell Bank" className="h-[36px]" />
           </Link>
           <div className="flex items-center gap-3">
-          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={48} />
             <button
               onClick={handleSignOut}
               className="text-[#426FB6] text-sm font-semibold p-0 bg-transparent border-none cursor-pointer"
