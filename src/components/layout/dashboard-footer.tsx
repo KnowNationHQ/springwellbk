@@ -8,7 +8,7 @@ export function DashboardFooter({ lastLogin }: { lastLogin?: number }) {
   return (
     <>
       <p className="text-[13px] text-gray-500 leading-relaxed my-4">
-        For checking, savings, and money market accounts, the balance may reflect transaction that have not yet posted to your account. For credit card Gold option and Gold reserve accounts, the balance may not reflect recent transactions or pending payments.
+        For checking, savings, and money market accounts, the balance may reflect transactions that have not yet posted to your account. For credit card Gold option and Gold reserve accounts, the balance may not reflect recent transactions or pending payments.
       </p>
       {lastLogin && (
         <p className="text-[13px] text-gray-500 mb-4">

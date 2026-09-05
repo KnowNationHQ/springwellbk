@@ -59,7 +59,9 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       {/* Row 1: Primary Navigation — mobile */}
       <nav className="md:hidden bg-[#434343] text-white">
         <div className="px-4 flex items-center justify-between h-11">
-          <Link href="/dashboard" className="text-white no-underline font-bold text-sm"></Link>
+          <Link href="/dashboard" className="text-white no-underline font-bold text-sm">
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-6 w-auto" />
+          </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-white p-1"
@@ -98,10 +100,10 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
             <img src="/logo.svg" alt="SpringWell Bank" className="h-[40px]" />
           </Link>
           <div className="flex items-center gap-5">
-            <a href="#" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
+            <Link href="/forgot-password" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
               <HelpCircle size={16} className="text-[#426FB6]" /> Help & Support
-            </a>
-            <a href="#" className="text-[#333] text-sm no-underline">&gt; Contact Us</a>
+            </Link>
+            <Link href="/#contact" className="text-[#333] text-sm no-underline">Contact Us</Link>
             <div className="relative">
               <button
                 onClick={() => setSignOutOpen(!signOutOpen)}

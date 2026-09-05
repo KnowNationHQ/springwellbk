@@ -7,7 +7,7 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, MapPin, Phone, MessageCircle } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 export function ContactSection() {
   const t = useT();
@@ -50,7 +50,6 @@ export function ContactSection() {
                 { icon: Phone, label: "Phone number", value: "+1 (555) 123-4567" },
                 { icon: Mail, label: "Email", value: "support@springwellbk.com", href: "mailto:support@springwellbk.com" },
                 { icon: MapPin, label: "Address", value: "3250 Pennsylvania Avenue NW" },
-                { icon: MessageCircle, label: "Live Chat", value: "Start now", href: "#" },
               ].map((c) => (
                 <div key={c.label} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="w-10 h-10 bg-[#426FB6]/10 rounded-lg flex items-center justify-center mb-3">

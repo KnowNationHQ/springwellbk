@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BankNav } from "@/components/layout/bank-nav";
-import { DashboardFooter } from "@/components/layout/dashboard-footer";
+import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
 
 type TransferType = null | "domestic" | "international" | "business";
 
@@ -380,16 +380,10 @@ export default function TransferPage() {
           </div>
         )}
 
-        <DashboardFooter />
+        <DashboardFooter lastLogin={currentUser?.lastLogin} />
       </div>
 
-      {/* Minimal footer */}
-      <div className="bg-[#eee] border-t border-gray-300">
-        <div className="max-w-[600px] mx-auto py-10 px-5 text-center">
-          <p className="text-[13px] text-gray-500 m-0 mb-1">Phone +44 7445 182201 / NMLS ID 411068</p>
-          <p className="text-xs text-gray-500 m-0">Copyright &copy; 2026 SpringWell Bank. All Rights Reserved.</p>
-        </div>
-      </div>
+      <DashboardFullFooter />
     </div>
   );
 }
