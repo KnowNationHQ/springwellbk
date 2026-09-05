@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, UserPlus, AlertTriangle } from "lucide-react";
+import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, UserPlus } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,23 +127,6 @@ export default function DashboardPage() {
       <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} />
 
       <div className="max-w-[1100px] mx-auto px-5">
-        {/* Account Disabled Alert */}
-        <div className="bg-[rgba(217,57,57,0.15)] border border-[rgba(217,57,57,0.3)] rounded p-3 px-5 mb-5">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-5 h-5 text-[#d93939]" />
-            <h3 className="text-base font-bold m-0 text-black">Account Disabled</h3>
-          </div>
-          <p className="m-0 mb-1 text-sm text-gray-700">Hello, Your account has been disabled due to suspicious activities from unknown location.</p>
-          <p className="m-0 mb-2 text-sm text-gray-700">Please visit any of our branches on how to resolve this issue.</p>
-          <button onClick={() => setQuickView(quickView === "investment" ? null : "investment")} className="bg-transparent border-none text-[#426FB6] cursor-pointer text-sm p-0">{quickView === "investment" ? "Hide" : "Quick view"}</button>
-          {quickView === "investment" && (
-            <div className="mt-3 p-3 bg-[#f9f9f9] rounded border border-[#eee]">
-              <p className="text-[13px] text-gray-700 m-0 mb-2">Investment account details will appear here once linked.</p>
-              <p className="text-xs text-gray-500 m-0">Connect an external investment account to view holdings, performance, and allocation.</p>
-            </div>
-          )}
-        </div>
-
         {/* Personal Accounts */}
         <div className="bg-white border border-gray-300 rounded mb-5">
           <div className="border-b-2 border-[#426FB6] p-3 px-5">
