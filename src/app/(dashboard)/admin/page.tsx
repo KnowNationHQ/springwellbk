@@ -1,17 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, Search, LogOut, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, ShieldCheck, UserCog, KeyRound, CalendarClock, Eye, EyeOff, AlertTriangle, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock } from "lucide-react";
 import { sym } from "@/lib/format";
 import { ProfileImageUpload } from "@/components/profile-image-upload";
 import { UserAvatar } from "@/components/user-avatar";
+import { BankNav } from "@/components/layout/bank-nav";
 
 type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
 
@@ -22,7 +19,6 @@ export default function AdminDashboard() {
   const [actionMsg, setActionMsg] = useState("");
   const [modal, setModal] = useState<Modal>(null);
   const [activeUser, setActiveUser] = useState<any>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -234,48 +230,17 @@ export default function AdminDashboard() {
         }
       `}</style>
 
-      {/* Top Nav */}
-      <nav style={{ backgroundColor: "#434343", color: "#fff", position: "relative" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <ul className={`admin-nav ${mobileMenuOpen ? "open" : ""}`}>
-            <li style={{ borderBottom: "3px solid #FEDF01", fontWeight: 600 }} onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}>Online banking</li>
-            <li onClick={() => { router.push("/#about"); setMobileMenuOpen(false); }}>About SpringWell Bank</li>
-            <li style={{ marginLeft: "auto" }}>
-              <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, padding: 0 }}>
-                Sign out
-              </button>
-            </li>
-          </ul>
-          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <Menu style={{ width: 24, height: 24 }} />
-          </button>
-        </div>
-      </nav>
-
-      {/* Header with Logo */}
-      <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
-        <div className="admin-header" style={{ maxWidth: 1100, margin: "0 auto", padding: "12px 20px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Landmark style={{ color: "#426FB6", width: 32, height: 32 }} />
-            <span style={{ fontSize: 22, fontWeight: 700, color: "#426FB6", fontFamily: "'BentonSans', Arial, sans-serif" }}>SpringWell Bank</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <input
-              type="text"
-              placeholder="Search customers..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ padding: "8px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 13, width: 200, fontFamily: "inherit" }}
-            />
-            <div style={{ backgroundColor: "#FEDF01", padding: "10px 20px", borderRadius: 4, fontWeight: 700, fontSize: 14, color: "#000" }}>
-              Signed In As Admin
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Blue Sub Header */}
-      <div style={{ backgroundColor: "#426FB6", height: 50 }} />
+      {/* Top Nav - same as customer dashboard */}
+      {adminUser && (
+        <BankNav
+          user={{
+            firstName: adminUser.firstName,
+            lastName: adminUser.lastName,
+            email: adminUser.email,
+            imageId: adminUser.imageId,
+          }}
+        />
+      )}
 
       {/* Main Content */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>

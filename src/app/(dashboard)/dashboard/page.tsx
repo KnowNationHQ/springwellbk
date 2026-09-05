@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, LogOut, ArrowUpRight, ArrowDownLeft, Clock, CreditCard, User, FileText, Settings, Menu, Link2, Building2, Search, Bell, DollarSign, Repeat, Tag, MessageSquare, PiggyBank, Target, UserPlus, Shield, AlertTriangle } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, Clock, User, FileText, Bell, DollarSign, Tag, MessageSquare, PiggyBank, Target, UserPlus, AlertTriangle } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sym } from "@/lib/format";
 import { ProfileImageUpload } from "@/components/profile-image-upload";
+import { Modal } from "@/components/ui/modal";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,7 +27,6 @@ export default function DashboardPage() {
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [pwMsg, setPwMsg] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [billPayOpen, setBillPayOpen] = useState(false);
   const [transactionsOpen, setTransactionsOpen] = useState(false);
@@ -452,15 +451,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Transfer Modal */}
-      {transferOpen && (
-        <div className="modal-overlay" onClick={() => setTransferOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Transfer Funds</h3>
-              <button onClick={() => setTransferOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <form onSubmit={handleTransfer} style={{ padding: 20 }}>
+      <Modal open={transferOpen} onClose={() => setTransferOpen(false)} title="Transfer Funds" maxWidth={420}>
+            <form onSubmit={handleTransfer}>
               {transferError && <p style={{ color: "#d93939", fontSize: 13, backgroundColor: "rgba(217,57,57,0.1)", padding: 8, borderRadius: 4, margin: "0 0 12px" }}>{transferError}</p>}
               {transferSuccess && <p style={{ color: "#426FB6", fontSize: 13, backgroundColor: "rgba(66,111,182,0.1)", padding: 8, borderRadius: 4, margin: "0 0 12px" }}>{transferSuccess}</p>}
               <div style={{ marginBottom: 12 }}>
@@ -480,19 +472,10 @@ export default function DashboardPage() {
                 {transferBusy ? "Sending..." : "Send Transfer"}
               </Button>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Profile Edit Modal */}
-      {editing && (
-        <div className="modal-overlay" onClick={() => setEditing(false)}>
-          <div className="modal-box" style={{ maxWidth: 500 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Profile</h3>
-              <button onClick={() => setEditing(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={editing} onClose={() => setEditing(false)} title="Profile" maxWidth={500}>
               {profileMsg && <p style={{ color: profileMsg.includes("success") ? "#426FB6" : "#d93939", fontSize: 13, marginBottom: 12 }}>{profileMsg}</p>}
               
               {/* Profile Image in Modal */}
@@ -539,39 +522,18 @@ export default function DashboardPage() {
                 </form>
               </div>
               <Button onClick={handleProfileSave} style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Save Profile</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Alerts Modal */}
-      {alertsOpen && (
-        <div className="modal-overlay" onClick={() => setAlertsOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Alerts</h3>
-              <button onClick={() => setAlertsOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={alertsOpen} onClose={() => setAlertsOpen(false)} title="Alerts">
               <div style={{ padding: "24px", textAlign: "center", color: "#999" }}>
                 <Bell style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
                 <p style={{ fontSize: 14 }}>No new alerts</p>
                 <p style={{ fontSize: 12, color: "#bbb", margin: "4px 0 0" }}>You&apos;re all caught up!</p>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Bill Pay Modal */}
-      {billPayOpen && (
-        <div className="modal-overlay" onClick={() => setBillPayOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Bill Pay</h3>
-              <button onClick={() => setBillPayOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={billPayOpen} onClose={() => setBillPayOpen(false)} title="Bill Pay">
               <div style={{ marginBottom: 12 }}>
                 <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Payee Name</Label>
                 <Input placeholder="e.g. Electric Company" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
@@ -589,20 +551,9 @@ export default function DashboardPage() {
                 <Input placeholder="Invoice or reference" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
               </div>
               <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { setBillPayOpen(false); }}>Submit Payment</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Transactions Modal */}
-      {transactionsOpen && (
-        <div className="modal-overlay" onClick={() => setTransactionsOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Transaction History</h3>
-              <button onClick={() => setTransactionsOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={transactionsOpen} onClose={() => setTransactionsOpen(false)} title="Transaction History" maxWidth={560}>
               {transactions.length === 0 ? (
                 <div style={{ padding: "24px", textAlign: "center", color: "#999" }}>
                   <Clock style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
@@ -623,20 +574,10 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Special Offers Modal */}
-      {offersOpen && (
-        <div className="modal-overlay" onClick={() => setOffersOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Special Offers</h3>
-              <button onClick={() => setOffersOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+      <Modal open={offersOpen} onClose={() => setOffersOpen(false)} title="Special Offers" maxWidth={520}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 { title: "5% Cash Back on Dining", desc: "Use your SpringWell card at restaurants this month and earn 5% cash back.", badge: "Limited Time" },
                 { title: "0% APR for 12 Months", desc: "Open a new credit card and enjoy 0% intro APR for the first 12 months.", badge: "New" },
@@ -650,20 +591,10 @@ export default function DashboardPage() {
                   <p style={{ margin: 0, fontSize: 13, color: "#666", lineHeight: 1.5 }}>{offer.desc}</p>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-      )}
+              </div>
+      </Modal>
 
-      {/* Messages Modal */}
-      {messagesOpen && (
-        <div className="modal-overlay" onClick={() => setMessagesOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Messages</h3>
-              <button onClick={() => setMessagesOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={messagesOpen} onClose={() => setMessagesOpen(false)} title="Messages" maxWidth={520}>
               <div style={{ marginBottom: 16 }}>
                 <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>To</Label>
                 <Input placeholder="Support team" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} />
@@ -677,20 +608,9 @@ export default function DashboardPage() {
                 <textarea placeholder="Type your message..." rows={4} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", resize: "vertical" }} />
               </div>
               <Button style={{ width: "100%", padding: "12px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => { setMessagesOpen(false); }}>Send Message</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Spending & Budgeting Modal */}
-      {spendingOpen && (
-        <div className="modal-overlay" onClick={() => setSpendingOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Spending & Budgeting</h3>
-              <button onClick={() => setSpendingOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={spendingOpen} onClose={() => setSpendingOpen(false)} title="Spending & Budgeting" maxWidth={520}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
                 <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Current Balance</p>
                 <p style={{ fontSize: 28, fontWeight: 700, margin: 0, color: "#333" }}>{sym(user.currency)}{user.balance.toLocaleString()}</p>
@@ -715,40 +635,18 @@ export default function DashboardPage() {
                 ))}
               </div>
               <p style={{ fontSize: 11, color: "#bbb", textAlign: "center", marginTop: 16 }}>No spending data yet. Start transacting to see your budget breakdown.</p>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Goals Modal */}
-      {goalsOpen && (
-        <div className="modal-overlay" onClick={() => setGoalsOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Savings Goals</h3>
-              <button onClick={() => setGoalsOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={goalsOpen} onClose={() => setGoalsOpen(false)} title="Savings Goals">
               <div style={{ padding: "24px", textAlign: "center", color: "#999" }}>
                 <Target style={{ width: 40, height: 40, margin: "0 auto 12px", opacity: 0.3 }} />
                 <p style={{ fontSize: 14, marginBottom: 8 }}>No goals set yet</p>
                 <p style={{ fontSize: 12, color: "#bbb", margin: "0 0 16px" }}>Create a savings goal to track your progress.</p>
                 <Button style={{ padding: "10px 24px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: "pointer" }} onClick={() => { setGoalsOpen(false); }}>Create Goal</Button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Open Account Modal */}
-      {openAccountOpen && (
-        <div className="modal-overlay" onClick={() => setOpenAccountOpen(false)}>
-          <div className="modal-box" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ backgroundColor: "#426FB6", color: "#fff", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Open a New Account</h3>
-              <button onClick={() => setOpenAccountOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
-            </div>
-            <div style={{ padding: 20 }}>
+      <Modal open={openAccountOpen} onClose={() => setOpenAccountOpen(false)} title="Open a New Account">
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
                   { name: "Checking Account", desc: "Everyday banking with no monthly fees", icon: "🏦" },
@@ -765,10 +663,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }
