@@ -151,7 +151,7 @@ export function BankNav({ user }: BankNavProps) {
           <div className="flex items-center gap-4">
             <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={50} />
             <div className="flex items-center gap-4">
-              <h2 className="text-lg font-bold m-0 text-black">Hello, {user.firstName} {user.lastName}</h2>
+              <h2 className="text-lg font-bold m-0 text-black">Hello, Springwell</h2>
               <Link href="/dashboard" className="text-[#426FB6] text-sm no-underline">Update profile</Link>
               <Link href="/dashboard" className="text-[#426FB6] text-sm no-underline">Security center</Link>
             </div>
@@ -172,7 +172,7 @@ export function BankNav({ user }: BankNavProps) {
         <div className="flex items-center gap-3">
           <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={40} />
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold m-0 text-black truncate">Hello, {user.firstName} {user.lastName}</h2>
+            <h2 className="text-base font-bold m-0 text-black truncate">Hello, Springwell</h2>
             <div className="flex items-center gap-3 mt-0.5">
               <Link href="/dashboard" className="text-[#426FB6] text-xs no-underline">Update profile</Link>
               <Link href="/dashboard" className="text-[#426FB6] text-xs no-underline">Security center</Link>
