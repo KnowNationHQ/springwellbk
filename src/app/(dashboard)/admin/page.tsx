@@ -140,10 +140,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {[
             { label: "Credit", icon: ArrowUpDown, action: () => openCredit(null) },
             { label: "Transfer", icon: Send, action: () => openTransfer(null) },
+            { label: "Wire Transfer", icon: Send, action: () => router.push("/admin/transfer") },
             { label: "Activate", icon: CheckCircle, action: () => setModal("status") },
             { label: "Suspend", icon: XCircle, action: () => setModal("status") },
             { label: "Complete", icon: KeyRound, action: () => openComplete() },

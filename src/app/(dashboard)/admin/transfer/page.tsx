@@ -1,0 +1,373 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Landmark, ArrowRightLeft, User, Loader2, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { BankNav } from "@/components/layout/bank-nav";
+import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
+
+type TransferType = null | "domestic" | "international" | "business";
+
+export default function AdminTransferPage() {
+  const router = useRouter();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [transferType, setTransferType] = useState<TransferType>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const users = useQuery(api.users.list);
+  const transferAdmin = useMutation(api.admin.transfer);
+
+  const [domesticForm, setDomesticForm] = useState({ fromUserId: "", toUserId: "", amount: "", description: "" });
+  const [intlForm, setIntlForm] = useState({
+    fromUserId: "",
+    recipientName: "",
+    recipientBank: "",
+    routingNumber: "",
+    accountNumber: "",
+    iban: "",
+    swiftCode: "",
+    amount: "",
+    currency: "USD",
+    description: "",
+  });
+  const [businessForm, setBusinessForm] = useState({ fromUserId: "", businessName: "", businessEmail: "", amount: "", description: "" });
+
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+    if (!id) { router.push("/login"); return; }
+    setUserId(id);
+  }, [router]);
+
+  const currentUser = users?.find((u: any) => u._id === userId);
+  const nonAdmins = users?.filter((u: any) => u.role !== "admin") ?? [];
+
+  if (!userId || users === undefined) {
+    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 className="animate-spin h-8 w-8 text-[#426FB6]" /></div>;
+  }
+
+  const userSelectCls = "w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] bg-white font-[inherit]";
+
+  async function handleDomestic(e: React.FormEvent) {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    const amt = parseFloat(domesticForm.amount);
+    if (!domesticForm.fromUserId || !domesticForm.toUserId || isNaN(amt) || amt <= 0) { setError("Select both accounts and enter a valid amount"); return; }
+    if (domesticForm.fromUserId === domesticForm.toUserId) { setError("From and To accounts must be different"); return; }
+    setLoading(true);
+    try {
+      await transferAdmin({ adminUserId: userId as any, fromUserId: domesticForm.fromUserId as any, toUserId: domesticForm.toUserId as any, amount: amt, description: domesticForm.description || "Domestic transfer" });
+      setSuccess(`$${amt.toLocaleString()} transferred successfully`);
+      setDomesticForm({ fromUserId: "", toUserId: "", amount: "", description: "" });
+    } catch (err: any) {
+      setError(err.message || "Transfer failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleInternational(e: React.FormEvent) {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    const amt = parseFloat(intlForm.amount);
+    if (!intlForm.fromUserId || !intlForm.recipientName || !intlForm.recipientBank || isNaN(amt) || amt <= 0) {
+      setError("Please fill in all required fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const fromUser = nonAdmins.find((u: any) => u._id === intlForm.fromUserId);
+      await transferAdmin({
+        adminUserId: userId as any,
+        fromUserId: intlForm.fromUserId as any,
+        toUserId: intlForm.fromUserId as any,
+        amount: amt,
+        description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
+      });
+      setSuccess(`International transfer of $${amt.toLocaleString()} to ${intlForm.recipientName} submitted. Processing 1-3 business days.`);
+      setIntlForm({ fromUserId: "", recipientName: "", recipientBank: "", routingNumber: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
+    } catch (err: any) {
+      setError(err.message || "Transfer failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleBusiness(e: React.FormEvent) {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    const amt = parseFloat(businessForm.amount);
+    if (!businessForm.fromUserId || !businessForm.businessEmail || isNaN(amt) || amt <= 0) { setError("Select an account, enter business email and amount"); return; }
+    setLoading(true);
+    try {
+      await transferAdmin({
+        adminUserId: userId as any,
+        fromUserId: businessForm.fromUserId as any,
+        toUserId: businessForm.fromUserId as any,
+        amount: amt,
+        description: businessForm.description || `Payment to ${businessForm.businessName}`,
+      });
+      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName || businessForm.businessEmail}`);
+      setBusinessForm({ fromUserId: "", businessName: "", businessEmail: "", amount: "", description: "" });
+    } catch (err: any) {
+      setError(err.message || "Transfer failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="bg-gray-100 min-h-screen font-sans page-container">
+      <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} />
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "30px 20px" }}>
+        {error && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #fecaca", borderRadius: 4, padding: "12px 20px", marginBottom: 20, color: "#dc2626", fontSize: 14 }}>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #bbf7d0", borderRadius: 4, padding: "12px 20px", marginBottom: 20, color: "#16a34a", fontSize: 14 }}>
+            {success}
+          </div>
+        )}
+
+        {!transferType && (
+          <>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#000", marginBottom: 24 }}>I want to transfer money...</h2>
+            <div className="transfer-grid">
+              <div
+                onClick={() => setTransferType("domestic")}
+                className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 cursor-pointer flex flex-col min-h-[180px] sm:min-h-[220px] transition-shadow hover:shadow-md"
+              >
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>Domestic Bank Transfer</h3>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between mt-4">
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  </div>
+                  <ArrowRightLeft size={18} style={{ color: "#999" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setTransferType("international")}
+                className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 cursor-pointer flex flex-col min-h-[180px] sm:min-h-[220px] transition-shadow hover:shadow-md"
+              >
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>International Bank Transfer</h3>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between mt-4">
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  </div>
+                  <ArrowRightLeft size={18} style={{ color: "#999" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Building2 size={20} style={{ color: "#ca8a04" }} />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setTransferType("business")}
+                className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 cursor-pointer flex flex-col min-h-[180px] sm:min-h-[220px] transition-shadow hover:shadow-md"
+              >
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>To someone else or a business</h3>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between mt-4">
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  </div>
+                  <ArrowRightLeft size={18} style={{ color: "#999" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <User size={20} style={{ color: "#426FB6" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {transferType === "domestic" && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 30 }}>
+            <div style={{ backgroundColor: "#426FB6", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Domestic Bank Transfer</h3>
+              <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <form onSubmit={handleDomestic} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Transfer between two SpringWell accounts</p>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>From Account *</Label>
+                    <select required className={userSelectCls} value={domesticForm.fromUserId} onChange={(e) => setDomesticForm({ ...domesticForm, fromUserId: e.target.value })}>
+                      <option value="">Select source account</option>
+                      {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>To Account *</Label>
+                    <select required className={userSelectCls} value={domesticForm.toUserId} onChange={(e) => setDomesticForm({ ...domesticForm, toUserId: e.target.value })}>
+                      <option value="">Select destination account</option>
+                      {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
+                  <Input type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.amount} onChange={(e) => setDomesticForm({ ...domesticForm, amount: e.target.value })} />
+                </div>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Description</Label>
+                  <Input placeholder="What's this for?" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.description} onChange={(e) => setDomesticForm({ ...domesticForm, description: e.target.value })} />
+                </div>
+                <div className="form-actions">
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} className="py-2.5 px-4 border border-gray-300 rounded bg-white cursor-pointer text-sm">Cancel</button>
+                  <Button type="submit" disabled={loading} className="py-2.5 px-4 bg-[#426FB6] text-white border-none rounded text-sm font-bold cursor-pointer">
+                    {loading ? "Sending..." : "Send Transfer"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {transferType === "international" && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 30 }}>
+            <div style={{ backgroundColor: "#426FB6", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>International Bank Transfer</h3>
+              <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <form onSubmit={handleInternational} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to any bank account worldwide</p>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Debit From Account *</Label>
+                  <select required className={userSelectCls} value={intlForm.fromUserId} onChange={(e) => setIntlForm({ ...intlForm, fromUserId: e.target.value })}>
+                    <option value="">Select account to debit</option>
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                  </select>
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
+                    <Input required placeholder="Full name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientName} onChange={(e) => setIntlForm({ ...intlForm, recipientName: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Bank Name *</Label>
+                    <Input required placeholder="Bank name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientBank} onChange={(e) => setIntlForm({ ...intlForm, recipientBank: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
+                    <Input placeholder="ABA / Routing" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.routingNumber} onChange={(e) => setIntlForm({ ...intlForm, routingNumber: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number</Label>
+                    <Input placeholder="Account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.accountNumber} onChange={(e) => setIntlForm({ ...intlForm, accountNumber: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>IBAN</Label>
+                    <Input placeholder="GB29NWBK60161331926819" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.iban} onChange={(e) => setIntlForm({ ...intlForm, iban: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>SWIFT / BIC Code</Label>
+                    <Input placeholder="NWBKGB2L" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.swiftCode} onChange={(e) => setIntlForm({ ...intlForm, swiftCode: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div style={{ flex: 2 }}>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount *</Label>
+                    <Input type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.amount} onChange={(e) => setIntlForm({ ...intlForm, amount: e.target.value })} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Currency</Label>
+                    <select value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                      <option value="JPY">JPY</option>
+                      <option value="CHF">CHF</option>
+                      <option value="CAD">CAD</option>
+                      <option value="AUD">AUD</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Purpose / Note</Label>
+                  <Input placeholder="Invoice payment, family support, etc." style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.description} onChange={(e) => setIntlForm({ ...intlForm, description: e.target.value })} />
+                </div>
+                <div className="form-actions">
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} className="py-2.5 px-4 border border-gray-300 rounded bg-white cursor-pointer text-sm">Cancel</button>
+                  <Button type="submit" disabled={loading} className="py-2.5 px-4 bg-[#426FB6] text-white border-none rounded text-sm font-bold cursor-pointer">
+                    {loading ? "Processing..." : "Send International Transfer"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {transferType === "business" && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, marginBottom: 30 }}>
+            <div style={{ backgroundColor: "#426FB6", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>To Someone Else or a Business</h3>
+              <button onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+            <div style={{ padding: 20 }}>
+              <form onSubmit={handleBusiness} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to another person or business</p>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Debit From Account *</Label>
+                  <select required className={userSelectCls} value={businessForm.fromUserId} onChange={(e) => setBusinessForm({ ...businessForm, fromUserId: e.target.value })}>
+                    <option value="">Select account to debit</option>
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                  </select>
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Business / Recipient Name *</Label>
+                    <Input required placeholder="Business or person name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessName} onChange={(e) => setBusinessForm({ ...businessForm, businessName: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Email *</Label>
+                    <Input type="email" required placeholder="recipient@email.com" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessEmail} onChange={(e) => setBusinessForm({ ...businessForm, businessEmail: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
+                  <Input type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.amount} onChange={(e) => setBusinessForm({ ...businessForm, amount: e.target.value })} />
+                </div>
+                <div>
+                  <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Description</Label>
+                  <Input placeholder="Invoice #, payment for..." style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.description} onChange={(e) => setBusinessForm({ ...businessForm, description: e.target.value })} />
+                </div>
+                <div className="form-actions">
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} className="py-2.5 px-4 border border-gray-300 rounded bg-white cursor-pointer text-sm">Cancel</button>
+                  <Button type="submit" disabled={loading} className="py-2.5 px-4 bg-[#426FB6] text-white border-none rounded text-sm font-bold cursor-pointer">
+                    {loading ? "Sending..." : "Send Payment"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        <DashboardFooter lastLogin={currentUser?.lastLogin} />
+      </div>
+
+      <DashboardFullFooter />
+    </div>
+  );
+}
