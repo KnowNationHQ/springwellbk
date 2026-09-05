@@ -166,7 +166,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       {/* Row 4: Profile Row — mobile */}
       <div className="md:hidden bg-white border-b border-gray-300 py-3 px-4">
         <div className="flex items-center gap-3">
-          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={40} />
+          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={64} />
           <div className="flex-1 min-w-0">
             <h2 className="text-base font-bold m-0 text-black truncate">Hello, Springwell</h2>
             <div className="flex items-center gap-3 mt-0.5">
