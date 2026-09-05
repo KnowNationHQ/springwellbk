@@ -112,19 +112,6 @@ export default function AdminDashboard() {
     <div className="bg-gray-100 min-h-screen font-sans">
       {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} />}
 
-      {/* Profile Header */}
-      {adminUser && (
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center gap-5">
-            <UserAvatar imageId={adminUser.imageId} firstName={adminUser.firstName} lastName={adminUser.lastName} size={80} />
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 m-0">Welcome, {adminUser.firstName} {adminUser.lastName}</h1>
-              <p className="text-sm text-gray-500 m-0 mt-1">Administrator Dashboard</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Search */}
         <div className="flex items-center gap-2">
