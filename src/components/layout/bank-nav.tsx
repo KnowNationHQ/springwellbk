@@ -142,14 +142,14 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       </div>
 
       {/* Row 3: Profile Row — desktop */}
-      <div className="hidden md:block bg-white border-b border-gray-300 py-3">
+      <div className="hidden md:block bg-white border-b border-gray-300 py-5">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={180} />
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-bold m-0 text-black">Hello, Springwell</h2>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
+          <div className="flex items-center gap-6">
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={220} />
+            <div className="flex items-center gap-5">
+              <h2 className="text-2xl font-bold m-0 text-black">Hello, Springwell</h2>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
             </div>
           </div>
           <div className="relative">
@@ -164,14 +164,14 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       </div>
 
       {/* Row 4: Profile Row — mobile */}
-      <div className="md:hidden bg-white border-b border-gray-300 py-3 px-4">
-        <div className="flex items-center gap-3">
-          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={100} />
+      <div className="md:hidden bg-white border-b border-gray-300 py-4 px-4">
+        <div className="flex items-center gap-4">
+          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={120} />
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold m-0 text-black truncate">Hello, Springwell</h2>
-            <div className="flex items-center gap-3 mt-0.5">
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
+            <h2 className="text-xl font-bold m-0 text-black truncate">Hello, Springwell</h2>
+            <div className="flex items-center gap-4 mt-1">
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
             </div>
           </div>
         </div>
