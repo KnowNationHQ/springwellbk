@@ -42,11 +42,7 @@ export function Header() {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto flex h-14 md:h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg md:text-xl text-[#426FB6]">
-            <svg className="h-7 w-7 md:h-8 md:w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            SpringWell Bank
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-8 w-auto md:h-10" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
@@ -76,10 +72,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto bg-white text-gray-900 border-gray-200 p-0">
                 <SheetHeader className="px-5 h-14 border-b border-gray-200 flex-row items-center justify-start gap-2 space-y-0">
-                  <svg className="h-6 w-6 text-[#426FB6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
+                  <img src="/logo.svg" alt="" className="h-6 w-auto" />
                   <SheetTitle className="text-gray-900">{t("header.menu")}</SheetTitle>
                 </SheetHeader>
                 <div className="p-3 border-b border-gray-200">

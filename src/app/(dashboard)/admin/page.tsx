@@ -43,7 +43,6 @@ export default function AdminDashboard() {
   const completeTransaction = useMutation(api.admin.completeTransaction);
   const backDateTransaction = useMutation(api.admin.backDateTransaction);
   const setUserStatus = useMutation(api.admin.setUserStatus);
-  const setUserRole = useMutation(api.admin.setUserRole);
   const updateUser = useMutation(api.admin.updateUser);
   const deleteUser = useMutation(api.admin.deleteUser);
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
@@ -70,7 +69,7 @@ export default function AdminDashboard() {
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   function togglePw(id: string) {
-    setRevealed((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   }
 
   if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined) {
@@ -92,7 +91,6 @@ export default function AdminDashboard() {
     setTimeout(() => setActionMsg(""), 3000);
   }
   function acct(u: any) { return "SWB-" + u._id.slice(-8).toUpperCase(); }
-  function initials(u: any) { return ((u.firstName?.[0] ?? "") + (u.lastName?.[0] ?? "")).toUpperCase() || "?"; }
 
   function openCredit(u: any) { setActiveUser(u); setCreditAmount(""); setCreditDesc(""); setCreditType("credit"); setCreditDate(new Date().toISOString().slice(0, 10)); setModal("credit"); }
   function openTransfer(u: any) { setActiveUser(u); setFromUser(u?._id ?? ""); setToUser(""); setTransferAmount(""); setTransferDesc(""); setTransferDate(new Date().toISOString().slice(0, 10)); setModal("transfer"); }
@@ -142,11 +140,6 @@ export default function AdminDashboard() {
     if (!userId) return;
     await setUserStatus({ adminUserId: userId as any, userId: uid as any, status });
     flash(`Account ${status === "suspended" ? "suspended" : "activated"}`);
-  }
-  async function handleRole(uid: string, role: "admin" | "customer") {
-    if (!userId) return;
-    await setUserRole({ adminUserId: userId as any, userId: uid as any, role });
-    flash(`Role set to ${role}`);
   }
   async function handleDelete(u: any) {
     if (!userId) return;

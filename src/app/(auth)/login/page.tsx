@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,8 +92,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
-            <Landmark className="h-7 w-7" style={{ color: "#fff" }} />
-            <span style={{ color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>SpringWell Bank</span>
+            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 40 }} />
           </Link>
         </div>
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Landmark, Menu, Search, HelpCircle, ChevronDown } from "lucide-react";
+import { Menu, Search, HelpCircle, ChevronDown } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
 
 interface BankNavProps {
@@ -35,7 +35,7 @@ const SUB_NAV = [
   { label: "TOOLS & INVESTING", href: "#" },
 ];
 
-export function BankNav({ user, activePage }: BankNavProps) {
+export function BankNav({ user }: BankNavProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -94,8 +94,7 @@ export function BankNav({ user, activePage }: BankNavProps) {
       <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <Landmark style={{ color: "#426FB6", width: 30, height: 30 }} />
-            <span style={{ fontSize: 22, fontWeight: 700, color: "#426FB6", fontFamily: "'BentonSans', Arial, sans-serif" }}>SpringWell Bank</span>
+            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 30 }} />
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             <a href="#" style={{ color: "#333", fontSize: 14, textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>

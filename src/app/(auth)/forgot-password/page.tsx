@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,9 +65,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
-            <Landmark className="h-7 w-7" />
-            SpringWell Bank
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
+            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 40 }} />
           </Link>
         </div>
 

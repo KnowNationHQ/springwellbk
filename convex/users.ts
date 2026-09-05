@@ -46,7 +46,9 @@ export const create = mutation({
     });
     try {
       await ctx.scheduler.runAfter(0, api.email.sendWelcomeEmail, { to: args.email, firstName: args.firstName });
-    } catch (_) {}
+    } catch {
+      // welcome email is best-effort
+    }
     return userId;
   },
 });

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, Camera, Loader2, X } from "lucide-react";
+import { Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,7 +89,9 @@ export default function RegisterPage() {
           });
           const { storageId } = await result.json();
           await saveProfileImage({ userId: userId as any, imageId: storageId });
-        } catch (_) {}
+        } catch {
+          // avatar upload is optional, continue with registration
+        }
       }
 
       setSuccess(true);
@@ -102,17 +104,32 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 16px",
+        backgroundImage: "url(/images/hero.jpeg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        position: "relative",
+      }}
+    >
+      {/* Dark overlay */}
+      <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.55)" }} />
+
+      <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-blue-700">
-            <Landmark className="h-7 w-7" />
-            SpringWell Bank
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
+            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 40 }} />
           </Link>
-          <p className="text-gray-500 mt-3 text-sm">Create your account in minutes</p>
+          <p style={{ color: "rgba(255,255,255,0.8)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }} className="mt-3 text-sm">Create your account in minutes</p>
         </div>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-2xl" style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(10px)" }}>
           <CardContent className="p-5 sm:p-7">
             {error && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">{error}</div>

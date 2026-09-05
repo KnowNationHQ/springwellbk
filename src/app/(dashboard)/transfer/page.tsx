@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, ArrowRightLeft, Globe, User, ArrowRight, CheckCircle, Loader2, Building2 } from "lucide-react";
+import { Landmark, ArrowRightLeft, User, Loader2, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { BankNav } from "@/components/layout/bank-nav";
+import { DashboardFooter } from "@/components/layout/dashboard-footer";
 
 type TransferType = null | "domestic" | "international" | "business";
 
@@ -381,29 +380,14 @@ export default function TransferPage() {
           </div>
         )}
 
-        {/* Disclaimer */}
-        <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, margin: "16px 0" }}>
-          For checking, savings, and money market accounts, the balance may reflect transaction that have not yet posted to your account. For credit card Gold option and Gold reserve accounts, the balance may not reflect recent transactions or pending payments.
-        </p>
-
-        {/* Last sign in */}
-        <p style={{ fontSize: 13, color: "#666", margin: "0 0 20px" }}>Last sign in {new Date().toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })} {new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
-
-        {/* Secure bar */}
-        <div style={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: 4, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Secure Area</span>
-          <div style={{ display: "flex", gap: 20 }}>
-            <Link href="/dashboard" style={{ color: "#426FB6", fontSize: 14 }}>Back to Dashboard</Link>
-            <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} style={{ background: "none", border: "none", color: "#426FB6", cursor: "pointer", fontSize: 14, padding: 0 }}>Sign out</button>
-          </div>
-        </div>
+        <DashboardFooter />
       </div>
 
-      {/* Footer */}
-      <div style={{ backgroundColor: "#eee", borderTop: "1px solid #ddd" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: "40px 20px", textAlign: "center" }}>
-          <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Phone +44 7445 182201 / NMLS ID 411068</p>
-          <p style={{ fontSize: 12, color: "#666", margin: 0 }}>Copyright &copy; 2026 SpringWell Bank. All Rights Reserved.</p>
+      {/* Minimal footer */}
+      <div className="bg-[#eee] border-t border-gray-300">
+        <div className="max-w-[600px] mx-auto py-10 px-5 text-center">
+          <p className="text-[13px] text-gray-500 m-0 mb-1">Phone +44 7445 182201 / NMLS ID 411068</p>
+          <p className="text-xs text-gray-500 m-0">Copyright &copy; 2026 SpringWell Bank. All Rights Reserved.</p>
         </div>
       </div>
     </div>
