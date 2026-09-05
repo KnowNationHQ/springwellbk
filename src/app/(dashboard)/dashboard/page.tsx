@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, UserPlus } from "lucide-react";
+import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, UserPlus, Wallet } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { ProfileImageUpload } from "@/components/profile-image-upload";
 import { Modal } from "@/components/ui/modal";
 import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
 
-type ModalName = "transfer" | "profile" | "alerts" | "billPay" | "transactions" | "offers" | "messages" | "spending" | "goals" | "openAccount";
+type ModalName = "transfer" | "profile" | "alerts" | "billPay" | "transactions" | "offers" | "messages" | "spending" | "goals" | "openAccount" | "deposit";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -29,9 +29,22 @@ export default function DashboardPage() {
   const [pwMsg, setPwMsg] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
+  const [billPayForm, setBillPayForm] = useState({ payee: "", accountNumber: "", amount: "", memo: "" });
+  const [billPayMsg, setBillPayMsg] = useState("");
+  const [billPayBusy, setBillPayBusy] = useState(false);
+  const [msgForm, setMsgForm] = useState({ subject: "", message: "" });
+  const [msgMsg, setMsgMsg] = useState("");
+  const [msgBusy, setMsgBusy] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositMsg, setDepositMsg] = useState("");
+  const [depositBusy, setDepositBusy] = useState(false);
+  const [openAcctType, setOpenAcctType] = useState("");
+  const [openAcctMsg, setOpenAcctMsg] = useState("");
+  const [openAcctBusy, setOpenAcctBusy] = useState(false);
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
   const transfer = useMutation(api.auth.transfer);
+  const createMessage = useMutation(api.messages.create);
   const generateUploadUrl = useMutation(api.auth.generateUploadUrl);
   const saveProfileImage = useMutation(api.auth.saveProfileImage);
   const removeProfileImage = useMutation(api.auth.removeProfileImage);
@@ -92,6 +105,58 @@ export default function DashboardPage() {
     } catch (err: any) { setPwMsg(err.message || "Could not update password"); }
   }
 
+  async function handleBillPay(e: React.FormEvent) {
+    e.preventDefault();
+    setBillPayMsg(""); setBillPayBusy(true);
+    try {
+      const amt = parseFloat(billPayForm.amount);
+      if (!billPayForm.payee || isNaN(amt) || amt <= 0) throw new Error("Enter a valid payee and amount");
+      await transfer({ fromUserId: userId as any, toEmail: `billpay-${billPayForm.payee.toLowerCase().replace(/\s+/g, "-")}@springwellbk.com`, amount: amt, description: `Bill Pay: ${billPayForm.payee}${billPayForm.memo ? ` — ${billPayForm.memo}` : ""}` });
+      setBillPayForm({ payee: "", accountNumber: "", amount: "", memo: "" });
+      setBillPayMsg("Payment submitted successfully!");
+      setTimeout(() => { setActiveModal(null); setBillPayMsg(""); }, 2000);
+    } catch (err: any) { setBillPayMsg(err.message || "Payment failed"); }
+    finally { setBillPayBusy(false); }
+  }
+
+  async function handleSendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    setMsgMsg(""); setMsgBusy(true);
+    try {
+      if (!msgForm.message.trim()) throw new Error("Please enter a message");
+      await createMessage({ name: `${user.firstName} ${user.lastName}`, email: user.email, subject: msgForm.subject || undefined, message: msgForm.message });
+      setMsgForm({ subject: "", message: "" });
+      setMsgMsg("Message sent successfully!");
+      setTimeout(() => { setActiveModal(null); setMsgMsg(""); }, 2000);
+    } catch (err: any) { setMsgMsg(err.message || "Failed to send"); }
+    finally { setMsgBusy(false); }
+  }
+
+  async function handleDeposit(e: React.FormEvent) {
+    e.preventDefault();
+    setDepositMsg(""); setDepositBusy(true);
+    try {
+      const amt = parseFloat(depositAmount);
+      if (isNaN(amt) || amt <= 0) throw new Error("Enter a valid amount");
+      await transfer({ fromUserId: userId as any, toEmail: user.email, amount: amt, description: "Mobile Deposit" });
+      setDepositAmount("");
+      setDepositMsg("Deposit submitted successfully!");
+      setTimeout(() => { setActiveModal(null); setDepositMsg(""); }, 2000);
+    } catch (err: any) { setDepositMsg(err.message || "Deposit failed"); }
+    finally { setDepositBusy(false); }
+  }
+
+  async function handleOpenAccount() {
+    if (!openAcctType) return;
+    setOpenAcctMsg(""); setOpenAcctBusy(true);
+    try {
+      await updateProfile({ userId: userId as any, accountType: openAcctType as any });
+      setOpenAcctMsg(`${openAcctType.charAt(0).toUpperCase() + openAcctType.slice(1)} account opened!`);
+      setTimeout(() => { setActiveModal(null); setOpenAcctMsg(""); setOpenAcctType(""); }, 2000);
+    } catch (err: any) { setOpenAcctMsg(err.message || "Failed"); }
+    finally { setOpenAcctBusy(false); }
+  }
+
   const openModal = (name: ModalName) => setActiveModal(name);
 
   const activityItems = [
@@ -102,13 +167,13 @@ export default function DashboardPage() {
     { label: "Special Offers", icon: Tag, modal: "offers" as const },
     { label: "Messages", icon: FileText, modal: "messages" as const },
     { label: "Spending & Budgeting", icon: PiggyBank, modal: "spending" as const },
-    { label: "Goals", icon: Target, modal: "goals" as const },
-    { label: "Open account", icon: UserPlus, modal: "openAccount" as const },
+    { label: "Profile", icon: Target, modal: "profile" as const },
+    { label: "Open Account", icon: UserPlus, modal: "openAccount" as const },
   ];
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
-      <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} />
+      <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} onOpenProfile={() => setActiveModal("profile")} />
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Balance Card */}
@@ -123,8 +188,8 @@ export default function DashboardPage() {
           {[
             { label: "Transfer", icon: ArrowUpRight, modal: "transfer" as const },
             { label: "Pay Bill", icon: DollarSign, modal: "billPay" as const },
-            { label: "Deposit", icon: PiggyBank, modal: "transactions" as const },
-            { label: "More", icon: Target, modal: "goals" as const },
+            { label: "Deposit", icon: Wallet, modal: "deposit" as const },
+            { label: "More", icon: Target, modal: "openAccount" as const },
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -274,13 +339,15 @@ export default function DashboardPage() {
       </Modal>
 
       <Modal open={activeModal === "billPay"} onClose={() => setActiveModal(null)} title="Bill Pay">
-        <div className="space-y-3">
-          <div><Label className="text-xs text-gray-500 block mb-1">Payee Name</Label><Input placeholder="e.g. Electric Company" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Account Number</Label><Input placeholder="Account number" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Amount</Label><Input type="number" min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Memo (optional)</Label><Input placeholder="Invoice or reference" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" /></div>
-          <Button className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" onClick={() => setActiveModal(null)}>Submit Payment</Button>
-        </div>
+        <form onSubmit={handleBillPay} className="space-y-3">
+          {billPayMsg && <p className={`text-xs ${billPayMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{billPayMsg}</p>}
+          <div><Label className="text-xs text-gray-500 block mb-1">Payee Name</Label><Input required placeholder="e.g. Electric Company" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.payee} onChange={(e) => setBillPayForm({ ...billPayForm, payee: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Account Number</Label><Input placeholder="Account number" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.accountNumber} onChange={(e) => setBillPayForm({ ...billPayForm, accountNumber: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Amount ({user.currency})</Label><Input type="number" required min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.amount} onChange={(e) => setBillPayForm({ ...billPayForm, amount: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Memo (optional)</Label><Input placeholder="Invoice or reference" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.memo} onChange={(e) => setBillPayForm({ ...billPayForm, memo: e.target.value })} /></div>
+          <p className="text-xs text-gray-400 m-0">Available: {sym(user.currency)}{user.balance.toLocaleString()}</p>
+          <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={billPayBusy}>{billPayBusy ? "Processing..." : "Submit Payment"}</Button>
+        </form>
       </Modal>
 
       <Modal open={activeModal === "transactions"} onClose={() => setActiveModal(null)} title="Transaction History" maxWidth={500}>
@@ -310,12 +377,13 @@ export default function DashboardPage() {
       </Modal>
 
       <Modal open={activeModal === "messages"} onClose={() => setActiveModal(null)} title="Messages">
-        <div className="space-y-3">
-          <div><Label className="text-xs text-gray-500 block mb-1">To</Label><Input placeholder="Support team" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Subject</Label><Input placeholder="How can we help?" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Message</Label><textarea placeholder="Type your message..." rows={3} className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm font-sans resize-y" /></div>
-          <Button className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" onClick={() => setActiveModal(null)}>Send Message</Button>
-        </div>
+        <form onSubmit={handleSendMessage} className="space-y-3">
+          {msgMsg && <p className={`text-xs ${msgMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{msgMsg}</p>}
+          <div><Label className="text-xs text-gray-500 block mb-1">To</Label><Input value="SpringWell Support" disabled className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm bg-gray-50" /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Subject</Label><Input placeholder="How can we help?" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={msgForm.subject} onChange={(e) => setMsgForm({ ...msgForm, subject: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Message</Label><textarea required placeholder="Type your message..." rows={4} className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm font-sans resize-y" value={msgForm.message} onChange={(e) => setMsgForm({ ...msgForm, message: e.target.value })} /></div>
+          <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={msgBusy}>{msgBusy ? "Sending..." : "Send Message"}</Button>
+        </form>
       </Modal>
 
       <Modal open={activeModal === "spending"} onClose={() => setActiveModal(null)} title="Spending & Budgeting">
@@ -327,19 +395,28 @@ export default function DashboardPage() {
         </div>
       </Modal>
 
-      <Modal open={activeModal === "goals"} onClose={() => setActiveModal(null)} title="Savings Goals">
-        <div className="p-6 text-center text-gray-400"><Target className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm m-0 mb-3">No goals set yet</p><Button className="py-2 px-5 bg-[#426FB6] text-white border-none rounded-lg text-xs font-semibold cursor-pointer" onClick={() => setActiveModal(null)}>Create Goal</Button></div>
-      </Modal>
-
-      <Modal open={activeModal === "openAccount"} onClose={() => setActiveModal(null)} title="Open a New Account">
+      <Modal open={activeModal === "openAccount"} onClose={() => { setActiveModal(null); setOpenAcctType(""); setOpenAcctMsg(""); }} title="Open a New Account">
         <div className="space-y-2">
-          {[{ name: "Checking Account", desc: "Everyday banking, no monthly fees" }, { name: "Savings Account", desc: "Earn interest on your savings" }, { name: "Money Market", desc: "Higher rates for higher balances" }, { name: "Certificate of Deposit", desc: "Locked-in rates for fixed terms" }].map((a) => (
-            <div key={a.name} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer active:bg-gray-50" onClick={() => setActiveModal(null)}>
+          {openAcctMsg && <p className={`text-xs ${openAcctMsg.includes("success") || openAcctMsg.includes("opened") ? "text-[#426FB6]" : "text-red-500"}`}>{openAcctMsg}</p>}
+          {[{ name: "checking", label: "Checking Account", desc: "Everyday banking, no monthly fees" }, { name: "savings", label: "Savings Account", desc: "Earn interest on your savings" }, { name: "business", label: "Business Account", desc: "For business transactions" }].map((a) => (
+            <div key={a.name} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer active:bg-gray-50 transition-colors ${openAcctType === a.name ? "border-[#426FB6] bg-blue-50" : "border-gray-200"}`} onClick={() => setOpenAcctType(a.name)}>
               <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><DollarSign className="w-4 h-4 text-[#426FB6]" /></div>
-              <div><p className="m-0 text-sm font-semibold text-gray-700">{a.name}</p><p className="mt-0.5 m-0 text-xs text-gray-400">{a.desc}</p></div>
+              <div className="flex-1"><p className="m-0 text-sm font-semibold text-gray-700">{a.label}</p><p className="mt-0.5 m-0 text-xs text-gray-400">{a.desc}</p></div>
+              {openAcctType === a.name && <div className="w-5 h-5 bg-[#426FB6] rounded-full flex items-center justify-center"><span className="text-white text-xs">✓</span></div>}
             </div>
           ))}
+          {openAcctType && <Button onClick={handleOpenAccount} className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer mt-3" disabled={openAcctBusy}>{openAcctBusy ? "Opening..." : "Open Account"}</Button>}
         </div>
+      </Modal>
+
+      {/* Deposit Modal */}
+      <Modal open={activeModal === "deposit"} onClose={() => { setActiveModal(null); setDepositMsg(""); setDepositAmount(""); }} title="Make a Deposit" maxWidth={420}>
+        <form onSubmit={handleDeposit} className="space-y-3">
+          {depositMsg && <p className={`text-xs ${depositMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{depositMsg}</p>}
+          <div><Label className="text-xs text-gray-500 block mb-1">Amount ({user.currency})</Label><Input type="number" required min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} /></div>
+          <p className="text-xs text-gray-400 m-0">Funds will be available in your account shortly.</p>
+          <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={depositBusy}>{depositBusy ? "Processing..." : "Submit Deposit"}</Button>
+        </form>
       </Modal>
     </div>
   );

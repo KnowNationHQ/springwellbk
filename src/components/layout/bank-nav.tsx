@@ -13,20 +13,16 @@ interface BankNavProps {
     email: string;
     imageId?: string;
   };
+  onOpenProfile?: () => void;
 }
 
 const PRIMARY_NAV = [
   { label: "Online banking", href: "/dashboard", active: true },
-  { label: "Business", href: "#" },
-  { label: "Wealth", href: "#" },
-  { label: "Institutional", href: "#", hasDropdown: true },
-  { label: "ZXT Trust Capital labs", href: "#" },
-  { label: "About ZXT Trust Capital", href: "#" },
 ];
 
 
 
-export function BankNav({ user }: BankNavProps) {
+export function BankNav({ user, onOpenProfile }: BankNavProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,7 +50,6 @@ export function BankNav({ user }: BankNavProps) {
                 } flex items-center gap-1`}
               >
                 {item.label}
-                {item.hasDropdown && <ChevronDown size={12} className="opacity-70" />}
               </Link>
             ))}
           </div>
@@ -64,7 +59,7 @@ export function BankNav({ user }: BankNavProps) {
       {/* Row 1: Primary Navigation — mobile */}
       <nav className="md:hidden bg-[#434343] text-white">
         <div className="px-4 flex items-center justify-between h-11">
-          <Link href="/dashboard" className="text-white no-underline font-bold text-sm">Menu</Link>
+          <Link href="/dashboard" className="text-white no-underline font-bold text-sm"></Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-white p-1"
@@ -152,8 +147,8 @@ export function BankNav({ user }: BankNavProps) {
             <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={50} />
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-bold m-0 text-black">Hello, Springwell</h2>
-              <Link href="/dashboard" className="text-[#426FB6] text-sm no-underline">Update profile</Link>
-              <Link href="/dashboard" className="text-[#426FB6] text-sm no-underline">Security center</Link>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
             </div>
           </div>
           <div className="relative">
@@ -174,8 +169,8 @@ export function BankNav({ user }: BankNavProps) {
           <div className="flex-1 min-w-0">
             <h2 className="text-base font-bold m-0 text-black truncate">Hello, Springwell</h2>
             <div className="flex items-center gap-3 mt-0.5">
-              <Link href="/dashboard" className="text-[#426FB6] text-xs no-underline">Update profile</Link>
-              <Link href="/dashboard" className="text-[#426FB6] text-xs no-underline">Security center</Link>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
             </div>
           </div>
         </div>

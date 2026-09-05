@@ -180,6 +180,7 @@ export const updateProfile = mutation({
     city: v.optional(v.string()),
     state: v.optional(v.string()),
     zip: v.optional(v.string()),
+    accountType: v.optional(v.union(v.literal("checking"), v.literal("savings"), v.literal("business"))),
   },
   handler: async (ctx, args) => {
     const { userId, ...fields } = args;
