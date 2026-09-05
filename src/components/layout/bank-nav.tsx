@@ -24,15 +24,7 @@ const PRIMARY_NAV = [
   { label: "About ZXT Trust Capital", href: "#" },
 ];
 
-const SUB_NAV = [
-  { label: "TRANSACTIONS", href: "/dashboard" },
-  { label: "BILL PAY", href: "#" },
-  { label: "OPEN AN ACCOUNT", href: "#" },
-  { label: "TRANSFER / SEND", href: "/transfer" },
-  { label: "LOANS", href: "#" },
-  { label: "SOCIAL OFFERS & IDEAS", href: "#" },
-  { label: "TOOLS & INVESTING", href: "#" },
-];
+
 
 export function BankNav({ user }: BankNavProps) {
   const router = useRouter();
@@ -153,47 +145,7 @@ export function BankNav({ user }: BankNavProps) {
         </div>
       </div>
 
-      {/* Row 3: Sub Navigation — desktop */}
-      <div className="hidden md:block bg-[#426FB6]">
-        <div className="max-w-[1200px] mx-auto px-5 flex items-center overflow-x-auto">
-          {SUB_NAV.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`text-white no-underline text-[13px] whitespace-nowrap px-4 py-3.5 border-b-[3px] tracking-[0.5px] ${
-                  isActive ? "font-bold border-white" : "font-normal border-transparent"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Row 3: Sub Navigation — mobile horizontal scroll */}
-      <div className="md:hidden bg-[#426FB6]">
-        <div className="flex items-center overflow-x-auto scrollbar-hide">
-          {SUB_NAV.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`text-white no-underline text-[11px] whitespace-nowrap px-3 py-3 border-b-[3px] tracking-[0.5px] shrink-0 ${
-                  isActive ? "font-bold border-white" : "font-normal border-transparent"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Row 4: Profile Row — desktop */}
+      {/* Row 3: Profile Row — desktop */}
       <div className="hidden md:block bg-white border-b border-gray-300 py-3">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
