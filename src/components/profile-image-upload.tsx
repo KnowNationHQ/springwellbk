@@ -42,7 +42,7 @@ export function ProfileImageUpload({
   const sizeClasses = {
     sm: "w-16 h-16 text-xl",
     md: "w-28 h-28 text-3xl",
-    lg: "w-36 h-36 text-4xl",
+    lg: "w-44 h-44 text-5xl",
   };
 
   const iconSize = size === "sm" ? 14 : 18;

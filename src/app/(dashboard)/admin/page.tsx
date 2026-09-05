@@ -116,7 +116,7 @@ export default function AdminDashboard() {
       {adminUser && (
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center gap-5">
-            <UserAvatar imageId={adminUser.imageId} firstName={adminUser.firstName} lastName={adminUser.lastName} size={72} />
+            <UserAvatar imageId={adminUser.imageId} firstName={adminUser.firstName} lastName={adminUser.lastName} size={80} />
             <div>
               <h1 className="text-xl font-bold text-gray-900 m-0">Welcome, {adminUser.firstName} {adminUser.lastName}</h1>
               <p className="text-sm text-gray-500 m-0 mt-1">Administrator Dashboard</p>

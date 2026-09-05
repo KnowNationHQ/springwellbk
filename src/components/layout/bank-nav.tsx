@@ -144,7 +144,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       <div className="hidden md:block bg-white border-b border-gray-300 py-3">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={64} />
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={80} />
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-bold m-0 text-black">Hello, Springwell</h2>
               <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
