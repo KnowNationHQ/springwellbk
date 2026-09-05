@@ -26,6 +26,8 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
   const [accountType, setAccountType] = useState("");
   const [currency, setCurrency] = useState("");
   const [password, setPassword] = useState("");
@@ -75,6 +77,8 @@ export default function RegisterPage() {
         firstName,
         lastName,
         phone: phone || undefined,
+        state: state || undefined,
+        country: country || undefined,
         accountType: accountType as "checking" | "savings" | "business",
         currency: currency as "USD" | "GBP" | "EUR",
       });
@@ -199,6 +203,17 @@ export default function RegisterPage() {
               <div className="space-y-1">
                 <Label className="text-xs">Phone</Label>
                 <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-10" />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">State</Label>
+                  <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="e.g. California" className="h-10" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Country</Label>
+                  <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. United States" className="h-10" />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -12,6 +12,7 @@ export default defineSchema({
     address: v.optional(v.string()),
     city: v.optional(v.string()),
     state: v.optional(v.string()),
+    country: v.optional(v.string()),
     zip: v.optional(v.string()),
     accountType: v.union(v.literal("checking"), v.literal("savings"), v.literal("business")),
     currency: v.union(v.literal("USD"), v.literal("GBP"), v.literal("EUR")),
