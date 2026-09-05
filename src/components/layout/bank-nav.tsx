@@ -163,15 +163,17 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
         </div>
       </div>
 
-      {/* Row 4: Profile Row — mobile */}
-      <div className="md:hidden bg-white border-b border-gray-300 py-4 px-4">
-        <div className="flex items-center gap-4">
-          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={120} />
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-bold m-0 text-black truncate">Hello, Springwell</h2>
-            <div className="flex items-center gap-4 mt-1">
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
+      {/* Row 3: Profile Row — mobile */}
+      <div className="md:hidden bg-white border-b border-gray-300 py-4 px-4 overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="shrink-0">
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={80} />
+          </div>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <h2 className="text-lg font-bold m-0 text-black truncate">Hello, Springwell</h2>
+            <div className="flex items-center gap-3 mt-1 flex-wrap">
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
             </div>
           </div>
         </div>

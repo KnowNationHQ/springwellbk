@@ -109,7 +109,7 @@ export default function AdminDashboard() {
   const statusColor = (s: string) => s === "active" ? "bg-green-100 text-green-700" : s === "suspended" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700";
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-100 min-h-screen font-sans page-container">
       {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} />}
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
@@ -277,8 +277,8 @@ export default function AdminDashboard() {
 
       {/* Modals */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 p-0 md:p-5" onClick={() => setModal(null)}>
-          <div className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setModal(null)}>
+          <div className="w-full max-w-[480px] bg-white rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="bg-[#426FB6] text-white px-5 py-4 flex items-center justify-between">
               <h3 className="m-0 text-base font-bold">
                 {modal === "credit" && "Credit / Debit Account"}

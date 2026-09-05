@@ -181,7 +181,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-100 min-h-screen font-sans page-container">
       <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} onOpenProfile={() => setActiveModal("profile")} />
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">

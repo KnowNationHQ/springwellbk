@@ -118,7 +118,7 @@ export default function TransferPage() {
   }
 
   return (
-    <div style={{ backgroundColor: "#eee", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }}>
+    <div style={{ backgroundColor: "#eee", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }} className="page-container">
       {/* Navigation */}
       <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} />
 
@@ -141,33 +141,21 @@ export default function TransferPage() {
         {!transferType && (
           <>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: "#000", marginBottom: 24 }}>I want to transfer money...</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 30 }}>
+            <div className="transfer-grid">
               {/* Domestic */}
               <div
                 onClick={() => setTransferType("domestic")}
-                style={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #ddd",
-                  borderRadius: 4,
-                  padding: "30px 20px 20px",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  minHeight: 220,
-                  transition: "box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+                className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 cursor-pointer flex flex-col min-h-[180px] sm:min-h-[220px] transition-shadow hover:shadow-md"
               >
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>Domestic Bank Transfer</h3>
-                <div style={{ flex: 1 }} />
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>Domestic Bank Transfer</h3>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between mt-4">
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
                   </div>
-                  <ArrowRightLeft size={20} style={{ color: "#999" }} />
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                  <ArrowRightLeft size={18} style={{ color: "#999" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
                   </div>
                 </div>
               </div>
@@ -175,29 +163,17 @@ export default function TransferPage() {
               {/* International */}
               <div
                 onClick={() => setTransferType("international")}
-                style={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #ddd",
-                  borderRadius: 4,
-                  padding: "30px 20px 20px",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  minHeight: 220,
-                  transition: "box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+                className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 cursor-pointer flex flex-col min-h-[180px] sm:min-h-[220px] transition-shadow hover:shadow-md"
               >
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>International Bank Transfer</h3>
-                <div style={{ flex: 1 }} />
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>International Bank Transfer</h3>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between mt-4">
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
                   </div>
-                  <ArrowRightLeft size={20} style={{ color: "#999" }} />
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Building2 size={22} style={{ color: "#ca8a04" }} />
+                  <ArrowRightLeft size={18} style={{ color: "#999" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Building2 size={20} style={{ color: "#ca8a04" }} />
                   </div>
                 </div>
               </div>
@@ -205,29 +181,17 @@ export default function TransferPage() {
               {/* Business */}
               <div
                 onClick={() => setTransferType("business")}
-                style={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #ddd",
-                  borderRadius: 4,
-                  padding: "30px 20px 20px",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  minHeight: 220,
-                  transition: "box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+                className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 cursor-pointer flex flex-col min-h-[180px] sm:min-h-[220px] transition-shadow hover:shadow-md"
               >
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>To someone else or a business</h3>
-                <div style={{ flex: 1 }} />
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={22} style={{ color: "#426FB6" }} />
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>To someone else or a business</h3>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between mt-4">
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#426FB6" }} />
                   </div>
-                  <ArrowRightLeft size={20} style={{ color: "#999" }} />
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <User size={22} style={{ color: "#426FB6" }} />
+                  <ArrowRightLeft size={18} style={{ color: "#999" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <User size={20} style={{ color: "#426FB6" }} />
                   </div>
                 </div>
               </div>
@@ -257,9 +221,9 @@ export default function TransferPage() {
                   <Label htmlFor="dom-desc" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Description</Label>
                   <Input id="dom-desc" placeholder="What's this for?" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.description} onChange={(e) => setDomesticForm({ ...domesticForm, description: e.target.value })} />
                 </div>
-                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
-                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
-                  <Button type="submit" disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                <div className="form-actions">
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} className="py-2.5 px-4 border border-gray-300 rounded bg-white cursor-pointer text-sm">Cancel</button>
+                  <Button type="submit" disabled={loading} className="py-2.5 px-4 bg-[#426FB6] text-white border-none rounded text-sm font-bold cursor-pointer">
                     {loading ? "Sending..." : "Send Transfer"}
                   </Button>
                 </div>
@@ -278,7 +242,7 @@ export default function TransferPage() {
             <div style={{ padding: 20 }}>
               <form onSubmit={handleInternational} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to any bank account worldwide</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-row">
                   <div>
                     <Label htmlFor="intl-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
                     <Input id="intl-name" required placeholder="Full name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientName} onChange={(e) => setIntlForm({ ...intlForm, recipientName: e.target.value })} />
@@ -288,7 +252,7 @@ export default function TransferPage() {
                     <Input id="intl-bank" required placeholder="Bank name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientBank} onChange={(e) => setIntlForm({ ...intlForm, recipientBank: e.target.value })} />
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-row">
                   <div>
                     <Label htmlFor="intl-routing" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
                     <Input id="intl-routing" placeholder="ABA / Routing" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.routingNumber} onChange={(e) => setIntlForm({ ...intlForm, routingNumber: e.target.value })} />
@@ -298,7 +262,7 @@ export default function TransferPage() {
                     <Input id="intl-account" placeholder="Account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.accountNumber} onChange={(e) => setIntlForm({ ...intlForm, accountNumber: e.target.value })} />
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-row">
                   <div>
                     <Label htmlFor="intl-iban" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>IBAN</Label>
                     <Input id="intl-iban" placeholder="GB29NWBK60161331926819" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.iban} onChange={(e) => setIntlForm({ ...intlForm, iban: e.target.value })} />
@@ -308,12 +272,12 @@ export default function TransferPage() {
                     <Input id="intl-swift" placeholder="NWBKGB2L" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.swiftCode} onChange={(e) => setIntlForm({ ...intlForm, swiftCode: e.target.value })} />
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
-                  <div>
+                <div className="form-row">
+                  <div style={{ flex: 2 }}>
                     <Label htmlFor="intl-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount *</Label>
                     <Input id="intl-amount" type="number" required min="0.01" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.amount} onChange={(e) => setIntlForm({ ...intlForm, amount: e.target.value })} />
                   </div>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <Label htmlFor="intl-currency" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Currency</Label>
                     <select id="intl-currency" value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
                       <option value="USD">USD</option>
@@ -330,9 +294,9 @@ export default function TransferPage() {
                   <Label htmlFor="intl-desc" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Purpose / Note</Label>
                   <Input id="intl-desc" placeholder="Invoice payment, family support, etc." style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.description} onChange={(e) => setIntlForm({ ...intlForm, description: e.target.value })} />
                 </div>
-                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
-                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
-                  <Button type="submit" disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                <div className="form-actions">
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} className="py-2.5 px-4 border border-gray-300 rounded bg-white cursor-pointer text-sm">Cancel</button>
+                  <Button type="submit" disabled={loading} className="py-2.5 px-4 bg-[#426FB6] text-white border-none rounded text-sm font-bold cursor-pointer">
                     {loading ? "Processing..." : "Send International Transfer"}
                   </Button>
                 </div>
@@ -351,7 +315,7 @@ export default function TransferPage() {
             <div style={{ padding: 20 }}>
               <form onSubmit={handleBusiness} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to another person or business</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-row">
                   <div>
                     <Label htmlFor="biz-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Business / Recipient Name *</Label>
                     <Input id="biz-name" required placeholder="Business or person name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessName} onChange={(e) => setBusinessForm({ ...businessForm, businessName: e.target.value })} />
@@ -369,9 +333,9 @@ export default function TransferPage() {
                   <Label htmlFor="biz-desc" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Description</Label>
                   <Input id="biz-desc" placeholder="Invoice #, payment for..." style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.description} onChange={(e) => setBusinessForm({ ...businessForm, description: e.target.value })} />
                 </div>
-                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8 }}>
-                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} style={{ padding: "8px 16px", border: "1px solid #ccc", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: 13 }}>Cancel</button>
-                  <Button type="submit" disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#426FB6", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                <div className="form-actions">
+                  <button type="button" onClick={() => { setTransferType(null); setError(""); setSuccess(""); }} className="py-2.5 px-4 border border-gray-300 rounded bg-white cursor-pointer text-sm">Cancel</button>
+                  <Button type="submit" disabled={loading} className="py-2.5 px-4 bg-[#426FB6] text-white border-none rounded text-sm font-bold cursor-pointer">
                     {loading ? "Sending..." : "Send Payment"}
                   </Button>
                 </div>
