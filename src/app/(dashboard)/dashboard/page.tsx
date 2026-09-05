@@ -260,6 +260,7 @@ export default function DashboardPage() {
         <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-bold text-gray-900 m-0">My Card</h3>
+            <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Card - {cardLast4}</p>
           </div>
           <div className="p-4">
             <div className="w-full max-w-[340px] h-[200px] mx-auto [perspective:800px] cursor-pointer group">
@@ -267,11 +268,11 @@ export default function DashboardPage() {
                 {/* Front */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1a3a5c] via-[#2a5a8c] to-[#1a3a5c] p-5 flex flex-col justify-between text-white shadow-lg [backface-visibility:hidden]">
                   <div className="flex justify-between items-start">
-                    <div className="w-8 h-6 bg-white/30 rounded" />
-                    <span className="text-lg font-bold italic text-[#FEDF01]">VISA</span>
+                    <div className="w-10 h-7 bg-white/30 rounded" />
+                    <span className="text-xl font-bold italic text-[#FEDF01]">VISA</span>
                   </div>
                   <div>
-                    <p className="text-base tracking-widest font-mono font-semibold m-0 mb-3">{cardNumber}</p>
+                    <p className="text-lg tracking-widest font-mono font-semibold m-0 mb-3">{cardNumber}</p>
                     <div className="flex justify-between">
                       <div>
                         <p className="text-[9px] tracking-wide m-0 opacity-70">CARD HOLDER</p>
@@ -290,12 +291,11 @@ export default function DashboardPage() {
                   <div className="px-5 mt-5">
                     <div className="bg-white/20 rounded px-3 py-2 flex items-center justify-between">
                       <span className="text-[9px] tracking-wide opacity-70">CCV</span>
-                      <span className="text-lg font-bold tracking-widest font-mono">***</span>
+                      <span className="text-lg font-bold tracking-widest font-mono">485</span>
                     </div>
-                    <p className="text-[9px] opacity-50 mt-3 text-center">Hover to reveal · For security, CCV is hidden</p>
                   </div>
                   <div className="absolute bottom-5 right-5">
-                    <span className="text-lg font-bold italic text-white/60">VISA</span>
+                    <span className="text-xl font-bold italic text-white/60">VISA</span>
                   </div>
                 </div>
               </div>
