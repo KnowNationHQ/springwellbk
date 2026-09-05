@@ -42,7 +42,7 @@ export function Header() {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto flex h-14 md:h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg md:text-xl text-[#426FB6]">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-8 w-auto md:h-10" />
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-10 w-auto md:h-12" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">

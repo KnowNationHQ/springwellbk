@@ -124,7 +124,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
-            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 40 }} />
+            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 50 }} />
           </Link>
           <p style={{ color: "rgba(255,255,255,0.8)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }} className="mt-3 text-sm">Create your account in minutes</p>
         </div>

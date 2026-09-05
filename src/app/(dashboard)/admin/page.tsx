@@ -8,6 +8,7 @@ import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet
 import { sym } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
+import { Toast } from "@/components/ui/toast";
 
 type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
 
@@ -16,6 +17,7 @@ export default function AdminDashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [actionMsg, setActionMsg] = useState("");
+  const [toastMsg, setToastMsg] = useState("");
   const [modal, setModal] = useState<Modal>(null);
   const [activeUser, setActiveUser] = useState<any>(null);
 
@@ -74,7 +76,7 @@ export default function AdminDashboard() {
   const totalBalance = nonAdmins.reduce((s: number, u: any) => s + (u.balance ?? 0), 0);
   const unreadMsgs = messages.filter((m: any) => m.status === "unread").length;
 
-  function flash(msg: string) { setActionMsg(msg); setTimeout(() => setActionMsg(""), 3000); }
+  function flash(msg: string) { setActionMsg(msg); setToastMsg(msg); setTimeout(() => setActionMsg(""), 3000); }
   function acct(u: any) { return "SWB-" + u._id.slice(-8).toUpperCase(); }
 
   function openCredit(u: any) { setActiveUser(u); setCreditAmount(""); setCreditDesc(""); setCreditType("credit"); setCreditDate(new Date().toISOString().slice(0, 10)); setModal("credit"); }
@@ -109,6 +111,19 @@ export default function AdminDashboard() {
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} />}
+
+      {/* Profile Header */}
+      {adminUser && (
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center gap-5">
+            <UserAvatar imageId={adminUser.imageId} firstName={adminUser.firstName} lastName={adminUser.lastName} size={72} />
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 m-0">Welcome, {adminUser.firstName} {adminUser.lastName}</h1>
+              <p className="text-sm text-gray-500 m-0 mt-1">Administrator Dashboard</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Search */}
@@ -180,7 +195,7 @@ export default function AdminDashboard() {
               <div key={c._id} className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2.5">
-                    <UserAvatar imageId={c.imageId} firstName={c.firstName} lastName={c.lastName} size={32} />
+                    <UserAvatar imageId={c.imageId} firstName={c.firstName} lastName={c.lastName} size={40} />
                     <div>
                       <p className="text-sm font-semibold text-gray-900 m-0">{c.firstName} {c.lastName}</p>
                       <p className="text-[11px] text-gray-400 m-0 font-mono">{acct(c)}</p>
@@ -261,10 +276,7 @@ export default function AdminDashboard() {
         {/* Secure Area */}
         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
           <span className="text-sm font-semibold text-gray-700">Secure Area</span>
-          <div className="flex gap-4">
-            <button className="text-sm text-[#426FB6] bg-transparent border-none cursor-pointer p-0">En Espanol</button>
-            <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} className="text-sm text-[#426FB6] bg-transparent border-none cursor-pointer p-0">Sign out</button>
-          </div>
+          <button onClick={() => { localStorage.removeItem("userId"); router.push("/login"); }} className="text-sm text-[#426FB6] bg-transparent border-none cursor-pointer p-0">Sign out</button>
         </div>
       </main>
 
@@ -361,6 +373,8 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
     </div>
   );
 }

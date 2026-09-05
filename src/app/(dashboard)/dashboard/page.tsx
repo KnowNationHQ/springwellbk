@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { sym } from "@/lib/format";
 import { ProfileImageUpload } from "@/components/profile-image-upload";
 import { Modal } from "@/components/ui/modal";
+import { Toast } from "@/components/ui/toast";
 import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
 
 type ModalName = "transfer" | "profile" | "alerts" | "billPay" | "transactions" | "offers" | "messages" | "spending" | "goals" | "openAccount" | "deposit";
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<ModalName | null>(null);
+  const [toastMsg, setToastMsg] = useState("");
   const [profileFields, setProfileFields] = useState<Record<string, string>>({});
   const [transferForm, setTransferForm] = useState({ toEmail: "", amount: "", description: "" });
   const [transferError, setTransferError] = useState("");
@@ -77,7 +79,8 @@ export default function DashboardPage() {
     try {
       await updateProfile({ userId: userId as any, ...profileFields });
       setProfileMsg("Profile updated successfully.");
-      setActiveModal(null);
+      setToastMsg("Profile updated successfully!");
+      setTimeout(() => { setActiveModal(null); setProfileMsg(""); }, 500);
     } catch (err: any) { setProfileMsg(err.message || "Failed to update profile."); }
   }
 
@@ -90,7 +93,8 @@ export default function DashboardPage() {
       await transfer({ fromUserId: userId as any, toEmail: transferForm.toEmail, amount: amt, description: transferForm.description || undefined });
       setTransferForm({ toEmail: "", amount: "", description: "" });
       setTransferSuccess("Transfer sent successfully!");
-      setTimeout(() => { setActiveModal(null); setTransferSuccess(""); }, 2000);
+      setToastMsg("Transfer sent successfully!");
+      setTimeout(() => { setActiveModal(null); setTransferSuccess(""); }, 500);
     } catch (err: any) { setTransferError(err.message || "Transfer failed"); }
     finally { setTransferBusy(false); }
   }
@@ -102,6 +106,7 @@ export default function DashboardPage() {
     try {
       await changePassword({ userId: userId as any, currentPassword: pwForm.current, newPassword: pwForm.next });
       setPwMsg("Password updated successfully."); setPwForm({ current: "", next: "", confirm: "" });
+      setToastMsg("Password updated successfully!");
     } catch (err: any) { setPwMsg(err.message || "Could not update password"); }
   }
 
@@ -114,7 +119,8 @@ export default function DashboardPage() {
       await transfer({ fromUserId: userId as any, toEmail: `billpay-${billPayForm.payee.toLowerCase().replace(/\s+/g, "-")}@springwellbk.com`, amount: amt, description: `Bill Pay: ${billPayForm.payee}${billPayForm.memo ? ` — ${billPayForm.memo}` : ""}` });
       setBillPayForm({ payee: "", accountNumber: "", amount: "", memo: "" });
       setBillPayMsg("Payment submitted successfully!");
-      setTimeout(() => { setActiveModal(null); setBillPayMsg(""); }, 2000);
+      setToastMsg("Bill payment submitted!");
+      setTimeout(() => { setActiveModal(null); setBillPayMsg(""); }, 500);
     } catch (err: any) { setBillPayMsg(err.message || "Payment failed"); }
     finally { setBillPayBusy(false); }
   }
@@ -127,7 +133,8 @@ export default function DashboardPage() {
       await createMessage({ name: `${user.firstName} ${user.lastName}`, email: user.email, subject: msgForm.subject || undefined, message: msgForm.message });
       setMsgForm({ subject: "", message: "" });
       setMsgMsg("Message sent successfully!");
-      setTimeout(() => { setActiveModal(null); setMsgMsg(""); }, 2000);
+      setToastMsg("Message sent successfully!");
+      setTimeout(() => { setActiveModal(null); setMsgMsg(""); }, 500);
     } catch (err: any) { setMsgMsg(err.message || "Failed to send"); }
     finally { setMsgBusy(false); }
   }
@@ -141,7 +148,8 @@ export default function DashboardPage() {
       await transfer({ fromUserId: userId as any, toEmail: user.email, amount: amt, description: "Mobile Deposit" });
       setDepositAmount("");
       setDepositMsg("Deposit submitted successfully!");
-      setTimeout(() => { setActiveModal(null); setDepositMsg(""); }, 2000);
+      setToastMsg("Deposit submitted successfully!");
+      setTimeout(() => { setActiveModal(null); setDepositMsg(""); }, 500);
     } catch (err: any) { setDepositMsg(err.message || "Deposit failed"); }
     finally { setDepositBusy(false); }
   }
@@ -152,7 +160,8 @@ export default function DashboardPage() {
     try {
       await updateProfile({ userId: userId as any, accountType: openAcctType as any });
       setOpenAcctMsg(`${openAcctType.charAt(0).toUpperCase() + openAcctType.slice(1)} account opened!`);
-      setTimeout(() => { setActiveModal(null); setOpenAcctMsg(""); setOpenAcctType(""); }, 2000);
+      setToastMsg(`${openAcctType.charAt(0).toUpperCase() + openAcctType.slice(1)} account opened!`);
+      setTimeout(() => { setActiveModal(null); setOpenAcctMsg(""); setOpenAcctType(""); }, 500);
     } catch (err: any) { setOpenAcctMsg(err.message || "Failed"); }
     finally { setOpenAcctBusy(false); }
   }
@@ -174,6 +183,17 @@ export default function DashboardPage() {
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} onOpenProfile={() => setActiveModal("profile")} />
+
+      {/* Profile Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center gap-5">
+          <ProfileImageUpload userId={userId} imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} onImageSaved={() => window.location.reload()} generateUploadUrl={generateUploadUrl} saveImage={saveProfileImage} removeImage={removeProfileImage} size="lg" />
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 m-0">Welcome, {user.firstName} {user.lastName}</h1>
+            <p className="text-sm text-gray-500 m-0 mt-1">{user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)} Account · {cardNumber}</p>
+          </div>
+        </div>
+      </div>
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Balance Card */}
@@ -418,6 +438,8 @@ export default function DashboardPage() {
           <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={depositBusy}>{depositBusy ? "Processing..." : "Submit Deposit"}</Button>
         </form>
       </Modal>
+
+      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
     </div>
   );
 }

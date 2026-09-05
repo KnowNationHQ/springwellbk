@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
-            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 40 }} />
+            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 50 }} />
           </Link>
         </div>
 

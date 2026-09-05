@@ -95,7 +95,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       <div className="hidden md:block bg-white border-b border-gray-300">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between py-2.5">
           <Link href="/dashboard" className="flex items-center gap-2 no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-[30px]" />
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-[40px]" />
           </Link>
           <div className="flex items-center gap-5">
             <a href="#" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
@@ -126,10 +126,10 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       <div className="md:hidden bg-white border-b border-gray-300">
         <div className="px-4 flex items-center justify-between py-2.5">
           <Link href="/dashboard" className="flex items-center gap-2 no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-[28px]" />
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-[36px]" />
           </Link>
           <div className="flex items-center gap-3">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={32} />
+          <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={48} />
             <button
               onClick={handleSignOut}
               className="text-[#426FB6] text-sm font-semibold p-0 bg-transparent border-none cursor-pointer"
@@ -144,7 +144,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       <div className="hidden md:block bg-white border-b border-gray-300 py-3">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={50} />
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={64} />
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-bold m-0 text-black">Hello, Springwell</h2>
               <button onClick={onOpenProfile} className="text-[#426FB6] text-sm no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
