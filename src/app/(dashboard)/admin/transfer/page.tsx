@@ -38,6 +38,15 @@ export default function AdminTransferPage() {
   });
   const [businessForm, setBusinessForm] = useState({ fromUserId: "", businessName: "", accountNumber: "", amount: "", description: "" });
 
+  type ConfirmData = {
+    type: "domestic" | "international" | "business";
+    title: string;
+    details: { label: string; value: string }[];
+    amount: number;
+    recipientLabel: string;
+  };
+  const [confirmData, setConfirmData] = useState<ConfirmData | null>(null);
+
   useEffect(() => {
     const id = localStorage.getItem("userId");
     if (!id) { router.push("/login"); return; }
@@ -59,14 +68,35 @@ export default function AdminTransferPage() {
     const amt = parseFloat(domesticForm.amount);
     if (!domesticForm.fromUserId || !domesticForm.toUserId || isNaN(amt) || amt <= 0) { setError("Select both accounts and enter a valid amount"); return; }
     if (domesticForm.fromUserId === domesticForm.toUserId) { setError("From and To accounts must be different"); return; }
+    const fromUser = nonAdmins.find((u: any) => u._id === domesticForm.fromUserId);
+    const toUser = nonAdmins.find((u: any) => u._id === domesticForm.toUserId);
+    setConfirmData({
+      type: "domestic",
+      title: "Confirm Domestic Transfer",
+      details: [
+        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (SWB-${domesticForm.fromUserId.slice(-8).toUpperCase()})` },
+        { label: "To", value: `${toUser?.firstName} ${toUser?.lastName} (SWB-${domesticForm.toUserId.slice(-8).toUpperCase()})` },
+        ...(domesticForm.bankName ? [{ label: "Bank", value: domesticForm.bankName }] : []),
+        ...(domesticForm.description ? [{ label: "Note", value: domesticForm.description }] : []),
+      ],
+      amount: amt,
+      recipientLabel: `${toUser?.firstName} ${toUser?.lastName}`,
+    });
+  }
+
+  async function confirmDomestic() {
+    if (!confirmData) return;
+    const amt = confirmData.amount;
     setLoading(true);
     try {
       const desc = domesticForm.bankName ? `Domestic transfer to ${domesticForm.recipientName || "recipient"} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber || "N/A"})${domesticForm.description ? ` — ${domesticForm.description}` : ""}` : domesticForm.description || "Domestic transfer";
       await transferAdmin({ adminUserId: userId as any, fromUserId: domesticForm.fromUserId as any, toUserId: domesticForm.toUserId as any, amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred successfully`);
       setDomesticForm({ fromUserId: "", toUserId: "", recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
+      setConfirmData(null);
     } catch (err: any) {
       setError(err.message || "Transfer failed");
+      setConfirmData(null);
     } finally {
       setLoading(false);
     }
@@ -80,9 +110,29 @@ export default function AdminTransferPage() {
       setError("Please fill in all required fields");
       return;
     }
+    const fromUser = nonAdmins.find((u: any) => u._id === intlForm.fromUserId);
+    setConfirmData({
+      type: "international",
+      title: "Confirm International Transfer",
+      details: [
+        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (SWB-${intlForm.fromUserId.slice(-8).toUpperCase()})` },
+        { label: "To", value: intlForm.recipientName },
+        { label: "Bank", value: intlForm.recipientBank },
+        ...(intlForm.iban ? [{ label: "IBAN", value: intlForm.iban }] : []),
+        ...(intlForm.swiftCode ? [{ label: "SWIFT", value: intlForm.swiftCode }] : []),
+        { label: "Currency", value: intlForm.currency },
+        ...(intlForm.description ? [{ label: "Note", value: intlForm.description }] : []),
+      ],
+      amount: amt,
+      recipientLabel: intlForm.recipientName,
+    });
+  }
+
+  async function confirmInternational() {
+    if (!confirmData) return;
+    const amt = confirmData.amount;
     setLoading(true);
     try {
-      const fromUser = nonAdmins.find((u: any) => u._id === intlForm.fromUserId);
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: intlForm.fromUserId as any,
@@ -92,8 +142,10 @@ export default function AdminTransferPage() {
       });
       setSuccess(`International transfer of $${amt.toLocaleString()} to ${intlForm.recipientName} submitted. Processing 1-3 business days.`);
       setIntlForm({ fromUserId: "", recipientName: "", recipientBank: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
+      setConfirmData(null);
     } catch (err: any) {
       setError(err.message || "Transfer failed");
+      setConfirmData(null);
     } finally {
       setLoading(false);
     }
@@ -104,22 +156,44 @@ export default function AdminTransferPage() {
     setError(""); setSuccess("");
     const amt = parseFloat(businessForm.amount);
     if (!businessForm.fromUserId || !businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
+    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
+    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct);
+    if (!recipient) { setError("No SpringWell user found with that account number"); return; }
+    const fromUser = nonAdmins.find((u: any) => u._id === businessForm.fromUserId);
+    setConfirmData({
+      type: "business",
+      title: "Confirm Business Transfer",
+      details: [
+        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (SWB-${businessForm.fromUserId.slice(-8).toUpperCase()})` },
+        { label: "To", value: businessForm.businessName },
+        { label: "Account", value: businessForm.accountNumber },
+        ...(businessForm.description ? [{ label: "Note", value: businessForm.description }] : []),
+      ],
+      amount: amt,
+      recipientLabel: businessForm.businessName,
+    });
+  }
+
+  async function confirmBusiness() {
+    if (!confirmData) return;
+    const amt = confirmData.amount;
+    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
+    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct);
     setLoading(true);
     try {
-      const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-      const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct);
-      if (!recipient) { setError("No SpringWell user found with that account number"); setLoading(false); return; }
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: businessForm.fromUserId as any,
-        toUserId: recipient._id,
+        toUserId: recipient!._id,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName} (Acct: ${businessForm.accountNumber})`,
       });
       setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName}`);
       setBusinessForm({ fromUserId: "", businessName: "", accountNumber: "", amount: "", description: "" });
+      setConfirmData(null);
     } catch (err: any) {
       setError(err.message || "Transfer failed");
+      setConfirmData(null);
     } finally {
       setLoading(false);
     }
@@ -379,6 +453,44 @@ export default function AdminTransferPage() {
       </div>
 
       <DashboardFullFooter />
+
+      {confirmData && (
+        <div className="modal-overlay" onClick={() => setConfirmData(null)}>
+          <div className="modal-box" style={{ maxWidth: 420, padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", padding: "16px 20px" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>{confirmData.title}</h3>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ marginBottom: 16 }}>
+                {confirmData.details.map((d, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #eee", fontSize: 14 }}>
+                    <span style={{ color: "#666" }}>{d.label}</span>
+                    <span style={{ fontWeight: 600, color: "#000" }}>{d.value}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ backgroundColor: "#f8f9fa", borderRadius: 8, padding: "16px", textAlign: "center", marginBottom: 20 }}>
+                <div style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>Total Amount</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: "#117aca" }}>${confirmData.amount.toLocaleString()}</div>
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button onClick={() => setConfirmData(null)} style={{ flex: 1, padding: "12px", border: "1px solid #ccc", borderRadius: 6, backgroundColor: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>Cancel</button>
+                <button
+                  onClick={() => {
+                    if (confirmData.type === "domestic") confirmDomestic();
+                    else if (confirmData.type === "international") confirmInternational();
+                    else confirmBusiness();
+                  }}
+                  disabled={loading}
+                  style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, opacity: loading ? 0.7 : 1 }}
+                >
+                  {loading ? "Sending..." : "Confirm & Send"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
