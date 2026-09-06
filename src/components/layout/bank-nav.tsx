@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, Search, HelpCircle, ChevronDown, LogOut } from "lucide-react";
+import { Menu, X, Search, HelpCircle, ChevronDown } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
 
 interface BankNavProps {
