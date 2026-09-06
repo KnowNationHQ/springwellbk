@@ -160,7 +160,7 @@ export function ServicesSection() {
                   <div className="flex items-center gap-3">
                     <a
                       href="/register"
-                      className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 group/btn text-sm sm:text-base"
+                      className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 group/btn text-sm sm:text-base"
                     >
                       <T k={svc.ctaKey} />
                       <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />

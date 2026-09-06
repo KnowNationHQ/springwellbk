@@ -60,7 +60,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-3 md:hidden">
-            <a href="mailto:support@springwellbk.com" className="text-gray-400 hover:text-[#426FB6] text-xs transition-colors">support@springwellbk.com</a>
+            <a href="mailto:support@springwellbk.com" className="text-gray-500 hover:text-[#426FB6] text-xs transition-colors">support@springwellbk.com</a>
             <Link href="/login" aria-label={t("header.logIn")} className="text-gray-600 hover:text-[#426FB6] transition-colors">
               <UserCircle className="h-5 w-5" />
             </Link>

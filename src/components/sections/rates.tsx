@@ -28,7 +28,7 @@ export function RatesSection() {
             </Button>
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-4 text-center"><T k="rates.footnote" /></p>
+        <p className="text-xs text-gray-500 mt-4 text-center"><T k="rates.footnote" /></p>
       </div>
     </section>
   );

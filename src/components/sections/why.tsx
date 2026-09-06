@@ -18,7 +18,7 @@ export function WhyBankSection() {
           <div className="rounded-xl bg-gray-50 p-6 border border-gray-200">
             <h3 className="mb-2 text-lg font-bold text-gray-900"><T k="why.hours.title" /></h3>
             <p className="text-sm leading-relaxed text-gray-600"><T k="why.hours.desc" /></p>
-            <p className="mt-1 text-xs text-gray-400"><T k="why.hours.note" /></p>
+            <p className="mt-1 text-xs text-gray-500"><T k="why.hours.note" /></p>
           </div>
           <div className="rounded-xl bg-gray-50 p-6 border border-gray-200">
             <h3 className="mb-2 text-lg font-bold text-gray-900"><T k="why.security.title" /></h3>
