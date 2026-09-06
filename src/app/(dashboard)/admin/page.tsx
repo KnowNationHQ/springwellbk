@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock } from "lucide-react";
 import { sym } from "@/lib/format";
@@ -10,7 +10,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Toast } from "@/components/ui/toast";
 
-type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate";
+type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "codes";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const transactions = useQuery(api.transactions.recent, { limit: 20 });
   const messages = useQuery(api.admin.listMessages);
   const pending = useQuery(api.admin.pendingTransactions);
+  const frozenTransfers = useQuery(api.admin.pendingFrozenTransfers);
 
   const creditDebit = useMutation(api.admin.creditDebit);
   const transferAdmin = useMutation(api.admin.transfer);
@@ -47,6 +48,8 @@ export default function AdminDashboard() {
   const updateUser = useMutation(api.admin.updateUser);
   const deleteUser = useMutation(api.admin.deleteUser);
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
+  const generateTransferCodes = useMutation(api.admin.generateTransferCodes);
+  const sendVerificationCodes = useAction(api.email.sendVerificationCodes);
 
   const [creditType, setCreditType] = useState<"credit" | "debit">("credit");
   const [creditAmount, setCreditAmount] = useState("");
@@ -64,9 +67,11 @@ export default function AdminDashboard() {
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  const [codesData, setCodesData] = useState<{ cot: string; bsac: string; vat: string; txn: any } | null>(null);
+  const [generatingCodes, setGeneratingCodes] = useState(false);
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
 
-  if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined) {
+  if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined || frozenTransfers === undefined) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
   }
 
@@ -102,6 +107,27 @@ export default function AdminDashboard() {
   async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Completed"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
   function openBackdate(t: any) { setBackdateTxn(t); setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10)); setModal("backdate"); }
   async function handleBackdate(e: React.FormEvent) { e.preventDefault(); if (!userId || !backdateTxn || !backdateValue) return; try { await backDateTransaction({ adminUserId: userId as any, transactionId: backdateTxn._id as any, date: backdateValue }); flash("Date updated"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
+
+  async function handleGenerateCodes(txn: any) {
+    if (!userId) return;
+    setGeneratingCodes(true);
+    try {
+      const codes = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id });
+      const sender = users?.find((u: any) => u._id === txn.userId);
+      if (sender?.email) {
+        try {
+          await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: codes.cot, bsacCode: codes.bsac, vatCode: codes.vat });
+        } catch { /* email best-effort */ }
+      }
+      setCodesData({ cot: codes.cot, bsac: codes.bsac, vat: codes.vat, txn });
+      setModal("codes");
+      flash("Codes generated and sent to customer");
+    } catch (err: any) {
+      flash(err?.message ?? "Failed to generate codes");
+    } finally {
+      setGeneratingCodes(false);
+    }
+  }
 
   const inputCls = "w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors";
   const btnPrimary = "px-4 py-2 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer";
@@ -176,6 +202,47 @@ export default function AdminDashboard() {
           )}
         </Section>
 
+        {/* Frozen Transfers */}
+        <Section title={`Frozen Transfers — Awaiting Verification Codes (${frozenTransfers.length})`}>
+          {frozenTransfers.length === 0 ? <p className="text-gray-400 text-sm m-0">No frozen transfers.</p> : (
+            <div className="space-y-2">
+              {frozenTransfers.map((t: any) => {
+                const sender = users?.find((u: any) => u._id === t.userId);
+                const feeLabel = t.feeStatus === "pending_cot" ? "Awaiting COT" : t.feeStatus === "pending_bsac" ? "COT verified" : t.feeStatus === "pending_vat" ? "BSAC verified" : "Completed";
+                return (
+                  <div key={t._id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center"><ArrowUpDown className="w-3.5 h-3.5 text-orange-600" /></div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900 m-0">{sym(t.currency)}{t.amount.toLocaleString()}</p>
+                          <p className="text-[11px] text-gray-400 m-0">{sender?.firstName} {sender?.lastName} · {new Date(t.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {t.cotCode ? (
+                        <div className="flex gap-1.5 text-[11px] font-mono text-gray-500">
+                          <span>COT: <strong className="text-gray-900">{t.cotCode}</strong></span>
+                          <span>·</span>
+                          <span>BSAC: <strong className="text-gray-900">{t.bsacCode}</strong></span>
+                          <span>·</span>
+                          <span>VAT: <strong className="text-gray-900">{t.vatCode}</strong></span>
+                        </div>
+                      ) : (
+                        <button onClick={() => handleGenerateCodes(t)} disabled={generatingCodes} className={btnPrimary + " text-xs"}>
+                          {generatingCodes ? "Generating..." : "Generate & Send Codes"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Section>
+
         {/* All Accounts */}
         <Section title={`All Accounts (${customers.length})`}>
           <div className="space-y-2">
@@ -202,8 +269,8 @@ export default function AdminDashboard() {
                   <button title="Credit" onClick={() => openCredit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><ArrowUpDown className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Transfer" onClick={() => openTransfer(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Send className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Edit" onClick={() => openEdit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Pencil className="w-3.5 h-3.5 text-gray-600" /></button>
-                  {c.status !== "active" && <button title="Activate" onClick={() => handleStatus(c._id, "active")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><CheckCircle className="w-3.5 h-3.5 text-green-600" /></button>}
-                  {c.status !== "suspended" && <button title="Suspend" onClick={() => handleStatus(c._id, "suspended")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><XCircle className="w-3.5 h-3.5 text-red-600" /></button>}
+                  {c.status === "suspended" && <button title="Unfreeze" onClick={() => handleStatus(c._id, "active")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><CheckCircle className="w-3.5 h-3.5 text-green-600" /></button>}
+                  {c.status !== "suspended" && c.status !== "pending" && <button title="Freeze Account" onClick={() => handleStatus(c._id, "suspended")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><XCircle className="w-3.5 h-3.5 text-orange-500" /></button>}
                   <button title="Delete" onClick={() => handleDelete(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Trash2 className="w-3.5 h-3.5 text-red-600" /></button>
                 </div>
               </div>
@@ -288,6 +355,7 @@ export default function AdminDashboard() {
                 {modal === "status" && "Change Account Status"}
                 {modal === "complete" && "Complete Transaction"}
                 {modal === "backdate" && "Back Date Transaction"}
+                {modal === "codes" && "Verification Codes"}
               </h3>
               <button onClick={() => setModal(null)} className="text-white text-2xl bg-transparent border-none cursor-pointer p-0 leading-none">&times;</button>
             </div>
@@ -356,6 +424,21 @@ export default function AdminDashboard() {
                   <input type="date" className={inputCls} value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Update</button></div>
                 </form>
+              )}
+              {modal === "codes" && codesData && (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 m-0">Codes sent to customer email. Enter them in order: <strong>COT → BSAC → VAT</strong></p>
+                  {([["COT", codesData.cot], ["BSAC", codesData.bsac], ["VAT", codesData.vat]] as const).map(([label, code]) => (
+                    <div key={label} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="text-xs text-gray-500 m-0">{label} Code</p>
+                        <p className="text-lg font-bold font-mono text-gray-900 m-0 tracking-wider">{code}</p>
+                      </div>
+                      <button onClick={() => { navigator.clipboard.writeText(code); flash(`${label} code copied`); }} className={btnGhost + " text-xs"}>Copy</button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2 justify-end pt-2"><button onClick={() => setModal(null)} className={btnPrimary}>Done</button></div>
+                </div>
               )}
             </div>
           </div>

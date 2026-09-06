@@ -106,3 +106,28 @@ export const sendPasswordResetEmail = action({
     return { ok: true as const };
   },
 });
+
+export const sendVerificationCodes = action({
+  args: { to: v.string(), firstName: v.string(), cotCode: v.string(), bsacCode: v.string(), vatCode: v.string() },
+  handler: async (_ctx, { to, firstName, cotCode, bsacCode, vatCode }) => {
+    const name = firstName || "there";
+    const codeBox = (label: string, code: string) =>
+      `<div style="margin:12px 0;padding:14px 20px;background:#f1f7f3;border:1px dashed #0f5132;border-radius:10px;text-align:center;">
+        <div style="font-size:11px;color:#8a958f;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">${label}</div>
+        <div style="font-size:28px;letter-spacing:8px;font-weight:700;color:#0f5132;">${code}</div>
+      </div>`;
+    const html = layout(
+      "Your Transfer Verification Codes",
+      `<p style="color:#333;font-size:15px;line-height:1.6;">Hi ${name},</p>
+       <p style="color:#333;font-size:15px;line-height:1.6;">Your transfer is being processed. Enter these codes one at a time in the SpringWell Bank portal to complete your transaction:</p>
+       ${codeBox("COT Code", cotCode)}
+       ${codeBox("BSAC Code", bsacCode)}
+       ${codeBox("VAT Code", vatCode)}
+       <p style="color:#333;font-size:14px;line-height:1.6;">Enter them in order: <strong>COT → BSAC → VAT</strong>. Each code is used once.</p>
+       <p style="color:#dc2626;font-size:13px;line-height:1.6;">Do not share these codes with anyone.</p>`
+    );
+    const text = `Hi ${name},\n\nYour transfer verification codes:\nCOT: ${cotCode}\nBSAC: ${bsacCode}\nVAT: ${vatCode}\n\nEnter them in order: COT → BSAC → VAT.\nDo not share these codes with anyone.`;
+    await transport().sendMail({ from: from(), to, subject: "Your SpringWell Bank Verification Codes", html, text });
+    return { ok: true as const };
+  },
+});

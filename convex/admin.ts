@@ -345,3 +345,41 @@ export const removeUserImage = mutation({
     await ctx.db.patch(args.userId, { imageId: undefined });
   },
 });
+
+export const generateTransferCodes = mutation({
+  args: {
+    adminUserId: v.id("users"),
+    transactionId: v.id("transactions"),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const tx = await ctx.db.get(args.transactionId);
+    if (!tx) throw new Error("Transaction not found");
+    if (tx.status !== "pending" || !tx.feeStatus) throw new Error("Not a frozen transfer");
+    if (tx.cotCode) throw new Error("Codes already generated for this transfer");
+
+    const code = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+    const cot = code();
+    const bsac = code();
+    const vat = code();
+
+    await ctx.db.patch(tx._id, { cotCode: cot, bsacCode: bsac, vatCode: vat });
+
+    const counterTx = await ctx.db
+      .query("transactions")
+      .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
+      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
+      .first();
+    if (counterTx) await ctx.db.patch(counterTx._id, { cotCode: cot, bsacCode: bsac, vatCode: vat });
+
+    return { cot, bsac, vat };
+  },
+});
+
+export const pendingFrozenTransfers = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("transactions").collect();
+    return all.filter((t) => t.status === "pending" && t.feeStatus);
+  },
+});

