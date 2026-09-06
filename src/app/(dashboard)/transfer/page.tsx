@@ -24,11 +24,10 @@ export default function TransferPage() {
   const users = useQuery(api.users.list);
   const transfer = useMutation(api.auth.transfer);
 
-  const [domesticForm, setDomesticForm] = useState({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", recipientAccount: "", amount: "", description: "" });
+  const [domesticForm, setDomesticForm] = useState({ recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
   const [intlForm, setIntlForm] = useState({
     recipientName: "",
     recipientBank: "",
-    routingNumber: "",
     accountNumber: "",
     iban: "",
     swiftCode: "",
@@ -62,10 +61,10 @@ export default function TransferPage() {
     if (recipient._id === userId) { setError("Cannot transfer to your own account"); return; }
     setLoading(true);
     try {
-      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.routingNumber ? ` (Routing: ${domesticForm.routingNumber})` : ""}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
+      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
       await transfer({ fromUserId: userId as any, toEmail: recipient.email, amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
-      setDomesticForm({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", recipientAccount: "", amount: "", description: "" });
+      setDomesticForm({ recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -91,7 +90,7 @@ export default function TransferPage() {
         description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
       });
       setSuccess(`International transfer of $${amt.toLocaleString()} to ${intlForm.recipientName} has been submitted. Processing takes 1-3 business days.`);
-      setIntlForm({ recipientName: "", recipientBank: "", routingNumber: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
+      setIntlForm({ recipientName: "", recipientBank: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -228,15 +227,9 @@ export default function TransferPage() {
                     <Input id="dom-name" required placeholder="Full name of account holder" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.recipientName} onChange={(e) => setDomesticForm({ ...domesticForm, recipientName: e.target.value })} />
                   </div>
                 </div>
-                <div className="form-row">
-                  <div>
-                    <Label htmlFor="dom-bank" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Bank Name *</Label>
-                    <Input id="dom-bank" required placeholder="e.g. Chase, Bank of America" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.bankName} onChange={(e) => setDomesticForm({ ...domesticForm, bankName: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="dom-routing" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
-                    <Input id="dom-routing" placeholder="9-digit routing number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.routingNumber} onChange={(e) => setDomesticForm({ ...domesticForm, routingNumber: e.target.value })} />
-                  </div>
+                <div>
+                  <Label htmlFor="dom-bank" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Bank Name *</Label>
+                  <Input id="dom-bank" required placeholder="e.g. Chase, Bank of America" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.bankName} onChange={(e) => setDomesticForm({ ...domesticForm, bankName: e.target.value })} />
                 </div>
                 <div>
                   <Label htmlFor="dom-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
@@ -277,15 +270,9 @@ export default function TransferPage() {
                     <Input id="intl-bank" required placeholder="Bank name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.recipientBank} onChange={(e) => setIntlForm({ ...intlForm, recipientBank: e.target.value })} />
                   </div>
                 </div>
-                <div className="form-row">
-                  <div>
-                    <Label htmlFor="intl-routing" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
-                    <Input id="intl-routing" placeholder="ABA / Routing" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.routingNumber} onChange={(e) => setIntlForm({ ...intlForm, routingNumber: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="intl-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number</Label>
-                    <Input id="intl-account" placeholder="Account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.accountNumber} onChange={(e) => setIntlForm({ ...intlForm, accountNumber: e.target.value })} />
-                  </div>
+                <div>
+                  <Label htmlFor="intl-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number</Label>
+                  <Input id="intl-account" placeholder="Account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={intlForm.accountNumber} onChange={(e) => setIntlForm({ ...intlForm, accountNumber: e.target.value })} />
                 </div>
                 <div className="form-row">
                   <div>
