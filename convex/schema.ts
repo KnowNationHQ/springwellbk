@@ -26,11 +26,13 @@ export default defineSchema({
     resetCode: v.optional(v.string()),
     resetExpiresAt: v.optional(v.number()),
     imageId: v.optional(v.string()),
+    accountNumber: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_username", ["username"])
     .index("by_email", ["email"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_accountNumber", ["accountNumber"]),
 
   transactions: defineTable({
     userId: v.id("users"),

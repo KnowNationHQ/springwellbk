@@ -24,7 +24,7 @@ export default function TransferPage() {
   const users = useQuery(api.users.list);
   const transfer = useMutation(api.auth.transfer);
 
-  const [domesticForm, setDomesticForm] = useState({ recipientName: "", bankName: "", accountNumber: "", routingNumber: "", amount: "", description: "" });
+  const [domesticForm, setDomesticForm] = useState({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", recipientAccount: "", amount: "", description: "" });
   const [intlForm, setIntlForm] = useState({
     recipientName: "",
     recipientBank: "",
@@ -36,7 +36,7 @@ export default function TransferPage() {
     currency: "USD",
     description: "",
   });
-  const [businessForm, setBusinessForm] = useState({ businessName: "", businessEmail: "", amount: "", description: "" });
+  const [businessForm, setBusinessForm] = useState({ businessName: "", accountNumber: "", amount: "", description: "" });
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -59,9 +59,9 @@ export default function TransferPage() {
     setLoading(true);
     try {
       const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber}${domesticForm.routingNumber ? `, Routing: ${domesticForm.routingNumber}` : ""})${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
-      await transfer({ fromUserId: userId as any, toEmail: "admin@springwellbk.com", amount: amt, description: desc });
+      await transfer({ fromUserId: userId as any, toAccountNumber: domesticForm.accountNumber.trim(), amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
-      setDomesticForm({ recipientName: "", bankName: "", accountNumber: "", routingNumber: "", amount: "", description: "" });
+      setDomesticForm({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", recipientAccount: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -99,18 +99,18 @@ export default function TransferPage() {
     e.preventDefault();
     setError(""); setSuccess("");
     const amt = parseFloat(businessForm.amount);
-    if (!businessForm.businessEmail || isNaN(amt) || amt <= 0) { setError("Enter a valid business email and amount"); return; }
+    if (!businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
     setLoading(true);
     try {
       await transfer({
         fromUserId: userId as any,
-        toEmail: "admin@springwellbk.com",
+        toAccountNumber: businessForm.accountNumber.trim(),
         amount: amt,
-        description: businessForm.description || `Business payment to ${businessForm.businessName} (${businessForm.businessEmail})`,
+        description: businessForm.description || `Business payment to ${businessForm.businessName}`,
       });
-      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName || businessForm.businessEmail}`);
-      setBusinessForm({ businessName: "", businessEmail: "", amount: "", description: "" });
+      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName}`);
+      setBusinessForm({ businessName: "", accountNumber: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -209,10 +209,16 @@ export default function TransferPage() {
             </div>
             <div style={{ padding: 20 }}>
               <form onSubmit={handleDomestic} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to a bank account in the United States</p>
-                <div>
-                  <Label htmlFor="dom-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
-                  <Input id="dom-name" required placeholder="Full name of account holder" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.recipientName} onChange={(e) => setDomesticForm({ ...domesticForm, recipientName: e.target.value })} />
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to a SpringWell account in the United States</p>
+                <div className="form-row">
+                  <div>
+                    <Label htmlFor="dom-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Account Number *</Label>
+                    <Input id="dom-account" required placeholder="e.g. SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.accountNumber} onChange={(e) => setDomesticForm({ ...domesticForm, accountNumber: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="dom-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
+                    <Input id="dom-name" required placeholder="Full name of account holder" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.recipientName} onChange={(e) => setDomesticForm({ ...domesticForm, recipientName: e.target.value })} />
+                  </div>
                 </div>
                 <div className="form-row">
                   <div>
@@ -223,10 +229,6 @@ export default function TransferPage() {
                     <Label htmlFor="dom-routing" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
                     <Input id="dom-routing" placeholder="9-digit routing number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.routingNumber} onChange={(e) => setDomesticForm({ ...domesticForm, routingNumber: e.target.value })} />
                   </div>
-                </div>
-                <div>
-                  <Label htmlFor="dom-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number *</Label>
-                  <Input id="dom-account" required placeholder="Recipient's account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.accountNumber} onChange={(e) => setDomesticForm({ ...domesticForm, accountNumber: e.target.value })} />
                 </div>
                 <div>
                   <Label htmlFor="dom-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
@@ -329,15 +331,15 @@ export default function TransferPage() {
             </div>
             <div style={{ padding: 20 }}>
               <form onSubmit={handleBusiness} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to another person or business</p>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to a business or person's SpringWell account</p>
                 <div className="form-row">
                   <div>
                     <Label htmlFor="biz-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Business / Recipient Name *</Label>
                     <Input id="biz-name" required placeholder="Business or person name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessName} onChange={(e) => setBusinessForm({ ...businessForm, businessName: e.target.value })} />
                   </div>
                   <div>
-                    <Label htmlFor="biz-email" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Email *</Label>
-                    <Input id="biz-email" type="email" required placeholder="recipient@email.com" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessEmail} onChange={(e) => setBusinessForm({ ...businessForm, businessEmail: e.target.value })} />
+                    <Label htmlFor="biz-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Account Number *</Label>
+                    <Input id="biz-account" required placeholder="e.g. SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.accountNumber} onChange={(e) => setBusinessForm({ ...businessForm, accountNumber: e.target.value })} />
                   </div>
                 </div>
                 <div>

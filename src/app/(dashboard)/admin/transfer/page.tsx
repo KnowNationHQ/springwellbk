@@ -37,7 +37,7 @@ export default function AdminTransferPage() {
     currency: "USD",
     description: "",
   });
-  const [businessForm, setBusinessForm] = useState({ fromUserId: "", businessName: "", businessEmail: "", amount: "", description: "" });
+  const [businessForm, setBusinessForm] = useState({ fromUserId: "", businessName: "", accountNumber: "", amount: "", description: "" });
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -104,18 +104,19 @@ export default function AdminTransferPage() {
     e.preventDefault();
     setError(""); setSuccess("");
     const amt = parseFloat(businessForm.amount);
-    if (!businessForm.fromUserId || !businessForm.businessEmail || isNaN(amt) || amt <= 0) { setError("Select an account, enter business email and amount"); return; }
+    if (!businessForm.fromUserId || !businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     setLoading(true);
     try {
+      const recipient = users?.find((u: any) => u.accountNumber === businessForm.accountNumber.trim());
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: businessForm.fromUserId as any,
-        toUserId: userId as any,
+        toUserId: recipient?._id || userId,
         amount: amt,
-        description: businessForm.description || `Business payment to ${businessForm.businessName} (${businessForm.businessEmail})`,
+        description: businessForm.description || `Business payment to ${businessForm.businessName} (Acct: ${businessForm.accountNumber})`,
       });
-      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName || businessForm.businessEmail}`);
-      setBusinessForm({ fromUserId: "", businessName: "", businessEmail: "", amount: "", description: "" });
+      setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName}`);
+      setBusinessForm({ fromUserId: "", businessName: "", accountNumber: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -362,8 +363,8 @@ export default function AdminTransferPage() {
                     <Input required placeholder="Business or person name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessName} onChange={(e) => setBusinessForm({ ...businessForm, businessName: e.target.value })} />
                   </div>
                   <div>
-                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Email *</Label>
-                    <Input type="email" required placeholder="recipient@email.com" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.businessEmail} onChange={(e) => setBusinessForm({ ...businessForm, businessEmail: e.target.value })} />
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Account Number *</Label>
+                    <Input required placeholder="e.g. SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.accountNumber} onChange={(e) => setBusinessForm({ ...businessForm, accountNumber: e.target.value })} />
                   </div>
                 </div>
                 <div>

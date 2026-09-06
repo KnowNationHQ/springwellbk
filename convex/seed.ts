@@ -20,6 +20,7 @@ export const seedAdmin = mutation({
       creditBalance: 25000,
       accountType: "checking",
       currency: "USD",
+      accountNumber: "1000000001",
       createdAt: Date.now(),
       lastLogin: 0,
     });
@@ -47,6 +48,7 @@ export const seedCustomer = mutation({
       creditBalance: 12000,
       accountType: "savings",
       currency: "USD",
+      accountNumber: "2000000001",
       createdAt: Date.now(),
       lastLogin: 0,
     });
