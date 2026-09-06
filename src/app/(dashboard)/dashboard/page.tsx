@@ -172,7 +172,7 @@ export default function DashboardPage() {
     { label: "Alerts", icon: Bell, modal: "alerts" as const },
     { label: "Bill Pay", icon: DollarSign, modal: "billPay" as const },
     { label: "Transactions", icon: Clock, modal: "transactions" as const },
-    { label: "Transfer Funds", icon: ArrowUpRight, modal: "transfer" as const },
+    { label: "Transfer Funds", icon: ArrowUpRight, route: "/transfer" },
     { label: "Special Offers", icon: Tag, modal: "offers" as const },
     { label: "Messages", icon: FileText, modal: "messages" as const },
     { label: "Spending & Budgeting", icon: PiggyBank, modal: "spending" as const },
@@ -195,14 +195,14 @@ export default function DashboardPage() {
         {/* Quick Actions Row */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { label: "Transfer", icon: ArrowUpRight, modal: "transfer" as const },
+            { label: "Transfer", icon: ArrowUpRight, action: () => router.push("/transfer") },
             { label: "Pay Bill", icon: DollarSign, modal: "billPay" as const },
             { label: "Deposit", icon: Wallet, modal: "deposit" as const },
             { label: "More", icon: Target, modal: "openAccount" as const },
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <button key={item.label} onClick={() => openModal(item.modal)} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
+              <button key={item.label} onClick={() => "action" in item && item.action ? item.action() : openModal(item.modal!)} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
                 <Icon className="w-5 h-5 text-[#426FB6]" />
                 <span className="text-[11px] text-gray-600 font-medium">{item.label}</span>
               </button>
@@ -313,7 +313,7 @@ export default function DashboardPage() {
             {activityItems.map((item) => {
               const Icon = item.icon;
               return (
-                <button key={item.label} onClick={() => openModal(item.modal)} className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-lg cursor-pointer active:bg-gray-50 transition-colors border-0 bg-transparent">
+                <button key={item.label} onClick={() => "route" in item && item.route ? router.push(item.route) : openModal(item.modal!)} className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-lg cursor-pointer active:bg-gray-50 transition-colors border-0 bg-transparent">
                   <Icon className="w-5 h-5 text-[#426FB6]" />
                   <span className="text-[10px] text-gray-600 font-medium text-center leading-tight">{item.label}</span>
                 </button>
