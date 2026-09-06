@@ -56,12 +56,16 @@ export default function TransferPage() {
     const amt = parseFloat(domesticForm.amount);
     if (!domesticForm.recipientName || !domesticForm.bankName || !domesticForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
+    const acct = domesticForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
+    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
+    if (!recipient) { setError("No SpringWell user found with that account number"); return; }
+    if (recipient._id === userId) { setError("Cannot transfer to your own account"); return; }
     setLoading(true);
     try {
-      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber}${domesticForm.routingNumber ? `, Routing: ${domesticForm.routingNumber}` : ""})${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
-      await transfer({ fromUserId: userId as any, toAccountNumber: domesticForm.accountNumber.trim(), amount: amt, description: desc });
+      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.routingNumber ? ` (Routing: ${domesticForm.routingNumber})` : ""}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
+      await transfer({ fromUserId: userId as any, toEmail: recipient.email, amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
-      setDomesticForm({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", recipientAccount: "", amount: "", description: "" });
+      setDomesticForm({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -101,11 +105,15 @@ export default function TransferPage() {
     const amt = parseFloat(businessForm.amount);
     if (!businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
+    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
+    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
+    if (!recipient) { setError("No SpringWell user found with that account number"); return; }
+    if (recipient._id === userId) { setError("Cannot transfer to your own account"); return; }
     setLoading(true);
     try {
       await transfer({
         fromUserId: userId as any,
-        toAccountNumber: businessForm.accountNumber.trim(),
+        toEmail: recipient.email,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName}`,
       });
@@ -213,7 +221,7 @@ export default function TransferPage() {
                 <div className="form-row">
                   <div>
                     <Label htmlFor="dom-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Account Number *</Label>
-                    <Input id="dom-account" required placeholder="e.g. SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.accountNumber} onChange={(e) => setDomesticForm({ ...domesticForm, accountNumber: e.target.value })} />
+                    <Input id="dom-account" required placeholder="SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.accountNumber} onChange={(e) => setDomesticForm({ ...domesticForm, accountNumber: e.target.value })} />
                   </div>
                   <div>
                     <Label htmlFor="dom-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
@@ -339,7 +347,7 @@ export default function TransferPage() {
                   </div>
                   <div>
                     <Label htmlFor="biz-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Account Number *</Label>
-                    <Input id="biz-account" required placeholder="e.g. SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.accountNumber} onChange={(e) => setBusinessForm({ ...businessForm, accountNumber: e.target.value })} />
+                    <Input id="biz-account" required placeholder="SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.accountNumber} onChange={(e) => setBusinessForm({ ...businessForm, accountNumber: e.target.value })} />
                   </div>
                 </div>
                 <div>

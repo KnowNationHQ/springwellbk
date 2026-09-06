@@ -107,7 +107,8 @@ export default function AdminTransferPage() {
     if (!businessForm.fromUserId || !businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     setLoading(true);
     try {
-      const recipient = users?.find((u: any) => u.accountNumber === businessForm.accountNumber.trim());
+      const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
+      const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct);
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: businessForm.fromUserId as any,
@@ -364,7 +365,7 @@ export default function AdminTransferPage() {
                   </div>
                   <div>
                     <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Account Number *</Label>
-                    <Input required placeholder="e.g. SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.accountNumber} onChange={(e) => setBusinessForm({ ...businessForm, accountNumber: e.target.value })} />
+                    <Input required placeholder="SWB-XXXXXXXX" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={businessForm.accountNumber} onChange={(e) => setBusinessForm({ ...businessForm, accountNumber: e.target.value })} />
                   </div>
                 </div>
                 <div>

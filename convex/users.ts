@@ -16,13 +16,6 @@ export const getByEmail = query({
   },
 });
 
-export const getByAccountNumber = query({
-  args: { accountNumber: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db.query("users").withIndex("by_accountNumber", (q) => q.eq("accountNumber", args.accountNumber)).unique();
-  },
-});
-
 export const create = mutation({
   args: {
     username: v.string(),
@@ -44,14 +37,12 @@ export const create = mutation({
     if (existingEmail) throw new Error("Email already registered");
     const existingUser = await ctx.db.query("users").withIndex("by_username", (q) => q.eq("username", args.username)).unique();
     if (existingUser) throw new Error("Username already taken");
-    const accountNumber = `${Math.floor(1000000000 + Math.random() * 9000000000)}`;
     const userId = await ctx.db.insert("users", {
       ...args,
       balance: 0,
       creditBalance: 0,
       status: "pending",
       role: "customer",
-      accountNumber,
       createdAt: Date.now(),
     });
     try {
@@ -104,21 +95,5 @@ export const fixAdminRole = mutation({
       return "Fixed admin role";
     }
     return "Admin role already correct";
-  },
-});
-
-export const migrateAccountNumbers = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
-    let count = 0;
-    for (const user of users) {
-      if (!user.accountNumber) {
-        const accountNumber = `${Math.floor(1000000000 + Math.random() * 9000000000)}`;
-        await ctx.db.patch(user._id, { accountNumber });
-        count++;
-      }
-    }
-    return `Patched ${count} users with account numbers`;
   },
 });
