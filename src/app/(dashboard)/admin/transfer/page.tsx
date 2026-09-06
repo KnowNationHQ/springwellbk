@@ -24,7 +24,7 @@ export default function AdminTransferPage() {
   const users = useQuery(api.users.list);
   const transferAdmin = useMutation(api.admin.transfer);
 
-  const [domesticForm, setDomesticForm] = useState({ fromUserId: "", toUserId: "", amount: "", description: "" });
+  const [domesticForm, setDomesticForm] = useState({ fromUserId: "", toUserId: "", recipientName: "", bankName: "", accountNumber: "", routingNumber: "", amount: "", description: "" });
   const [intlForm, setIntlForm] = useState({
     fromUserId: "",
     recipientName: "",
@@ -62,9 +62,10 @@ export default function AdminTransferPage() {
     if (domesticForm.fromUserId === domesticForm.toUserId) { setError("From and To accounts must be different"); return; }
     setLoading(true);
     try {
-      await transferAdmin({ adminUserId: userId as any, fromUserId: domesticForm.fromUserId as any, toUserId: domesticForm.toUserId as any, amount: amt, description: domesticForm.description || "Domestic transfer" });
+      const desc = domesticForm.bankName ? `Domestic transfer to ${domesticForm.recipientName || "recipient"} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber || "N/A"}${domesticForm.routingNumber ? `, Routing: ${domesticForm.routingNumber}` : ""})${domesticForm.description ? ` — ${domesticForm.description}` : ""}` : domesticForm.description || "Domestic transfer";
+      await transferAdmin({ adminUserId: userId as any, fromUserId: domesticForm.fromUserId as any, toUserId: domesticForm.toUserId as any, amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred successfully`);
-      setDomesticForm({ fromUserId: "", toUserId: "", amount: "", description: "" });
+      setDomesticForm({ fromUserId: "", toUserId: "", recipientName: "", bankName: "", accountNumber: "", routingNumber: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -204,7 +205,7 @@ export default function AdminTransferPage() {
             </div>
             <div style={{ padding: 20 }}>
               <form onSubmit={handleDomestic} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Transfer between two SpringWell accounts</p>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Transfer between SpringWell accounts with recipient bank details</p>
                 <div className="form-row">
                   <div>
                     <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>From Account *</Label>
@@ -219,6 +220,26 @@ export default function AdminTransferPage() {
                       <option value="">Select destination account</option>
                       {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
                     </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name</Label>
+                    <Input placeholder="Account holder name" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.recipientName} onChange={(e) => setDomesticForm({ ...domesticForm, recipientName: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Bank Name</Label>
+                    <Input placeholder="e.g. Chase, Bank of America" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.bankName} onChange={(e) => setDomesticForm({ ...domesticForm, bankName: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number</Label>
+                    <Input placeholder="Recipient account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.accountNumber} onChange={(e) => setDomesticForm({ ...domesticForm, accountNumber: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
+                    <Input placeholder="9-digit routing number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.routingNumber} onChange={(e) => setDomesticForm({ ...domesticForm, routingNumber: e.target.value })} />
                   </div>
                 </div>
                 <div>

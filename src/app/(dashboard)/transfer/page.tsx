@@ -24,7 +24,7 @@ export default function TransferPage() {
   const users = useQuery(api.users.list);
   const transfer = useMutation(api.auth.transfer);
 
-  const [domesticForm, setDomesticForm] = useState({ toEmail: "", amount: "", description: "" });
+  const [domesticForm, setDomesticForm] = useState({ recipientName: "", bankName: "", accountNumber: "", routingNumber: "", amount: "", description: "" });
   const [intlForm, setIntlForm] = useState({
     recipientName: "",
     recipientBank: "",
@@ -54,13 +54,14 @@ export default function TransferPage() {
     e.preventDefault();
     setError(""); setSuccess("");
     const amt = parseFloat(domesticForm.amount);
-    if (!domesticForm.toEmail || isNaN(amt) || amt <= 0) { setError("Enter a valid recipient email and amount"); return; }
+    if (!domesticForm.recipientName || !domesticForm.bankName || !domesticForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
     setLoading(true);
     try {
-      await transfer({ fromUserId: userId as any, toEmail: domesticForm.toEmail, amount: amt, description: domesticForm.description || undefined });
-      setSuccess(`$${amt.toLocaleString()} transferred successfully to ${domesticForm.toEmail}`);
-      setDomesticForm({ toEmail: "", amount: "", description: "" });
+      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber}${domesticForm.routingNumber ? `, Routing: ${domesticForm.routingNumber}` : ""})${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
+      await transfer({ fromUserId: userId as any, toEmail: "admin@springwellbk.com", amount: amt, description: desc });
+      setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
+      setDomesticForm({ recipientName: "", bankName: "", accountNumber: "", routingNumber: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {
@@ -208,10 +209,24 @@ export default function TransferPage() {
             </div>
             <div style={{ padding: 20 }}>
               <form onSubmit={handleDomestic} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Transfer to another SpringWell user by email</p>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to a bank account in the United States</p>
                 <div>
-                  <Label htmlFor="dom-to" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Email *</Label>
-                  <Input id="dom-to" type="email" required placeholder="friend@springwellbk.com" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.toEmail} onChange={(e) => setDomesticForm({ ...domesticForm, toEmail: e.target.value })} />
+                  <Label htmlFor="dom-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Recipient Name *</Label>
+                  <Input id="dom-name" required placeholder="Full name of account holder" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.recipientName} onChange={(e) => setDomesticForm({ ...domesticForm, recipientName: e.target.value })} />
+                </div>
+                <div className="form-row">
+                  <div>
+                    <Label htmlFor="dom-bank" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Bank Name *</Label>
+                    <Input id="dom-bank" required placeholder="e.g. Chase, Bank of America" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.bankName} onChange={(e) => setDomesticForm({ ...domesticForm, bankName: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="dom-routing" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Routing Number</Label>
+                    <Input id="dom-routing" placeholder="9-digit routing number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.routingNumber} onChange={(e) => setDomesticForm({ ...domesticForm, routingNumber: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="dom-account" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Account Number *</Label>
+                  <Input id="dom-account" required placeholder="Recipient's account number" style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14 }} value={domesticForm.accountNumber} onChange={(e) => setDomesticForm({ ...domesticForm, accountNumber: e.target.value })} />
                 </div>
                 <div>
                   <Label htmlFor="dom-amount" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Amount (USD) *</Label>
