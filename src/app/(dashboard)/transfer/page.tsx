@@ -65,7 +65,7 @@ export default function TransferPage() {
       const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.routingNumber ? ` (Routing: ${domesticForm.routingNumber})` : ""}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
       await transfer({ fromUserId: userId as any, toEmail: recipient.email, amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
-      setDomesticForm({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", amount: "", description: "" });
+      setDomesticForm({ recipientName: "", bankName: "", routingNumber: "", accountNumber: "", recipientAccount: "", amount: "", description: "" });
     } catch (err: any) {
       setError(err.message || "Transfer failed");
     } finally {

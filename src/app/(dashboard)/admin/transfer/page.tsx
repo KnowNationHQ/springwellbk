@@ -112,7 +112,7 @@ export default function AdminTransferPage() {
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: businessForm.fromUserId as any,
-        toUserId: recipient?._id || userId,
+        toUserId: recipient?._id ?? userId as any,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName} (Acct: ${businessForm.accountNumber})`,
       });
