@@ -81,7 +81,7 @@ export default function TransferPage() {
     try {
       await transfer({
         fromUserId: userId as any,
-        toEmail: `wire-${intlForm.recipientName.toLowerCase().replace(/\s+/g, ".")}@springwellbk.com`,
+        toEmail: "admin@springwellbk.com",
         amount: amt,
         description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
       });
@@ -104,9 +104,9 @@ export default function TransferPage() {
     try {
       await transfer({
         fromUserId: userId as any,
-        toEmail: businessForm.businessEmail,
+        toEmail: "admin@springwellbk.com",
         amount: amt,
-        description: businessForm.description || `Payment to ${businessForm.businessName}`,
+        description: businessForm.description || `Business payment to ${businessForm.businessName} (${businessForm.businessEmail})`,
       });
       setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName || businessForm.businessEmail}`);
       setBusinessForm({ businessName: "", businessEmail: "", amount: "", description: "" });

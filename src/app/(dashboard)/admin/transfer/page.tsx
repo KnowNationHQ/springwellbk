@@ -86,7 +86,7 @@ export default function AdminTransferPage() {
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: intlForm.fromUserId as any,
-        toUserId: intlForm.fromUserId as any,
+        toUserId: userId as any,
         amount: amt,
         description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
       });
@@ -109,9 +109,9 @@ export default function AdminTransferPage() {
       await transferAdmin({
         adminUserId: userId as any,
         fromUserId: businessForm.fromUserId as any,
-        toUserId: businessForm.fromUserId as any,
+        toUserId: userId as any,
         amount: amt,
-        description: businessForm.description || `Payment to ${businessForm.businessName}`,
+        description: businessForm.description || `Business payment to ${businessForm.businessName} (${businessForm.businessEmail})`,
       });
       setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName || businessForm.businessEmail}`);
       setBusinessForm({ fromUserId: "", businessName: "", businessEmail: "", amount: "", description: "" });
