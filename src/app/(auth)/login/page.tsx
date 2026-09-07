@@ -10,6 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
+function Spinner() {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+      <span style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin .6s linear infinite" }} />
+    </span>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const login = useMutation(api.auth.login);
@@ -86,6 +94,7 @@ export default function LoginPage() {
         position: "relative",
       }}
     >
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* Dark overlay */}
       <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.55)" }} />
 
@@ -141,7 +150,7 @@ export default function LoginPage() {
                   </Link>
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? <><Spinner /> Signing in...</> : "Sign In"}
                 </Button>
                 <button
                   type="button"
@@ -165,7 +174,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? "Sending..." : "Send code"}
+                  {loading ? <><Spinner /> Sending...</> : "Send code"}
                 </Button>
                 <button
                   type="button"
@@ -189,7 +198,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? "Verifying..." : "Verify & sign in"}
+                  {loading ? <><Spinner /> Verifying...</> : "Verify & sign in"}
                 </Button>
                 <button
                   type="button"

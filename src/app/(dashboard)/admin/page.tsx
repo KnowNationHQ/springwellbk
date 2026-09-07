@@ -168,15 +168,15 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {[
-            { label: "Credit", icon: ArrowUpDown, action: () => openCredit(null) },
-            { label: "Transfer", icon: Send, action: () => openTransfer(null) },
-            { label: "Wire Transfer", icon: Send, action: () => router.push("/admin/transfer") },
-            { label: "Activate", icon: CheckCircle, action: () => setModal("status") },
-            { label: "Suspend", icon: XCircle, action: () => setModal("status") },
-            { label: "Complete", icon: KeyRound, action: () => openComplete() },
+            { label: "Credit", icon: ArrowUpDown, color: "#16a34a", bg: "#dcfce7", action: () => openCredit(null) },
+            { label: "Transfer", icon: Send, color: "#2563eb", bg: "#dbeafe", action: () => openTransfer(null) },
+            { label: "Wire Transfer", icon: Send, color: "#7c3aed", bg: "#ede9fe", action: () => router.push("/admin/transfer") },
+            { label: "Activate", icon: CheckCircle, color: "#059669", bg: "#d1fae5", action: () => setModal("status") },
+            { label: "Suspend", icon: XCircle, color: "#dc2626", bg: "#fee2e2", action: () => setModal("status") },
+            { label: "Complete", icon: KeyRound, color: "#d97706", bg: "#fef3c7", action: () => openComplete() },
           ].map((b) => (
             <button key={b.label} onClick={b.action} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-xl border border-gray-200 cursor-pointer active:bg-gray-50">
-              <b.icon className="w-5 h-5 text-[#426FB6]" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: b.bg }}><b.icon className="w-4 h-4" style={{ color: b.color }} /></div>
               <span className="text-[10px] text-gray-600 font-medium">{b.label}</span>
             </button>
           ))}
