@@ -356,23 +356,32 @@ export const generateTransferCodes = mutation({
     const tx = await ctx.db.get(args.transactionId);
     if (!tx) throw new Error("Transaction not found");
     if (tx.status !== "pending" || !tx.feeStatus) throw new Error("Not a frozen transfer");
-    if (tx.cotCode) throw new Error("Codes already generated for this transfer");
-
     const code = () => Math.random().toString(36).substring(2, 8).toUpperCase();
-    const cot = code();
-    const bsac = code();
-    const vat = code();
 
-    await ctx.db.patch(tx._id, { cotCode: cot, bsacCode: bsac, vatCode: vat });
+    const patch: Record<string, string> = {};
+    let label = "";
+    if (!tx.cotCode) {
+      patch.cotCode = code();
+      label = "COT";
+    } else if (!tx.bsacCode) {
+      patch.bsacCode = code();
+      label = "BSAC";
+    } else if (!tx.vatCode) {
+      patch.vatCode = code();
+      label = "VAT";
+    }
+
+    if (Object.keys(patch).length === 0) throw new Error("All codes already generated");
+    await ctx.db.patch(tx._id, patch);
 
     const counterTx = await ctx.db
       .query("transactions")
       .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
       .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
       .first();
-    if (counterTx) await ctx.db.patch(counterTx._id, { cotCode: cot, bsacCode: bsac, vatCode: vat });
+    if (counterTx) await ctx.db.patch(counterTx._id, patch);
 
-    return { cot, bsac, vat };
+    return { label, code: patch[`${label.toLowerCase()}Code`] as string };
   },
 });
 

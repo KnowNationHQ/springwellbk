@@ -67,7 +67,7 @@ export default function AdminDashboard() {
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [codesData, setCodesData] = useState<{ cot: string; bsac: string; vat: string; txn: any } | null>(null);
+  const [codesData, setCodesData] = useState<{ label: string; code: string; txn: any } | null>(null);
   const [generatingCodes, setGeneratingCodes] = useState(false);
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
 
@@ -112,16 +112,16 @@ export default function AdminDashboard() {
     if (!userId) return;
     setGeneratingCodes(true);
     try {
-      const codes = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id });
+      const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id });
       const sender = users?.find((u: any) => u._id === txn.userId);
       if (sender?.email) {
         try {
-          await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: codes.cot, bsacCode: codes.bsac, vatCode: codes.vat });
+          await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: result.label === "COT" ? result.code : "", bsacCode: result.label === "BSAC" ? result.code : "", vatCode: result.label === "VAT" ? result.code : "" });
         } catch { /* email best-effort */ }
       }
-      setCodesData({ cot: codes.cot, bsac: codes.bsac, vat: codes.vat, txn });
+      setCodesData({ label: result.label, code: result.code, txn });
       setModal("codes");
-      flash("Codes generated and sent to customer");
+      flash(`${result.label} code generated and sent to customer`);
     } catch (err: any) {
       flash(err?.message ?? "Failed to generate codes");
     } finally {
@@ -222,17 +222,16 @@ export default function AdminDashboard() {
                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {t.cotCode ? (
+                      {t.cotCode && (
                         <div className="flex gap-1.5 text-[11px] font-mono text-gray-500">
-                          <span>COT: <strong className="text-gray-900">{t.cotCode}</strong></span>
-                          <span>·</span>
-                          <span>BSAC: <strong className="text-gray-900">{t.bsacCode}</strong></span>
-                          <span>·</span>
-                          <span>VAT: <strong className="text-gray-900">{t.vatCode}</strong></span>
+                          {t.cotCode && <span>COT: <strong className="text-gray-900">{t.cotCode}</strong></span>}
+                          {t.bsacCode && <><span>·</span><span>BSAC: <strong className="text-gray-900">{t.bsacCode}</strong></span></>}
+                          {t.vatCode && <><span>·</span><span>VAT: <strong className="text-gray-900">{t.vatCode}</strong></span></>}
                         </div>
-                      ) : (
+                      )}
+                      {(!t.vatCode) && (
                         <button onClick={() => handleGenerateCodes(t)} disabled={generatingCodes} className={btnPrimary + " text-xs"}>
-                          {generatingCodes ? "Generating..." : "Generate & Send Codes"}
+                          {generatingCodes ? "Generating..." : `Generate ${t.cotCode && !t.bsacCode ? "BSAC" : t.bsacCode && !t.vatCode ? "VAT" : "COT"} Code`}
                         </button>
                       )}
                     </div>
@@ -427,16 +426,15 @@ export default function AdminDashboard() {
               )}
               {modal === "codes" && codesData && (
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600 m-0">Codes sent to customer email. Enter them in order: <strong>COT → BSAC → VAT</strong></p>
-                  {([["COT", codesData.cot], ["BSAC", codesData.bsac], ["VAT", codesData.vat]] as const).map(([label, code]) => (
-                    <div key={label} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="text-xs text-gray-500 m-0">{label} Code</p>
-                        <p className="text-lg font-bold font-mono text-gray-900 m-0 tracking-wider">{code}</p>
-                      </div>
-                      <button onClick={() => { navigator.clipboard.writeText(code); flash(`${label} code copied`); }} className={btnGhost + " text-xs"}>Copy</button>
+                  <p className="text-sm text-gray-600 m-0"><strong>{codesData.label}</strong> code generated and sent to customer email.</p>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-xs text-gray-500 m-0">{codesData.label} Code</p>
+                      <p className="text-lg font-bold font-mono text-gray-900 m-0 tracking-wider">{codesData.code}</p>
                     </div>
-                  ))}
+                    <button onClick={() => { navigator.clipboard.writeText(codesData.code); flash(`${codesData.label} code copied`); }} className={btnGhost + " text-xs"}>Copy</button>
+                  </div>
+                  <p className="text-xs text-gray-400 m-0">Next: customer enters this code, then you generate the next one.</p>
                   <div className="flex gap-2 justify-end pt-2"><button onClick={() => setModal(null)} className={btnPrimary}>Done</button></div>
                 </div>
               )}
