@@ -76,7 +76,12 @@ export default function AdminDashboard() {
   }
 
   const adminUser = users.find((u: any) => u._id === userId);
-  const customers = users.filter((u: any) => u.firstName.toLowerCase().includes(search.toLowerCase()) || u.lastName.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()));
+  const customers = users.filter((u: any) => {
+    if (u.role === "admin") return false;
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return u.firstName.toLowerCase().includes(q) || u.lastName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u._id.slice(-8).toUpperCase().includes(q.toUpperCase());
+  });
   const nonAdmins = users.filter((u: any) => u.role !== "admin");
   const totalBalance = nonAdmins.reduce((s: number, u: any) => s + (u.balance ?? 0), 0);
   const unreadMsgs = messages.filter((m: any) => m.status === "unread").length;
@@ -235,6 +240,10 @@ export default function AdminDashboard() {
 
         {/* All Accounts */}
         <Section id="accounts" title={`All Accounts (${customers.length})`}>
+          <div className="mb-3 relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input type="text" placeholder="Search by name, email, or account number..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-xs outline-none focus:border-[#426FB6]" />
+          </div>
           <div className="space-y-2">
             {customers.map((c: any) => (
               <div key={c._id} className="p-3 bg-gray-50 rounded-lg">
