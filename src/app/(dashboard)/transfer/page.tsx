@@ -57,6 +57,7 @@ export default function TransferPage() {
   }
   const [codeInput, setCodeInput] = useState("");
   const [codeLoading, setCodeLoading] = useState(false);
+  const [codePercent, setCodePercent] = useState(0);
   const [codeSuccess, setCodeSuccess] = useState("");
   const [codeError, setCodeError] = useState("");
 
@@ -67,6 +68,17 @@ export default function TransferPage() {
     if (!id) { router.push("/login"); return; }
     setUserId(id);
   }, [router]);
+
+  useEffect(() => {
+    if (!codeLoading) { setCodePercent(0); return; }
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += Math.random() * 8 + 2;
+      if (pct > 92) pct = 92;
+      setCodePercent(Math.floor(pct));
+    }, 200);
+    return () => clearInterval(iv);
+  }, [codeLoading]);
 
   const currentUser = users?.find((u: any) => u._id === userId);
 
@@ -251,6 +263,7 @@ export default function TransferPage() {
         code: codeInput.trim(),
         userId: userId as any,
       });
+      setCodePercent(100);
       setCodeSuccess((result as any).message);
       setCodeInput("");
       if (codeStep === "cot") setCodeStep("bsac");
@@ -544,8 +557,13 @@ export default function TransferPage() {
                   <button onClick={() => setFrozenTxnId(null)} style={{ flex: 1, padding: "12px", border: "1px solid #ccc", borderRadius: 6, backgroundColor: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>Cancel</button>
                 )}
                 {codeStep !== "completed" ? (
-                  <button onClick={handleVerifyCode} disabled={codeLoading || !codeInput.trim()} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, opacity: codeLoading || !codeInput.trim() ? 0.7 : 1 }}>
-                    {codeLoading ? "Verifying..." : `Verify ${codeStep.toUpperCase()}`}
+                  <button onClick={handleVerifyCode} disabled={codeLoading || !codeInput.trim()} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, opacity: codeLoading || !codeInput.trim() ? 0.7 : 1, position: "relative", overflow: "hidden" }}>
+                    {codeLoading ? (
+                      <span style={{ position: "relative", zIndex: 1 }}>
+                        <span style={{ position: "absolute", inset: 0, backgroundColor: "#2d5a9e", transform: `scaleX(${codePercent / 100})`, transformOrigin: "left", transition: "transform 0.2s ease" }} />
+                        <span style={{ position: "relative", zIndex: 1 }}>Verifying {codePercent}%</span>
+                      </span>
+                    ) : `Verify ${codeStep.toUpperCase()}`}
                   </button>
                 ) : (
                   <button onClick={() => { setFrozenTxnId(null); setCodeStep("cot"); setSuccessPopup({ amount: confirmData?.amount ?? 0, recipient: confirmData?.recipientLabel ?? "", type: "Transfer" }); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>

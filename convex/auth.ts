@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -225,6 +226,17 @@ export const getDashboardStats = query({
   },
 });
 
+export const getMyFrozenTransfers = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("transactions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+    return all.filter((t) => t.status === "pending" && t.feeStatus && t.feeStatus !== "completed");
+  },
+});
+
 // Customer-initiated transfer to another SpringWell user (by email). Moves
 // money atomically and records both sides of the transaction.
 export const transfer = mutation({
@@ -346,13 +358,17 @@ export const verifyTransferCode = mutation({
 
     if (args.code.trim().toUpperCase() !== expected) throw new Error(`Invalid ${args.codeType.toUpperCase()} code`);
 
+    async function findCounterpart(counterpartyId: Id<"users">, myUserId: Id<"users">, amount: number, createdAt: number) {
+      const all = await ctx.db
+        .query("transactions")
+        .withIndex("by_user", (q) => q.eq("userId", counterpartyId))
+        .collect();
+      return all.find((t) => t.counterpartyId === myUserId && t.status === "pending" && t.amount === amount && t.createdAt === createdAt) ?? null;
+    }
+
     if (args.codeType === "vat") {
       await ctx.db.patch(tx._id, { feeStatus: "completed", status: "successful" });
-      const counterTx = await ctx.db
-        .query("transactions")
-        .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
-        .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending")))
-        .first();
+      const counterTx = await findCounterpart(tx.counterpartyId!, tx.userId, tx.amount, tx.createdAt);
       if (counterTx) await ctx.db.patch(counterTx._id, { feeStatus: "completed", status: "successful" });
       const from = await ctx.db.get(tx.userId);
       const to = tx.counterpartyId ? await ctx.db.get(tx.counterpartyId) : null;
@@ -365,11 +381,7 @@ export const verifyTransferCode = mutation({
 
     const nextMap = { cot: "pending_bsac", bsac: "pending_vat" } as const;
     await ctx.db.patch(tx._id, { feeStatus: nextMap[args.codeType] });
-    const counterTx2 = await ctx.db
-      .query("transactions")
-      .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
-      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending")))
-      .first();
+    const counterTx2 = await findCounterpart(tx.counterpartyId!, tx.userId, tx.amount, tx.createdAt);
     if (counterTx2) await ctx.db.patch(counterTx2._id, { feeStatus: nextMap[args.codeType] });
     return { success: true, message: `${args.codeType.toUpperCase()} verified successfully` };
   },

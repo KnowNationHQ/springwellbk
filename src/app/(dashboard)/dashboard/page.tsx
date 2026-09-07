@@ -50,12 +50,33 @@ export default function DashboardPage() {
   const generateUploadUrl = useMutation(api.auth.generateUploadUrl);
   const saveProfileImage = useMutation(api.auth.saveProfileImage);
   const removeProfileImage = useMutation(api.auth.removeProfileImage);
+  const frozenTransfers = useQuery(api.auth.getMyFrozenTransfers, userId ? { userId: userId as any } : "skip");
+  const verifyTransferCode = useMutation(api.auth.verifyTransferCode);
+
+  const [frozenVerifyTxn, setFrozenVerifyTxn] = useState<any>(null);
+  const [frozenStep, setFrozenStep] = useState<"cot" | "bsac" | "vat" | "completed">("cot");
+  const [frozenCode, setFrozenCode] = useState("");
+  const [frozenLoading, setFrozenLoading] = useState(false);
+  const [frozenPercent, setFrozenPercent] = useState(0);
+  const [frozenError, setFrozenError] = useState("");
+  const [frozenSuccess, setFrozenSuccess] = useState("");
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
     if (!id) { router.push("/login"); return; }
     setUserId(id);
   }, [router]);
+
+  useEffect(() => {
+    if (!frozenLoading) { setFrozenPercent(0); return; }
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += Math.random() * 8 + 2;
+      if (pct > 92) pct = 92;
+      setFrozenPercent(Math.floor(pct));
+    }, 200);
+    return () => clearInterval(iv);
+  }, [frozenLoading]);
 
   useEffect(() => {
     if (!activeModal) return;
@@ -97,6 +118,45 @@ export default function DashboardPage() {
       setTimeout(() => { setActiveModal(null); setTransferSuccess(""); }, 500);
     } catch (err: any) { setTransferError(err.message || "Transfer failed"); }
     finally { setTransferBusy(false); }
+  }
+
+  function stepFromFeeStatus(fs?: string): "cot" | "bsac" | "vat" {
+    if (fs === "pending_bsac") return "bsac";
+    if (fs === "pending_vat") return "vat";
+    return "cot";
+  }
+
+  function openFrozenVerify(tx: any) {
+    setFrozenVerifyTxn(tx);
+    setFrozenStep(stepFromFeeStatus(tx.feeStatus));
+    setFrozenCode("");
+    setFrozenError("");
+    setFrozenSuccess("");
+  }
+
+  async function handleFrozenVerify() {
+    if (!frozenVerifyTxn || !frozenCode.trim() || frozenStep === "completed") return;
+    setFrozenLoading(true);
+    setFrozenError("");
+    setFrozenSuccess("");
+    try {
+      const result = await verifyTransferCode({
+        transactionId: frozenVerifyTxn._id,
+        codeType: frozenStep,
+        code: frozenCode.trim(),
+        userId: userId as any,
+      });
+      setFrozenPercent(100);
+      setFrozenSuccess((result as any).message);
+      setFrozenCode("");
+      if (frozenStep === "cot") setFrozenStep("bsac");
+      else if (frozenStep === "bsac") setFrozenStep("vat");
+      else setFrozenStep("completed");
+    } catch (err: any) {
+      setFrozenError(err.message || "Invalid code");
+    } finally {
+      setFrozenLoading(false);
+    }
   }
 
   async function handlePasswordChange(e: React.FormEvent) {
@@ -203,6 +263,25 @@ export default function DashboardPage() {
             <div>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#92400e" }}>Your account is frozen</p>
               <p style={{ margin: 0, fontSize: 12, color: "#a16207" }}>Transfers require verification codes from support. Contact your administrator for COT, BSAC, and VAT codes.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {user.status === "suspended" && frozenTransfers && frozenTransfers.length > 0 && (
+        <div className="max-w-[1100px] mx-auto px-4 pt-2">
+          <div style={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 16px" }}>
+            <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 700, color: "#374151" }}>Pending Verification ({frozenTransfers.length})</p>
+            <div className="space-y-2">
+              {frozenTransfers.map((tx: any) => (
+                <div key={tx._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: 6, border: "1px solid #f3f4f6" }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#111" }}>{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : "BSAC verified"}</p>
+                  </div>
+                  <button onClick={() => openFrozenVerify(tx)} style={{ padding: "6px 14px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Verify</button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -471,6 +550,56 @@ export default function DashboardPage() {
           <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={depositBusy}>{depositBusy ? "Processing..." : "Submit Deposit"}</Button>
         </form>
       </Modal>
+
+      {frozenVerifyTxn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setFrozenVerifyTxn(null)}>
+          <div className="w-full max-w-[420px] bg-white rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", padding: "16px 20px" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Verify Transfer Code</h3>
+            </div>
+            <div style={{ padding: 20 }}>
+              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Your account is frozen. Enter the verification code sent to your email.</p>
+              {frozenSuccess && (
+                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#16a34a", fontSize: 13, textAlign: "center", fontWeight: 600 }}>{frozenSuccess}</div>
+              )}
+              {frozenError && (
+                <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#dc2626", fontSize: 13, textAlign: "center" }}>{frozenError}</div>
+              )}
+              {frozenStep !== "completed" ? (
+                <>
+                  <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>{frozenStep.toUpperCase()} Code</label>
+                  <input value={frozenCode} onChange={(e) => setFrozenCode(e.target.value)} placeholder={`Enter ${frozenStep.toUpperCase()} code`}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "monospace", letterSpacing: 2, textAlign: "center", boxSizing: "border-box" }}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleFrozenVerify(); }} autoFocus />
+                </>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>&#10003;</div>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "#16a34a", margin: "0 0 4px" }}>Transfer Successful!</p>
+                  <p style={{ fontSize: 13, color: "#666", margin: 0 }}>All verification codes confirmed.</p>
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+                {frozenStep !== "completed" && (
+                  <button onClick={() => setFrozenVerifyTxn(null)} style={{ flex: 1, padding: "12px", border: "1px solid #ccc", borderRadius: 6, backgroundColor: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>Cancel</button>
+                )}
+                {frozenStep !== "completed" ? (
+                  <button onClick={handleFrozenVerify} disabled={frozenLoading || !frozenCode.trim()} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, opacity: frozenLoading || !frozenCode.trim() ? 0.7 : 1, position: "relative", overflow: "hidden" }}>
+                    {frozenLoading ? (
+                      <span style={{ position: "relative", zIndex: 1 }}>
+                        <span style={{ position: "absolute", inset: 0, backgroundColor: "#2d5a9e", transform: `scaleX(${frozenPercent / 100})`, transformOrigin: "left", transition: "transform 0.2s ease" }} />
+                        <span style={{ position: "relative", zIndex: 1 }}>Verifying {frozenPercent}%</span>
+                      </span>
+                    ) : `Verify ${frozenStep.toUpperCase()}`}
+                  </button>
+                ) : (
+                  <button onClick={() => { setFrozenVerifyTxn(null); setFrozenStep("cot"); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
     </div>
