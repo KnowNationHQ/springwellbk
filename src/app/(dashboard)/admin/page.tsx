@@ -259,8 +259,9 @@ export default function AdminDashboard() {
                   <button title="Credit" onClick={() => openCredit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><ArrowUpDown className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Transfer" onClick={() => openTransfer(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Send className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Edit" onClick={() => openEdit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Pencil className="w-3.5 h-3.5 text-gray-600" /></button>
+                  {c.status === "pending" && <button title="Activate Account" onClick={() => handleStatus(c._id, "active")} className="p-1.5 border border-green-300 rounded-lg bg-green-50"><CheckCircle className="w-3.5 h-3.5 text-green-600" /></button>}
                   {c.status === "suspended" && <button title="Unfreeze" onClick={() => handleStatus(c._id, "active")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><CheckCircle className="w-3.5 h-3.5 text-green-600" /></button>}
-                  {c.status !== "suspended" && c.status !== "pending" && <button title="Freeze Account" onClick={() => handleStatus(c._id, "suspended")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><XCircle className="w-3.5 h-3.5 text-orange-500" /></button>}
+                  {c.status === "active" && <button title="Freeze Account" onClick={() => handleStatus(c._id, "suspended")} className="p-1.5 border border-gray-200 rounded-lg bg-white"><XCircle className="w-3.5 h-3.5 text-orange-500" /></button>}
                   <button title="Delete" onClick={() => handleDelete(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Trash2 className="w-3.5 h-3.5 text-red-600" /></button>
                 </div>
               </div>
@@ -307,7 +308,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`text-sm font-bold ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                    <button onClick={() => openBackdate(t)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><CalendarClock className="w-3.5 h-3.5 text-gray-500" /></button>
+                    <button onClick={() => openBackdate(t)} className="flex items-center gap-1 px-2 py-1 border border-gray-200 rounded-lg bg-white text-[11px] text-gray-500 cursor-pointer"><CalendarClock className="w-3.5 h-3.5" /><span className="hidden sm:inline">Backdate</span></button>
                   </div>
                 </div>
               ))}
