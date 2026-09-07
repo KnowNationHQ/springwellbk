@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "codes" | "profile";
+type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "profile";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -43,7 +43,6 @@ export default function AdminDashboard() {
   const transactions = useQuery(api.transactions.recent, { limit: 20 });
   const messages = useQuery(api.admin.listMessages);
   const pending = useQuery(api.admin.pendingTransactions);
-  const frozenTransfers = useQuery(api.admin.pendingFrozenTransfers);
 
   const creditDebit = useMutation(api.admin.creditDebit);
   const transferAdmin = useMutation(api.admin.transfer);
@@ -53,8 +52,6 @@ export default function AdminDashboard() {
   const updateUser = useMutation(api.admin.updateUser);
   const deleteUser = useMutation(api.admin.deleteUser);
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
-  const generateTransferCodes = useMutation(api.admin.generateTransferCodes);
-  const sendVerificationCodes = useAction(api.email.sendVerificationCodes);
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
   const generateUploadUrl = useMutation(api.auth.generateUploadUrl);
@@ -77,15 +74,13 @@ export default function AdminDashboard() {
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [codesData, setCodesData] = useState<{ label: string; code: string; txn: any } | null>(null);
-  const [generatingCodes, setGeneratingCodes] = useState(false);
   const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [profileMsg, setProfileMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
 
-  if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined || frozenTransfers === undefined) {
+  if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
   }
 
@@ -149,27 +144,6 @@ export default function AdminDashboard() {
     } catch (err: any) { setPwMsg(err?.message ?? "Failed"); }
   }
 
-  async function handleGenerateCodes(txn: any) {
-    if (!userId) return;
-    setGeneratingCodes(true);
-    try {
-      const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id });
-      const sender = users?.find((u: any) => u._id === txn.userId);
-      if (sender?.email) {
-        try {
-          await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: result.label === "COT" ? result.code : "", bsacCode: result.label === "BSAC" ? result.code : "", vatCode: result.label === "VAT" ? result.code : "" });
-        } catch { /* email best-effort */ }
-      }
-      setCodesData({ label: result.label, code: result.code, txn });
-      setModal("codes");
-      flash(`${result.label} code generated and sent to customer`);
-    } catch (err: any) {
-      flash(err?.message ?? "Failed to generate codes");
-    } finally {
-      setGeneratingCodes(false);
-    }
-  }
-
   const inputCls = "w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors";
   const btnPrimary = "px-4 py-2 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer";
   const btnGhost = "px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm cursor-pointer text-gray-700";
@@ -230,46 +204,6 @@ export default function AdminDashboard() {
                   <button onClick={() => openComplete(t._id)} className={btnPrimary + " text-xs"}>Complete</button>
                 </div>
               ))}
-            </div>
-          )}
-        </Section>
-
-        {/* Frozen Transfers */}
-        <Section title={`Frozen Transfers — Awaiting Verification Codes (${frozenTransfers.length})`}>
-          {frozenTransfers.length === 0 ? <p className="text-gray-400 text-sm m-0">No frozen transfers.</p> : (
-            <div className="space-y-2">
-              {frozenTransfers.map((t: any) => {
-                const sender = users?.find((u: any) => u._id === t.userId);
-                const feeLabel = t.feeStatus === "pending_cot" ? "Awaiting COT" : t.feeStatus === "pending_bsac" ? "COT verified" : t.feeStatus === "pending_vat" ? "BSAC verified" : "Completed";
-                return (
-                  <div key={t._id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center"><ArrowUpDown className="w-3.5 h-3.5 text-orange-600" /></div>
-                        <div>
-                          <p className="text-sm font-bold text-gray-900 m-0">{sym(t.currency)}{t.amount.toLocaleString()}</p>
-                          <p className="text-[11px] text-gray-400 m-0">{sender?.firstName} {sender?.lastName} · {new Date(t.createdAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {t.cotCode && (
-                        <div className="flex gap-1.5 text-[11px] font-mono text-gray-500">
-                          {t.cotCode && <span>COT: <strong className="text-gray-900">{t.cotCode}</strong></span>}
-                          {t.bsacCode && <><span>·</span><span>BSAC: <strong className="text-gray-900">{t.bsacCode}</strong></span></>}
-                          {t.vatCode && <><span>·</span><span>VAT: <strong className="text-gray-900">{t.vatCode}</strong></span></>}
-                        </div>
-                      )}
-                      {(!t.vatCode) && (
-                        <button onClick={() => handleGenerateCodes(t)} disabled={generatingCodes} className={btnPrimary + " text-xs"}>
-                          {generatingCodes ? "Generating..." : `Generate ${t.cotCode && !t.bsacCode ? "BSAC" : t.bsacCode && !t.vatCode ? "VAT" : "COT"} Code`}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           )}
         </Section>
@@ -391,7 +325,6 @@ export default function AdminDashboard() {
                 {modal === "status" && "Change Account Status"}
                 {modal === "complete" && "Complete Transaction"}
                 {modal === "backdate" && "Back Date Transaction"}
-                {modal === "codes" && "Verification Codes"}
               </h3>
               <button onClick={() => setModal(null)} className="text-white text-2xl bg-transparent border-none cursor-pointer p-0 leading-none">&times;</button>
             </div>
@@ -460,20 +393,6 @@ export default function AdminDashboard() {
                   <input type="date" className={inputCls} value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Update</button></div>
                 </form>
-              )}
-              {modal === "codes" && codesData && (
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-600 m-0"><strong>{codesData.label}</strong> code generated and sent to customer email.</p>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-500 m-0">{codesData.label} Code</p>
-                      <p className="text-lg font-bold font-mono text-gray-900 m-0 tracking-wider">{codesData.code}</p>
-                    </div>
-                    <button onClick={() => { navigator.clipboard.writeText(codesData.code); flash(`${codesData.label} code copied`); }} className={btnGhost + " text-xs"}>Copy</button>
-                  </div>
-                  <p className="text-xs text-gray-400 m-0">Next: customer enters this code, then you generate the next one.</p>
-                  <div className="flex gap-2 justify-end pt-2"><button onClick={() => setModal(null)} className={btnPrimary}>Done</button></div>
-                </div>
               )}
             </div>
           </div>
