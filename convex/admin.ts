@@ -89,14 +89,30 @@ export const completeTransaction = mutation({
       if (from.balance < tx.amount) throw new Error("Sender has insufficient funds");
       await ctx.db.patch(tx.userId, { balance: from.balance - tx.amount });
       await ctx.db.patch(tx.counterpartyId!, { balance: to.balance + tx.amount });
-      // Mark the counterpart transfer row successful too.
       const counterpart = await ctx.db
         .query("transactions")
         .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
         .filter((q) =>
           q.and(
             q.eq(q.field("counterpartyId"), tx.userId),
-            q.eq(q.field("type"), "transfer"),
+            q.eq(q.field("status"), "pending"),
+          ),
+        )
+        .first();
+      if (counterpart) await ctx.db.patch(counterpart._id, { status: "successful" });
+    } else if (tx.type === "debit" && tx.counterpartyId) {
+      const from = await ctx.db.get(tx.userId);
+      const to = await ctx.db.get(tx.counterpartyId);
+      if (!from || !to) throw new Error("Account not found");
+      if (from.balance < tx.amount) throw new Error("Sender has insufficient funds");
+      await ctx.db.patch(tx.userId, { balance: from.balance - tx.amount });
+      await ctx.db.patch(tx.counterpartyId, { balance: to.balance + tx.amount });
+      const counterpart = await ctx.db
+        .query("transactions")
+        .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("counterpartyId"), tx.userId),
             q.eq(q.field("status"), "pending"),
           ),
         )
@@ -106,11 +122,6 @@ export const completeTransaction = mutation({
       const user = await ctx.db.get(tx.userId);
       if (!user) throw new Error("Account not found");
       await ctx.db.patch(tx.userId, { balance: user.balance + tx.amount });
-    } else if (tx.type === "debit") {
-      const user = await ctx.db.get(tx.userId);
-      if (!user) throw new Error("Account not found");
-      if (user.balance < tx.amount) throw new Error("Insufficient funds");
-      await ctx.db.patch(tx.userId, { balance: user.balance - tx.amount });
     }
 
     await ctx.db.patch(tx._id, { status: "successful" });

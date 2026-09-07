@@ -340,7 +340,7 @@ export const verifyTransferCode = mutation({
       const counterTx = await ctx.db
         .query("transactions")
         .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
-        .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
+        .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending")))
         .first();
       if (counterTx) await ctx.db.patch(counterTx._id, { feeStatus: "completed", status: "successful" });
       const from = await ctx.db.get(tx.userId);
@@ -357,7 +357,7 @@ export const verifyTransferCode = mutation({
     const counterTx2 = await ctx.db
       .query("transactions")
       .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
-      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
+      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending")))
       .first();
     if (counterTx2) await ctx.db.patch(counterTx2._id, { feeStatus: nextMap[args.codeType] });
     return { success: true, message: `${args.codeType.toUpperCase()} verified successfully` };
