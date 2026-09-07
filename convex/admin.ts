@@ -379,24 +379,25 @@ export const generateTransferCodes = mutation({
   args: {
     adminUserId: v.id("users"),
     transactionId: v.id("transactions"),
+    code: v.string(),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.adminUserId);
+    if (!args.code.trim()) throw new Error("Code cannot be empty");
     const tx = await ctx.db.get(args.transactionId);
     if (!tx) throw new Error("Transaction not found");
     if (tx.status !== "pending" || !tx.feeStatus) throw new Error("Not a frozen transfer");
-    const code = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const patch: Record<string, string> = {};
     let label = "";
     if (!tx.cotCode) {
-      patch.cotCode = code();
+      patch.cotCode = args.code.trim().toUpperCase();
       label = "COT";
     } else if (!tx.bsacCode) {
-      patch.bsacCode = code();
+      patch.bsacCode = args.code.trim().toUpperCase();
       label = "BSAC";
     } else if (!tx.vatCode) {
-      patch.vatCode = code();
+      patch.vatCode = args.code.trim().toUpperCase();
       label = "VAT";
     }
 

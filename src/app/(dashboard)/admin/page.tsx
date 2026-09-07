@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "codes" | "profile";
+type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "profile";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -76,8 +76,8 @@ export default function AdminDashboard() {
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [codesData, setCodesData] = useState<{ label: string; code: string; txn: any } | null>(null);
   const [generatingCodes, setGeneratingCodes] = useState(false);
+  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
   const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [profileMsg, setProfileMsg] = useState("");
@@ -151,18 +151,19 @@ export default function AdminDashboard() {
 
   async function handleGenerateCodes(txn: any) {
     if (!userId) return;
+    const codeVal = (codeInputs[txn._id] || "").trim();
+    if (!codeVal) return;
     setGeneratingCodes(true);
     try {
-      const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id });
+      const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id, code: codeVal });
       const sender = users?.find((u: any) => u._id === txn.userId);
       if (sender?.email) {
         try {
           await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: result.label === "COT" ? result.code : "", bsacCode: result.label === "BSAC" ? result.code : "", vatCode: result.label === "VAT" ? result.code : "" });
         } catch { /* email best-effort */ }
       }
-      setCodesData({ label: result.label, code: result.code, txn });
-      setModal("codes");
-      flash(`${result.label} Code Generated!`, `Code sent to ${sender?.email ?? "customer"}`);
+      setCodeInputs((prev) => { const n = { ...prev }; delete n[txn._id]; return n; });
+      flash(`${result.label} Code Sent!`, `Code sent to ${sender?.email ?? "customer"}`);
     } catch (err: any) {
       flash("Error", err?.message ?? "Failed to generate codes");
     } finally {
@@ -260,9 +261,24 @@ export default function AdminDashboard() {
                         </div>
                       )}
                       {(!t.vatCode) && (
-                        <button onClick={() => handleGenerateCodes(t)} disabled={generatingCodes} className={btnPrimary + " text-xs"}>
-                          {generatingCodes ? "Generating..." : `Generate ${t.cotCode && !t.bsacCode ? "BSAC" : t.bsacCode && !t.vatCode ? "VAT" : "COT"} Code`}
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            placeholder={`Enter ${t.cotCode && !t.bsacCode ? "BSAC" : t.bsacCode && !t.vatCode ? "VAT" : "COT"} code`}
+                            value={codeInputs[t._id] || ""}
+                            onChange={(e) => setCodeInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
+                            onKeyDown={(e) => { if (e.key === "Enter") handleGenerateCodes(t); }}
+                            className="px-2 py-1 border border-gray-300 rounded text-xs font-mono w-28 outline-none focus:border-[#426FB6]"
+                          />
+                          <button
+                            onClick={() => handleGenerateCodes(t)}
+                            disabled={generatingCodes || !(codeInputs[t._id] || "").trim()}
+                            className={btnPrimary + " text-xs"}
+                            style={{ opacity: generatingCodes || !(codeInputs[t._id] || "").trim() ? 0.5 : 1 }}
+                          >
+                            {generatingCodes ? "Sending..." : "Send Code"}
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -389,7 +405,6 @@ export default function AdminDashboard() {
                 {modal === "status" && "Change Account Status"}
                 {modal === "complete" && "Complete Transaction"}
                 {modal === "backdate" && "Back Date Transaction"}
-                {modal === "codes" && "Verification Codes"}
               </h3>
               <button onClick={() => setModal(null)} className="text-white text-2xl bg-transparent border-none cursor-pointer p-0 leading-none">&times;</button>
             </div>
@@ -467,20 +482,6 @@ export default function AdminDashboard() {
                   <input type="date" className={inputCls} value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Update</button></div>
                 </form>
-              )}
-              {modal === "codes" && codesData && (
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-600 m-0"><strong>{codesData.label}</strong> code generated and sent to customer email.</p>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-500 m-0">{codesData.label} Code</p>
-                      <p className="text-lg font-bold font-mono text-gray-900 m-0 tracking-wider">{codesData.code}</p>
-                    </div>
-                    <button onClick={() => { navigator.clipboard.writeText(codesData.code); flash("Copied!", `${codesData.label} code copied to clipboard`); }} className={btnGhost + " text-xs"}>Copy</button>
-                  </div>
-                  <p className="text-xs text-gray-400 m-0">Next: customer enters this code, then you generate the next one.</p>
-                  <div className="flex gap-2 justify-end pt-2"><button onClick={() => setModal(null)} className={btnPrimary}>Done</button></div>
-                </div>
               )}
             </div>
           </div>
