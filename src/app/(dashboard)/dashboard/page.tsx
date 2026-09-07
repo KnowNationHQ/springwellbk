@@ -417,7 +417,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-4">
             <div className="w-full max-w-[340px] h-[200px] mx-auto [perspective:800px] cursor-pointer group">
-              <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+              <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] card-spin-mobile card-spin-tablet">
                 {/* Front */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1a3a5c] via-[#2a5a8c] to-[#1a3a5c] p-5 flex flex-col justify-between text-white shadow-lg [backface-visibility:hidden]">
                   <div className="flex justify-between items-start">
