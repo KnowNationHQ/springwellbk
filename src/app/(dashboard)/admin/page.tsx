@@ -141,7 +141,7 @@ export default function AdminDashboard() {
   async function handleComplete(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; setCompleteLoading(true);
     try {
-      const frozenTx = frozenTransfers.find((t: any) => t._id === completeTxn);
+      const frozenTx = frozenTransfers?.find((t: any) => t._id === completeTxn);
       if (frozenTx) {
         const sender = users?.find((u: any) => u._id === frozenTx.userId);
         await generateTransferCodes({ adminUserId: userId as any, transactionId: completeTxn as any, code: activationCode });

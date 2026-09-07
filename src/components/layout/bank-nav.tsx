@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 import { Menu, X, Search, HelpCircle, ChevronDown } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
 
@@ -35,6 +37,24 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => { setUserId(localStorage.getItem("userId")); }, []);
+
+  const frozenTransfers = useQuery(
+    api.auth.getMyFrozenTransfers,
+    userId && role === "customer" ? { userId: userId as any } : "skip"
+  );
+
+  const pendingCount = frozenTransfers?.length ?? 0;
+
+  const customerNav = [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Transfer", href: "/transfer" },
+    ...(pendingCount > 0 ? [{ label: `Pending Verification (${pendingCount})`, href: "/dashboard#pending-verification" }] : []),
+  ];
+
+  const navItems = role === "admin" ? ADMIN_NAV : customerNav;
 
   function handleSignOut() {
     localStorage.removeItem("userId");
@@ -47,7 +67,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
       <nav className="hidden md:block bg-[#434343] text-white">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-9">
           <div className="flex items-center gap-0">
-            {(role === "admin" ? ADMIN_NAV : CUSTOMER_NAV).map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -79,7 +99,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
         </div>
         {mobileOpen && (
           <div className="bg-[#333] border-t border-[#555]">
-            {(role === "admin" ? ADMIN_NAV : CUSTOMER_NAV).map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
