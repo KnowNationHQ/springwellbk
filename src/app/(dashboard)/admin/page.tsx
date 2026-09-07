@@ -8,7 +8,6 @@ import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet
 import { sym } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
-import { Toast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
 import { ProfileImageUpload } from "@/components/profile-image-upload";
 import { Button } from "@/components/ui/button";
@@ -21,8 +20,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [actionMsg, setActionMsg] = useState("");
-  const [toastMsg, setToastMsg] = useState("");
   const [modal, setModal] = useState<Modal>(null);
   const [activeUser, setActiveUser] = useState<any>(null);
 
@@ -85,6 +82,7 @@ export default function AdminDashboard() {
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [profileMsg, setProfileMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
+  const [successPopup, setSuccessPopup] = useState<{ title: string; message: string; details?: { label: string; value: string }[] } | null>(null);
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
 
   if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined || frozenTransfers === undefined) {
@@ -102,7 +100,7 @@ export default function AdminDashboard() {
   const totalBalance = nonAdmins.reduce((s: number, u: any) => s + (u.balance ?? 0), 0);
   const unreadMsgs = messages.filter((m: any) => m.status === "unread").length;
 
-  function flash(msg: string) { setActionMsg(msg); setToastMsg(msg); setTimeout(() => setActionMsg(""), 3000); }
+  function flash(title: string, message?: string) { setSuccessPopup({ title, message: message ?? "" }); }
   function acct(u: any) { return "SWB-" + u._id.slice(-8).toUpperCase(); }
 
   function openCredit(u: any) { setActiveUser(u); setCreditAmount(""); setCreditDesc(""); setCreditType("credit"); setCreditDate(new Date().toISOString().slice(0, 10)); setModal("credit"); }
@@ -111,21 +109,21 @@ export default function AdminDashboard() {
 
   async function handleCredit(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !activeUser || !creditAmount) return;
-    try { await creditDebit({ adminUserId: userId as any, userId: activeUser._id, type: creditType, amount: Number(creditAmount), description: creditDesc || (creditType === "credit" ? "Admin credit" : "Admin debit"), date: creditDate || undefined }); flash(`${creditType} created`); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); }
+    try { await creditDebit({ adminUserId: userId as any, userId: activeUser._id, type: creditType, amount: Number(creditAmount), description: creditDesc || (creditType === "credit" ? "Admin credit" : "Admin debit"), date: creditDate || undefined }); flash("Transaction Successful!", `${creditType === "credit" ? "Credit" : "Debit"} of $${Number(creditAmount).toLocaleString()} created`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
   }
   async function handleTransfer(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !fromUser || !toUser || !transferAmount) return;
-    try { await transferAdmin({ adminUserId: userId as any, fromUserId: fromUser as any, toUserId: toUser as any, amount: Number(transferAmount), description: transferDesc || "Admin transfer", date: transferDate || undefined }); flash("Transfer created"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); }
+    try { await transferAdmin({ adminUserId: userId as any, fromUserId: fromUser as any, toUserId: toUser as any, amount: Number(transferAmount), description: transferDesc || "Admin transfer", date: transferDate || undefined }); flash("Transfer Successful!", `$${Number(transferAmount).toLocaleString()} transferred`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
   }
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !activeUser) return;
-    try { await updateUser({ adminUserId: userId as any, userId: activeUser._id, firstName: edit.firstName, lastName: edit.lastName, email: edit.email, accountType: edit.accountType as any, currency: edit.currency as any, status: edit.status as any, balance: Number(edit.balance), creditBalance: Number(edit.creditBalance) || 0 }); flash("Account updated"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); }
+    try { await updateUser({ adminUserId: userId as any, userId: activeUser._id, firstName: edit.firstName, lastName: edit.lastName, email: edit.email, accountType: edit.accountType as any, currency: edit.currency as any, status: edit.status as any, balance: Number(edit.balance), creditBalance: Number(edit.creditBalance) || 0 }); flash("Account Updated", `${edit.firstName} ${edit.lastName} profile saved`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
   }
-  async function handleStatus(uid: string, status: "active" | "suspended" | "pending") { if (!userId) return; await setUserStatus({ adminUserId: userId as any, userId: uid as any, status }); flash(`Account ${status}`); }
-  async function handleDelete(u: any) { if (!userId) return; if (!confirm(`Delete ${acct(u)}?`)) return; try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Deleted"); } catch (err: any) { flash(err?.message ?? "Failed"); } }
+  async function handleStatus(uid: string, status: "active" | "suspended" | "pending") { if (!userId) return; await setUserStatus({ adminUserId: userId as any, userId: uid as any, status }); flash(`Account ${status.charAt(0).toUpperCase() + status.slice(1)}`, `Account has been ${status}`); }
+  async function handleDelete(u: any) { if (!userId) return; if (!confirm(`Delete ${acct(u)}?`)) return; try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Deleted", `${acct(u)} removed`); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   async function handleMessage(id: string, status: "read" | "replied") { if (!userId) return; await setMessageStatus({ adminUserId: userId as any, messageId: id as any, status }); flash(`Marked ${status}`); }
   function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setGeneratedCode(""); setModal("complete"); }
-  async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Completed"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
+  async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Transaction Completed!", "Transfer has been processed successfully"); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   function openBackdate(t: any) { setBackdateTxn(t); setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10)); setModal("backdate"); }
   function openProfile() {
     if (adminUser) {
@@ -134,7 +132,7 @@ export default function AdminDashboard() {
     setProfileMsg(""); setPwMsg(""); setPwForm({ current: "", next: "", confirm: "" });
     setModal("profile");
   }
-  async function handleBackdate(e: React.FormEvent) { e.preventDefault(); if (!userId || !backdateTxn || !backdateValue) return; try { await backDateTransaction({ adminUserId: userId as any, transactionId: backdateTxn._id as any, date: backdateValue }); flash("Date updated"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
+  async function handleBackdate(e: React.FormEvent) { e.preventDefault(); if (!userId || !backdateTxn || !backdateValue) return; try { await backDateTransaction({ adminUserId: userId as any, transactionId: backdateTxn._id as any, date: backdateValue }); flash("Date Updated!", `Changed to ${backdateValue}`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   async function handleProfileSave() {
     if (!userId) return;
     try {
@@ -164,9 +162,9 @@ export default function AdminDashboard() {
       }
       setCodesData({ label: result.label, code: result.code, txn });
       setModal("codes");
-      flash(`${result.label} code generated and sent to customer`);
+      flash(`${result.label} Code Generated!`, `Code sent to ${sender?.email ?? "customer"}`);
     } catch (err: any) {
-      flash(err?.message ?? "Failed to generate codes");
+      flash("Error", err?.message ?? "Failed to generate codes");
     } finally {
       setGeneratingCodes(false);
     }
@@ -189,8 +187,6 @@ export default function AdminDashboard() {
             <input type="text" placeholder="Search customers..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6]" />
           </div>
         </div>
-
-        {actionMsg && <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-sm text-[#426FB6]">{actionMsg}</div>}
 
         {/* Balance Card */}
         <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
@@ -453,7 +449,7 @@ export default function AdminDashboard() {
                 <form onSubmit={handleComplete} className="space-y-3">
                   <select className={inputCls} value={completeTxn} onChange={(e) => { setCompleteTxn(e.target.value); setGeneratedCode(""); }} required><option value="">Select transaction</option>{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</select>
                   {completeTxn && !generatedCode && (
-                    <button type="button" onClick={async () => { if (!userId || !completeTxn) return; try { const code = await generateActivationCode({ adminUserId: userId as any, transactionId: completeTxn as any }); setGeneratedCode(code); } catch (err: any) { flash(err?.message ?? "Failed"); } }} style={{ width: "100%", padding: "10px", border: "2px dashed #426FB6", borderRadius: 6, backgroundColor: "#f0f4ff", color: "#426FB6", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Generate Activation Code</button>
+                    <button type="button" onClick={async () => { if (!userId || !completeTxn) return; try { const code = await generateActivationCode({ adminUserId: userId as any, transactionId: completeTxn as any }); setGeneratedCode(code); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }} style={{ width: "100%", padding: "10px", border: "2px dashed #426FB6", borderRadius: 6, backgroundColor: "#f0f4ff", color: "#426FB6", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Generate Activation Code</button>
                   )}
                   {generatedCode && (
                     <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "12px 14px", textAlign: "center" }}>
@@ -480,7 +476,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-500 m-0">{codesData.label} Code</p>
                       <p className="text-lg font-bold font-mono text-gray-900 m-0 tracking-wider">{codesData.code}</p>
                     </div>
-                    <button onClick={() => { navigator.clipboard.writeText(codesData.code); flash(`${codesData.label} code copied`); }} className={btnGhost + " text-xs"}>Copy</button>
+                    <button onClick={() => { navigator.clipboard.writeText(codesData.code); flash("Copied!", `${codesData.label} code copied to clipboard`); }} className={btnGhost + " text-xs"}>Copy</button>
                   </div>
                   <p className="text-xs text-gray-400 m-0">Next: customer enters this code, then you generate the next one.</p>
                   <div className="flex gap-2 justify-end pt-2"><button onClick={() => setModal(null)} className={btnPrimary}>Done</button></div>
@@ -491,7 +487,30 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
+      {successPopup && (
+        <div className="modal-overlay" onClick={() => setSuccessPopup(null)}>
+          <div className="modal-box" style={{ maxWidth: 400, padding: 0, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: "32px 24px 24px" }}>
+              <div style={{ width: 64, height: 64, borderRadius: "50%", backgroundColor: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+              </div>
+              <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: "#111" }}>{successPopup.title}</h3>
+              {successPopup.message && <p style={{ margin: "0 0 20px", fontSize: 13, color: "#666" }}>{successPopup.message}</p>}
+              {successPopup.details && successPopup.details.length > 0 && (
+                <div style={{ backgroundColor: "#f8f9fa", borderRadius: 10, padding: "16px 20px", marginBottom: 24, textAlign: "left" }}>
+                  {successPopup.details.map((d, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 14, borderBottom: i < successPopup.details!.length - 1 ? "1px solid #eee" : "none" }}>
+                      <span style={{ color: "#888" }}>{d.label}</span>
+                      <span style={{ fontWeight: 600, color: "#111" }}>{d.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => setSuccessPopup(null)} style={{ width: "100%", padding: "12px", border: "none", borderRadius: 8, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Modal open={modal === "profile"} onClose={() => setModal(null)} title="My Profile" maxWidth={500}>
         {profileMsg && <p className={`text-xs mb-3 ${profileMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{profileMsg}</p>}
