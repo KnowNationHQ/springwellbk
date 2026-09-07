@@ -155,7 +155,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
           <div className="flex items-center gap-6">
             <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={220} />
             <div className="flex items-center gap-5">
-              <h2 className="text-2xl font-bold m-0 text-black">Hello, Springwell</h2>
+              <h2 className="text-2xl font-bold m-0 text-black">Hello, {user.firstName}</h2>
               <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
               <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
             </div>
@@ -178,7 +178,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
             <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={80} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
-            <h2 className="text-lg font-bold m-0 text-black truncate">Hello, Springwell</h2>
+            <h2 className="text-lg font-bold m-0 text-black truncate">Hello, {user.firstName}</h2>
             <div className="flex items-center gap-3 mt-1 flex-wrap">
               <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
               <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
