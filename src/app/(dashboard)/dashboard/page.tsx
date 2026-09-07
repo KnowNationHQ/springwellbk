@@ -309,7 +309,7 @@ export default function DashboardPage() {
                 <div key={tx._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: 6, border: "1px solid #f3f4f6" }}>
                   <div>
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#111" }}>{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : "BSAC verified"}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : tx.feeStatus === "pending_vat" ? "BSAC verified" : "Completed"}</p>
                   </div>
                   <button onClick={() => openFrozenVerify(tx)} style={{ padding: "6px 14px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Verify</button>
                 </div>

@@ -138,7 +138,24 @@ export default function AdminDashboard() {
   async function handleDelete(u: any) { if (!userId) return; if (!confirm(`Delete ${acct(u)}?`)) return; try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Deleted", `${acct(u)} removed`); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   async function handleMessage(id: string, status: "read" | "replied") { if (!userId) return; await setMessageStatus({ adminUserId: userId as any, messageId: id as any, status }); flash(`Marked ${status}`); }
   function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setModal("complete"); }
-  async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; setCompleteLoading(true); try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Transaction Completed!", "Transfer has been processed successfully"); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } finally { setCompleteLoading(false); } }
+  async function handleComplete(e: React.FormEvent) {
+    e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; setCompleteLoading(true);
+    try {
+      const frozenTx = frozenTransfers.find((t: any) => t._id === completeTxn);
+      if (frozenTx) {
+        const sender = users?.find((u: any) => u._id === frozenTx.userId);
+        await generateTransferCodes({ adminUserId: userId as any, transactionId: completeTxn as any, code: activationCode });
+        if (sender?.email) {
+          try { await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: frozenTx.cotCode || activationCode, bsacCode: frozenTx.bsacCode || "", vatCode: frozenTx.vatCode || "" }); } catch {}
+        }
+        flash("Code Sent!", `Verification code sent to ${sender?.email ?? "customer"}`);
+      } else {
+        await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode });
+        flash("Transaction Completed!", "Transfer has been processed successfully");
+      }
+      setModal(null);
+    } catch (err: any) { flash("Error", err?.message ?? "Failed"); } finally { setCompleteLoading(false); }
+  }
   function openBackdate(t: any) { setBackdateTxn(t); setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10)); setModal("backdate"); }
   function openTxns(u: any) { setTxnsUser(u); setModal("txns"); }
   function openProfile() {
@@ -480,7 +497,10 @@ export default function AdminDashboard() {
               )}
               {modal === "complete" && (
                 <form onSubmit={handleComplete} className="space-y-3">
-                  <select className={inputCls} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required><option value="">Select transaction</option>{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</select>
+                  <select className={inputCls} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required><option value="">Select transaction</option>
+                    {pending.length > 0 && <optgroup label="Pending Transactions">{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</optgroup>}
+                    {frozenTransfers.length > 0 && <optgroup label="Frozen Transfers">{frozenTransfers.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.description?.slice(0, 30)} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</optgroup>}
+                  </select>
                   <input type="text" placeholder="Enter activation code" className={inputCls} value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary} disabled={!activationCode || completeLoading} style={{ opacity: !activationCode || completeLoading ? 0.7 : 1, position: "relative", overflow: "hidden", minWidth: 120 }}>{completeLoading ? <span style={{ position: "relative", zIndex: 1 }}><span style={{ position: "absolute", inset: 0, backgroundColor: "#2d5a9e", transform: `scaleX(${completePercent / 100})`, transformOrigin: "left", transition: "transform 0.2s ease" }} /><span style={{ position: "relative", zIndex: 1 }}>Completing {completePercent}%</span></span> : "Complete"}</button></div>
                 </form>

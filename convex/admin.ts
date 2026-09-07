@@ -401,7 +401,6 @@ export const generateTransferCodes = mutation({
       label = "BSAC";
     } else if (!tx.vatCode) {
       patch.vatCode = args.code.trim().toUpperCase();
-      patch.feeStatus = "completed";
       label = "VAT";
     }
 
@@ -414,17 +413,6 @@ export const generateTransferCodes = mutation({
       .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending"), q.eq(q.field("amount"), tx.amount), q.eq(q.field("createdAt"), tx.createdAt)))
       .first();
     if (counterTx) await ctx.db.patch(counterTx._id, patch);
-
-    if (label === "VAT") {
-      const from = await ctx.db.get(tx.userId);
-      const to = tx.counterpartyId ? await ctx.db.get(tx.counterpartyId) : null;
-      if (from && to) {
-        await ctx.db.patch(from._id, { balance: from.balance - tx.amount });
-        await ctx.db.patch(to._id, { balance: to.balance + tx.amount });
-      }
-      await ctx.db.patch(tx._id, { status: "successful" });
-      if (counterTx) await ctx.db.patch(counterTx._id, { status: "successful" });
-    }
 
     return { label, code: patch[`${label.toLowerCase()}Code`] as string };
   },
