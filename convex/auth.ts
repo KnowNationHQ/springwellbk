@@ -265,17 +265,6 @@ export const transfer = mutation({
     const ts = Date.now();
 
     if (from.status === "suspended") {
-      const all = await ctx.db
-        .query("transactions")
-        .withIndex("by_user", (q) => q.eq("userId", from._id))
-        .filter((q) => q.eq(q.field("status"), "pending"))
-        .collect();
-      const frozen = all.filter((t) => t.feeStatus && t.feeStatus !== "completed");
-      if (frozen.length > 0) {
-        const priority: Record<string, number> = { pending_vat: 3, pending_bsac: 2, pending_cot: 1 };
-        frozen.sort((a, b) => (priority[b.feeStatus ?? ""] ?? 0) - (priority[a.feeStatus ?? ""] ?? 0));
-        return { frozen: true, transactionId: frozen[0]._id, feeStatus: frozen[0].feeStatus };
-      }
       if (from.balance < args.amount) throw new Error("Insufficient funds");
       const code = () => Math.random().toString(36).substring(2, 8).toUpperCase();
       const txId = await ctx.db.insert("transactions", {
