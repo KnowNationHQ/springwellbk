@@ -14,15 +14,20 @@ interface BankNavProps {
     imageId?: string;
   };
   onOpenProfile?: () => void;
+  role?: "admin" | "customer";
 }
 
-const PRIMARY_NAV = [
-  { label: "Online banking", href: "/dashboard", active: true },
+const CUSTOMER_NAV = [
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Transfer", href: "/transfer" },
 ];
 
+const ADMIN_NAV = [
+  { label: "Dashboard", href: "/admin" },
+  { label: "Wire Transfer", href: "/admin/transfer" },
+];
 
-
-export function BankNav({ user, onOpenProfile }: BankNavProps) {
+export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -39,12 +44,12 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       <nav className="hidden md:block bg-[#434343] text-white">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-9">
           <div className="flex items-center gap-0">
-            {PRIMARY_NAV.map((item) => (
+            {(role === "admin" ? ADMIN_NAV : CUSTOMER_NAV).map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
                 className={`px-3.5 py-2 text-[13px] no-underline border-b-2 ${
-                  item.active
+                  pathname === item.href
                     ? "text-[#FEDF01] border-[#FEDF01] font-bold"
                     : "text-white border-transparent"
                 } flex items-center gap-1`}
@@ -59,7 +64,7 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
       {/* Row 1: Primary Navigation — mobile */}
       <nav className="md:hidden bg-[#434343] text-white">
         <div className="px-4 flex items-center justify-between h-11">
-          <Link href="/dashboard" className="text-white no-underline font-bold text-sm">
+          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="text-white no-underline font-bold text-sm">
             <img src="/logo.svg" alt="SpringWell Bank" className="h-6 w-auto" />
           </Link>
           <button
@@ -71,13 +76,13 @@ export function BankNav({ user, onOpenProfile }: BankNavProps) {
         </div>
         {mobileOpen && (
           <div className="bg-[#333] border-t border-[#555]">
-            {PRIMARY_NAV.map((item) => (
+            {(role === "admin" ? ADMIN_NAV : CUSTOMER_NAV).map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`block px-5 py-3.5 text-sm no-underline border-b border-[#444] ${
-                  item.active ? "text-[#FEDF01] font-bold" : "text-white"
+                  pathname === item.href ? "text-[#FEDF01] font-bold" : "text-white"
                 }`}
               >
                 {item.label}

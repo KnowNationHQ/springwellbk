@@ -201,7 +201,7 @@ export default function AdminTransferPage() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans page-container">
-      <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} />
+      <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} role="admin" />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "30px 20px" }}>
         {error && (

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock } from "lucide-react";
+import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban } from "lucide-react";
 import { sym } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans page-container">
-      {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} />}
+      {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} role="admin" />}
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Search */}
@@ -149,30 +149,21 @@ export default function AdminDashboard() {
 
         {actionMsg && <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-sm text-[#426FB6]">{actionMsg}</div>}
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Customers", value: String(nonAdmins.length), icon: Users },
-            { label: "Total Balance", value: `${sym(adminUser?.currency ?? "USD")}${totalBalance.toLocaleString()}`, icon: Wallet },
-            { label: "Unread Msgs", value: String(unreadMsgs), icon: MessageSquare },
-          ].map((s) => (
-            <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center"><s.icon className="w-4 h-4 text-[#426FB6]" /></div>
-                <div><p className="text-[11px] text-gray-500 m-0">{s.label}</p><p className="text-base font-bold text-gray-900 m-0">{s.value}</p></div>
-              </div>
-            </div>
-          ))}
+        {/* Balance Card */}
+        <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
+          <p className="text-white/60 text-xs uppercase tracking-wider m-0">Total Customer Balance</p>
+          <p className="text-3xl font-bold m-0 mt-1">{sym(adminUser?.currency ?? "USD")}{totalBalance.toLocaleString()}</p>
+          <p className="text-white/50 text-xs m-0 mt-2">{nonAdmins.length} customers · {unreadMsgs} unread messages</p>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {[
             { label: "Credit", icon: ArrowUpDown, color: "#16a34a", bg: "#dcfce7", action: () => openCredit(null) },
-            { label: "Transfer", icon: Send, color: "#2563eb", bg: "#dbeafe", action: () => openTransfer(null) },
-            { label: "Wire Transfer", icon: Send, color: "#7c3aed", bg: "#ede9fe", action: () => router.push("/admin/transfer") },
-            { label: "Activate", icon: CheckCircle, color: "#059669", bg: "#d1fae5", action: () => setModal("status") },
-            { label: "Suspend", icon: XCircle, color: "#dc2626", bg: "#fee2e2", action: () => setModal("status") },
+            { label: "Transfer", icon: ArrowRight, color: "#2563eb", bg: "#dbeafe", action: () => openTransfer(null) },
+            { label: "Wire Transfer", icon: Globe, color: "#7c3aed", bg: "#ede9fe", action: () => router.push("/admin/transfer") },
+            { label: "Activate", icon: Shield, color: "#059669", bg: "#d1fae5", action: () => setModal("status") },
+            { label: "Suspend", icon: Ban, color: "#dc2626", bg: "#fee2e2", action: () => setModal("status") },
             { label: "Complete", icon: KeyRound, color: "#d97706", bg: "#fef3c7", action: () => openComplete() },
           ].map((b) => (
             <button key={b.label} onClick={b.action} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-xl border border-gray-200 cursor-pointer active:bg-gray-50">
