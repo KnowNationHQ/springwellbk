@@ -47,6 +47,7 @@ export default defineSchema({
     bsacCode: v.optional(v.string()),
     vatCode: v.optional(v.string()),
     feeStatus: v.optional(v.union(v.literal("pending_cot"), v.literal("pending_bsac"), v.literal("pending_vat"), v.literal("completed"))),
+    activationCode: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])

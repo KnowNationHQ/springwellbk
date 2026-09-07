@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   const creditDebit = useMutation(api.admin.creditDebit);
   const transferAdmin = useMutation(api.admin.transfer);
   const completeTransaction = useMutation(api.admin.completeTransaction);
+  const generateActivationCode = useMutation(api.admin.generateActivationCode);
   const backDateTransaction = useMutation(api.admin.backDateTransaction);
   const setUserStatus = useMutation(api.admin.setUserStatus);
   const updateUser = useMutation(api.admin.updateUser);
@@ -74,6 +75,7 @@ export default function AdminDashboard() {
   const [statusTarget, setStatusTarget] = useState("");
   const [completeTxn, setCompleteTxn] = useState("");
   const [activationCode, setActivationCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
@@ -122,7 +124,7 @@ export default function AdminDashboard() {
   async function handleStatus(uid: string, status: "active" | "suspended" | "pending") { if (!userId) return; await setUserStatus({ adminUserId: userId as any, userId: uid as any, status }); flash(`Account ${status}`); }
   async function handleDelete(u: any) { if (!userId) return; if (!confirm(`Delete ${acct(u)}?`)) return; try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Deleted"); } catch (err: any) { flash(err?.message ?? "Failed"); } }
   async function handleMessage(id: string, status: "read" | "replied") { if (!userId) return; await setMessageStatus({ adminUserId: userId as any, messageId: id as any, status }); flash(`Marked ${status}`); }
-  function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setModal("complete"); }
+  function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setGeneratedCode(""); setModal("complete"); }
   async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Completed"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
   function openBackdate(t: any) { setBackdateTxn(t); setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10)); setModal("backdate"); }
   function openProfile() {
@@ -449,9 +451,18 @@ export default function AdminDashboard() {
               )}
               {modal === "complete" && (
                 <form onSubmit={handleComplete} className="space-y-3">
-                  <select className={inputCls} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required><option value="">Select transaction</option>{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</select>
-                  <input type="text" placeholder="Activation Code" className={inputCls} value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
-                  <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Complete</button></div>
+                  <select className={inputCls} value={completeTxn} onChange={(e) => { setCompleteTxn(e.target.value); setGeneratedCode(""); }} required><option value="">Select transaction</option>{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</select>
+                  {completeTxn && !generatedCode && (
+                    <button type="button" onClick={async () => { if (!userId || !completeTxn) return; try { const code = await generateActivationCode({ adminUserId: userId as any, transactionId: completeTxn as any }); setGeneratedCode(code); } catch (err: any) { flash(err?.message ?? "Failed"); } }} style={{ width: "100%", padding: "10px", border: "2px dashed #426FB6", borderRadius: 6, backgroundColor: "#f0f4ff", color: "#426FB6", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Generate Activation Code</button>
+                  )}
+                  {generatedCode && (
+                    <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "12px 14px", textAlign: "center" }}>
+                      <p style={{ fontSize: 11, color: "#666", margin: "0 0 4px" }}>Activation Code</p>
+                      <p style={{ fontSize: 18, fontWeight: 700, color: "#16a34a", margin: 0, fontFamily: "monospace", letterSpacing: 2 }}>{generatedCode}</p>
+                    </div>
+                  )}
+                  <input type="text" placeholder="Enter activation code" className={inputCls} value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
+                  <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary} disabled={!activationCode}>Complete</button></div>
                 </form>
               )}
               {modal === "backdate" && (

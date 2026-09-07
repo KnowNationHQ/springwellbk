@@ -46,6 +46,24 @@ export const creditDebit = mutation({
 // Override via Convex env var ACTIVATION_CODE in production.
 const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "SWB-ADMIN-2026";
 
+// Generate a fresh activation code for a pending transaction.
+export const generateActivationCode = mutation({
+  args: {
+    adminUserId: v.id("users"),
+    transactionId: v.id("transactions"),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const tx = await ctx.db.get(args.transactionId);
+    if (!tx) throw new Error("Transaction not found");
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "SWB-";
+    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    await ctx.db.patch(args.transactionId, { activationCode: code });
+    return code;
+  },
+});
+
 // Complete a pending transaction after verifying the admin's activation code.
 // Applies the balance change and marks the transaction successful.
 export const completeTransaction = mutation({
@@ -56,13 +74,13 @@ export const completeTransaction = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.adminUserId);
-    if (args.activationCode.trim() !== ACTIVATION_CODE) {
-      throw new Error("Invalid activation code");
-    }
-
     const tx = await ctx.db.get(args.transactionId);
     if (!tx) throw new Error("Transaction not found");
     if (tx.status !== "pending") throw new Error("Transaction is not pending");
+    const expected = tx.activationCode ?? ACTIVATION_CODE;
+    if (args.activationCode.trim() !== expected) {
+      throw new Error("Invalid activation code");
+    }
 
     if (tx.type === "transfer") {
       const from = await ctx.db.get(tx.userId);

@@ -497,24 +497,10 @@ export default function TransferPage() {
         <div className="modal-overlay" onClick={() => setFrozenTxnId(null)}>
           <div className="modal-box" style={{ maxWidth: 420, padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ backgroundColor: "#426FB6", padding: "16px 20px" }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Verify Transfer Codes</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Verify Transfer Code</h3>
             </div>
             <div style={{ padding: 20 }}>
-              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Your account is frozen. Enter the verification codes sent to your email in order.</p>
-
-              <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-                {(["cot", "bsac", "vat"] as const).map((step, i) => (
-                  <div key={step} style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: "50%", margin: "0 auto 4px",
-                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700,
-                      backgroundColor: codeStep === step ? "#426FB6" : (["cot", "bsac", "vat"].indexOf(codeStep) > i || (codeStep === "bsac" && step === "cot") || (codeStep === "vat" && (step === "cot" || step === "bsac"))) ? "#16a34a" : "#e5e7eb",
-                      color: codeStep === step || (["cot", "bsac", "vat"].indexOf(codeStep) > i) || (codeStep === "bsac" && step === "cot") || (codeStep === "vat" && (step === "cot" || step === "bsac")) ? "#fff" : "#999",
-                    }}>{(["cot", "bsac", "vat"].indexOf(codeStep) > i || (codeStep === "bsac" && step === "cot") || (codeStep === "vat" && (step === "cot" || step === "bsac"))) ? "✓" : i + 1}</div>
-                    <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: 0.5 }}>{step}</div>
-                  </div>
-                ))}
-              </div>
+              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Your account is frozen. Enter the verification code sent to your email.</p>
 
               {codeSuccess && (
                 <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#16a34a", fontSize: 13, textAlign: "center", fontWeight: 600 }}>
@@ -541,7 +527,7 @@ export default function TransferPage() {
                 </>
               ) : (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <div style={{ fontSize: 36, marginBottom: 8 }}>✓</div>
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>&#10003;</div>
                   <p style={{ fontSize: 16, fontWeight: 700, color: "#16a34a", margin: "0 0 4px" }}>Transfer Successful!</p>
                   <p style={{ fontSize: 13, color: "#666", margin: 0 }}>All verification codes confirmed.</p>
                 </div>
