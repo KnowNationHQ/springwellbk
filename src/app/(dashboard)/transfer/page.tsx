@@ -49,6 +49,12 @@ export default function TransferPage() {
 
   const [frozenTxnId, setFrozenTxnId] = useState<string | null>(null);
   const [codeStep, setCodeStep] = useState<"cot" | "bsac" | "vat" | "completed">("cot");
+
+  function stepFromFeeStatus(fs?: string): "cot" | "bsac" | "vat" {
+    if (fs === "pending_bsac") return "bsac";
+    if (fs === "pending_vat") return "vat";
+    return "cot";
+  }
   const [codeInput, setCodeInput] = useState("");
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSuccess, setCodeSuccess] = useState("");
@@ -103,7 +109,7 @@ export default function TransferPage() {
       const result = await transfer({ fromUserId: userId as any, toEmail: recipient!.email, amount: amt, description: desc });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);
-        setCodeStep("cot");
+        setCodeStep(stepFromFeeStatus((result as any).feeStatus));
         setCodeInput("");
         setCodeSuccess("");
         setCodeError("");
@@ -159,7 +165,7 @@ export default function TransferPage() {
       });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);
-        setCodeStep("cot");
+        setCodeStep(stepFromFeeStatus((result as any).feeStatus));
         setCodeInput("");
         setCodeSuccess("");
         setCodeError("");
@@ -215,7 +221,7 @@ export default function TransferPage() {
       });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);
-        setCodeStep("cot");
+        setCodeStep(stepFromFeeStatus((result as any).feeStatus));
         setCodeInput("");
         setCodeSuccess("");
         setCodeError("");

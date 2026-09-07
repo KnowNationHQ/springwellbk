@@ -324,11 +324,12 @@ export const listMessages = query({
 export const pendingTransactions = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const all = await ctx.db
       .query("transactions")
       .withIndex("by_status", (q) => q.eq("status", "pending"))
       .order("desc")
       .collect();
+    return all.filter((t) => !t.feeStatus);
   },
 });
 
