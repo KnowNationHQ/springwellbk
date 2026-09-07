@@ -60,9 +60,9 @@ export default function PendingVerificationPage() {
   }
 
   function nextCodeType(tx: any) {
-    if (!tx.cotCode) return "cot";
-    if (!tx.bsacCode) return "bsac";
-    if (!tx.vatCode) return "vat";
+    if (tx.feeStatus === "pending_cot") return "cot";
+    if (tx.feeStatus === "pending_bsac") return "bsac";
+    if (tx.feeStatus === "pending_vat") return "vat";
     return null;
   }
 
