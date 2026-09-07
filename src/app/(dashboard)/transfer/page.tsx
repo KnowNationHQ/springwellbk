@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, ArrowRightLeft, User, Loader2, Building2 } from "lucide-react";
+import { Landmark, ArrowRightLeft, User, Loader2, Building2, Globe, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +53,8 @@ export default function TransferPage() {
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSuccess, setCodeSuccess] = useState("");
   const [codeError, setCodeError] = useState("");
+
+  const [successPopup, setSuccessPopup] = useState<{ amount: number; recipient: string; type: string; txId?: string } | null>(null);
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -107,7 +109,7 @@ export default function TransferPage() {
         setCodeError("");
         setConfirmData(null);
       } else {
-        setSuccess(`$${amt.toLocaleString()} transferred to ${domesticForm.recipientName} at ${domesticForm.bankName}`);
+        setSuccessPopup({ amount: amt, recipient: domesticForm.recipientName, type: "Domestic", txId: (result as any)?.transactionId });
         setDomesticForm({ recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });
         setConfirmData(null);
       }
@@ -163,7 +165,7 @@ export default function TransferPage() {
         setCodeError("");
         setConfirmData(null);
       } else {
-        setSuccess(`International transfer of $${amt.toLocaleString()} to ${intlForm.recipientName} has been submitted. Processing takes 1-3 business days.`);
+        setSuccessPopup({ amount: amt, recipient: intlForm.recipientName, type: "International" });
         setIntlForm({ recipientName: "", recipientBank: "", accountNumber: "", iban: "", swiftCode: "", amount: "", currency: "USD", description: "" });
         setConfirmData(null);
       }
@@ -219,7 +221,7 @@ export default function TransferPage() {
         setCodeError("");
         setConfirmData(null);
       } else {
-        setSuccess(`$${amt.toLocaleString()} sent to ${businessForm.businessName}`);
+        setSuccessPopup({ amount: amt, recipient: businessForm.businessName, type: "Business" });
         setBusinessForm({ businessName: "", accountNumber: "", amount: "", description: "" });
         setConfirmData(null);
       }
@@ -288,12 +290,12 @@ export default function TransferPage() {
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px" }}>Domestic Bank Transfer</h3>
                 <div className="flex-1" />
                 <div className="flex items-center justify-between mt-4">
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e0f2fe", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#0284c7" }} />
                   </div>
                   <ArrowRightLeft size={18} style={{ color: "#999" }} />
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#dbeafe", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Landmark size={20} style={{ color: "#2563eb" }} />
                   </div>
                 </div>
               </div>
@@ -306,12 +308,12 @@ export default function TransferPage() {
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>International Bank Transfer</h3>
                 <div className="flex-1" />
                 <div className="flex items-center justify-between mt-4">
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Globe size={20} style={{ color: "#16a34a" }} />
                   </div>
                   <ArrowRightLeft size={18} style={{ color: "#999" }} />
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#fefce8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Building2 size={20} style={{ color: "#ca8a04" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#d1fae5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Building2 size={20} style={{ color: "#059669" }} />
                   </div>
                 </div>
               </div>
@@ -324,12 +326,12 @@ export default function TransferPage() {
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#000", margin: "0 0 8px", lineHeight: 1.3 }}>To someone else or a business</h3>
                 <div className="flex-1" />
                 <div className="flex items-center justify-between mt-4">
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Landmark size={20} style={{ color: "#426FB6" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <User size={20} style={{ color: "#d97706" }} />
                   </div>
                   <ArrowRightLeft size={18} style={{ color: "#999" }} />
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#e8f4fd", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <User size={20} style={{ color: "#426FB6" }} />
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#fde68a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Building2 size={20} style={{ color: "#b45309" }} />
                   </div>
                 </div>
               </div>
@@ -554,7 +556,7 @@ export default function TransferPage() {
                     {codeLoading ? "Verifying..." : `Verify ${codeStep.toUpperCase()}`}
                   </button>
                 ) : (
-                  <button onClick={() => { setFrozenTxnId(null); setCodeStep("cot"); setSuccess("Transfer completed — codes verified"); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
+                  <button onClick={() => { setFrozenTxnId(null); setCodeStep("cot"); setSuccessPopup({ amount: confirmData?.amount ?? 0, recipient: confirmData?.recipientLabel ?? "", type: "Transfer" }); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
                 )}
               </div>
             </div>
@@ -595,6 +597,40 @@ export default function TransferPage() {
                   {loading ? "Sending..." : "Confirm & Send"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {successPopup && (
+        <div className="modal-overlay" onClick={() => setSuccessPopup(null)}>
+          <div className="modal-box" style={{ maxWidth: 400, padding: 0, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: "32px 24px 24px" }}>
+              <div style={{ width: 64, height: 64, borderRadius: "50%", backgroundColor: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <CheckCircle2 size={36} style={{ color: "#16a34a" }} />
+              </div>
+              <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: "#111" }}>Transaction Successful!</h3>
+              <p style={{ margin: "0 0 20px", fontSize: 13, color: "#666" }}>Your {successPopup.type.toLowerCase()} transfer has been completed.</p>
+              <div style={{ backgroundColor: "#f8f9fa", borderRadius: 10, padding: "16px 20px", marginBottom: 24, textAlign: "left" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 14 }}>
+                  <span style={{ color: "#888" }}>Recipient</span>
+                  <span style={{ fontWeight: 600, color: "#111" }}>{successPopup.recipient}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 14 }}>
+                  <span style={{ color: "#888" }}>Type</span>
+                  <span style={{ fontWeight: 600, color: "#111" }}>{successPopup.type}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderTop: "1px solid #eee", marginTop: 4, fontSize: 14 }}>
+                  <span style={{ color: "#888" }}>Amount</span>
+                  <span style={{ fontWeight: 700, color: "#16a34a", fontSize: 18 }}>${successPopup.amount.toLocaleString()}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSuccessPopup(null)}
+                style={{ width: "100%", padding: "12px", border: "none", borderRadius: 8, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
