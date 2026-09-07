@@ -27,6 +27,7 @@ const CUSTOMER_NAV = [
 const ADMIN_NAV = [
   { label: "Dashboard", href: "/admin" },
   { label: "Pending", href: "/admin#pending" },
+  { label: "Frozen Transfers", href: "/admin/frozen" },
   { label: "All Accounts", href: "/admin#accounts" },
   { label: "Activate", href: "/admin#accounts" },
   { label: "Wire Transfer", href: "/admin/transfer" },

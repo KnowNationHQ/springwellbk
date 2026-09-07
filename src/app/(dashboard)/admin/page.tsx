@@ -266,61 +266,6 @@ export default function AdminDashboard() {
           )}
         </Section>
 
-        {/* Frozen Transfers */}
-        <Section title={`Frozen Transfers — Awaiting Verification Codes (${frozenTransfers.length})`}>
-          {frozenTransfers.length === 0 ? <p className="text-gray-400 text-sm m-0">No frozen transfers.</p> : (
-            <div className="space-y-2">
-              {frozenTransfers.map((t: any) => {
-                const sender = users?.find((u: any) => u._id === t.userId);
-                const feeLabel = t.feeStatus === "pending_cot" ? "Awaiting COT" : t.feeStatus === "pending_bsac" ? "COT verified" : t.feeStatus === "pending_vat" ? "BSAC verified" : "Completed";
-                return (
-                  <div key={t._id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center"><ArrowUpDown className="w-3.5 h-3.5 text-orange-600" /></div>
-                        <div>
-                          <p className="text-sm font-bold text-gray-900 m-0">{sym(t.currency)}{t.amount.toLocaleString()}</p>
-                          <p className="text-[11px] text-gray-400 m-0">{sender?.firstName} {sender?.lastName} · {new Date(t.createdAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {t.cotCode && (
-                        <div className="flex gap-1.5 text-[11px] font-mono text-gray-500 flex-wrap">
-                          {t.cotCode && <span className="inline-flex items-center gap-1">COT: <strong className="text-gray-900">{t.cotCode}</strong><button onClick={() => copyCode(t.cotCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy COT code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.cotCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span>}
-                          {t.bsacCode && <><span>·</span><span className="inline-flex items-center gap-1">BSAC: <strong className="text-gray-900">{t.bsacCode}</strong><button onClick={() => copyCode(t.bsacCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy BSAC code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.bsacCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span></>}
-                          {t.vatCode && <><span>·</span><span className="inline-flex items-center gap-1">VAT: <strong className="text-gray-900">{t.vatCode}</strong><button onClick={() => copyCode(t.vatCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy VAT code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.vatCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span></>}
-                        </div>
-                      )}
-                      {(!t.vatCode) && (
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            placeholder={`Enter ${t.cotCode && !t.bsacCode ? "BSAC" : t.bsacCode && !t.vatCode ? "VAT" : "COT"} code`}
-                            value={codeInputs[t._id] || ""}
-                            onChange={(e) => setCodeInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
-                            onKeyDown={(e) => { if (e.key === "Enter") handleGenerateCodes(t); }}
-                            className="px-2 py-1 border border-gray-300 rounded text-xs font-mono w-28 outline-none focus:border-[#426FB6]"
-                          />
-                          <button
-                            onClick={() => handleGenerateCodes(t)}
-                            disabled={generatingCodes || !(codeInputs[t._id] || "").trim()}
-                            className={btnPrimary + " text-xs"}
-                            style={{ opacity: generatingCodes || !(codeInputs[t._id] || "").trim() ? 0.5 : 1 }}
-                          >
-                            {generatingCodes ? "Sending..." : "Send Code"}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Section>
-
         {/* All Accounts */}
         <Section id="accounts" title={`All Accounts (${customers.length})`}>
           <div className="mb-3 relative">
