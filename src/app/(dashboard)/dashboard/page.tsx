@@ -300,43 +300,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {user.status === "suspended" && frozenTransfers && frozenTransfers.length > 0 && (
-        <div id="pending-verification" className="max-w-[1100px] mx-auto px-4 pt-2">
-          <div style={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 16px" }}>
-            <div className="space-y-2">
-              {frozenTransfers.map((tx: any) => (
-                <div key={tx._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: 6, border: "1px solid #f3f4f6" }}>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#111" }}>{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : tx.feeStatus === "pending_vat" ? "BSAC verified" : "Completed"}</p>
-                  </div>
-                  <button onClick={() => openFrozenVerify(tx)} style={{ padding: "6px 14px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Verify</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {myPending && myPending.length > 0 && (
-        <div className="max-w-[1100px] mx-auto px-4 pt-2">
-          <div style={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 16px" }}>
-            <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 700, color: "#374151" }}>Pending Transactions ({myPending.length})</p>
-            <div className="space-y-2">
-              {myPending.map((tx: any) => (
-                <div key={tx._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: 6, border: "1px solid #f3f4f6" }}>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#111" }}>{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {new Date(tx.createdAt).toLocaleDateString()}</p>
-                  </div>
-                  <button onClick={() => { setPendingVerifyTxn(tx); setPendingCode(""); setPendingError(""); setPendingSuccess(""); }} style={{ padding: "6px 14px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Complete</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Balance Card */}
         <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
@@ -417,7 +380,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-4">
             <div className="w-full max-w-[340px] h-[200px] mx-auto [perspective:800px] cursor-pointer group">
-              <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] card-spin-mobile card-spin-tablet">
+              <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]" style={{ animation: "cardSpin 4s ease-in-out infinite" }}>
                 {/* Front */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1a3a5c] via-[#2a5a8c] to-[#1a3a5c] p-5 flex flex-col justify-between text-white shadow-lg [backface-visibility:hidden]">
                   <div className="flex justify-between items-start">

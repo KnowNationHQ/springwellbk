@@ -157,15 +157,3 @@
   50%, 90% { transform: rotateY(180deg); }
   100% { transform: rotateY(0deg); }
 }
-
-@media (max-width: 768px) {
-  .card-spin-mobile {
-    animation: cardSpin 4s ease-in-out infinite;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .card-spin-tablet {
-    animation: cardSpin 4s ease-in-out infinite;
-  }
-}
