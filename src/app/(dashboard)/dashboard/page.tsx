@@ -303,7 +303,6 @@ export default function DashboardPage() {
       {user.status === "suspended" && frozenTransfers && frozenTransfers.length > 0 && (
         <div id="pending-verification" className="max-w-[1100px] mx-auto px-4 pt-2">
           <div style={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 16px" }}>
-            <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 700, color: "#374151" }}>Pending Verification ({frozenTransfers.length})</p>
             <div className="space-y-2">
               {frozenTransfers.map((tx: any) => (
                 <div key={tx._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: 6, border: "1px solid #f3f4f6" }}>
