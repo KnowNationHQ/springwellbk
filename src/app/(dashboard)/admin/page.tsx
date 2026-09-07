@@ -9,8 +9,13 @@ import { sym } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Toast } from "@/components/ui/toast";
+import { Modal } from "@/components/ui/modal";
+import { ProfileImageUpload } from "@/components/profile-image-upload";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "codes";
+type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "codes" | "profile";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -50,6 +55,11 @@ export default function AdminDashboard() {
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
   const generateTransferCodes = useMutation(api.admin.generateTransferCodes);
   const sendVerificationCodes = useAction(api.email.sendVerificationCodes);
+  const updateProfile = useMutation(api.auth.updateProfile);
+  const changePassword = useMutation(api.auth.changePassword);
+  const generateUploadUrl = useMutation(api.auth.generateUploadUrl);
+  const saveProfileImage = useMutation(api.auth.saveProfileImage);
+  const removeProfileImage = useMutation(api.auth.removeProfileImage);
 
   const [creditType, setCreditType] = useState<"credit" | "debit">("credit");
   const [creditAmount, setCreditAmount] = useState("");
@@ -69,6 +79,10 @@ export default function AdminDashboard() {
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [codesData, setCodesData] = useState<{ label: string; code: string; txn: any } | null>(null);
   const [generatingCodes, setGeneratingCodes] = useState(false);
+  const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
+  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+  const [profileMsg, setProfileMsg] = useState("");
+  const [pwMsg, setPwMsg] = useState("");
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
 
   if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined || frozenTransfers === undefined) {
@@ -111,7 +125,29 @@ export default function AdminDashboard() {
   function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setModal("complete"); }
   async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Completed"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
   function openBackdate(t: any) { setBackdateTxn(t); setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10)); setModal("backdate"); }
+  function openProfile() {
+    if (adminUser) {
+      setProfileFields({ firstName: adminUser.firstName, lastName: adminUser.lastName, phone: adminUser.phone || "", address: adminUser.address || "" });
+    }
+    setProfileMsg(""); setPwMsg(""); setPwForm({ current: "", next: "", confirm: "" });
+    setModal("profile");
+  }
   async function handleBackdate(e: React.FormEvent) { e.preventDefault(); if (!userId || !backdateTxn || !backdateValue) return; try { await backDateTransaction({ adminUserId: userId as any, transactionId: backdateTxn._id as any, date: backdateValue }); flash("Date updated"); setModal(null); } catch (err: any) { flash(err?.message ?? "Failed"); } }
+  async function handleProfileSave() {
+    if (!userId) return;
+    try {
+      await updateProfile({ userId: userId as any, firstName: profileFields.firstName, lastName: profileFields.lastName, phone: profileFields.phone, address: profileFields.address });
+      setProfileMsg("Profile updated successfully");
+    } catch (err: any) { setProfileMsg(err?.message ?? "Failed"); }
+  }
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault(); if (!userId) return;
+    if (pwForm.next !== pwForm.confirm) { setPwMsg("Passwords do not match"); return; }
+    try {
+      await changePassword({ userId: userId as any, currentPassword: pwForm.current, newPassword: pwForm.next });
+      setPwMsg("Password updated successfully"); setPwForm({ current: "", next: "", confirm: "" });
+    } catch (err: any) { setPwMsg(err?.message ?? "Failed"); }
+  }
 
   async function handleGenerateCodes(txn: any) {
     if (!userId) return;
@@ -141,7 +177,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans page-container">
-      {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} role="admin" />}
+      {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} role="admin" onOpenProfile={openProfile} />}
 
       <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Search */}
@@ -445,6 +481,27 @@ export default function AdminDashboard() {
       )}
 
       {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
+
+      <Modal open={modal === "profile"} onClose={() => setModal(null)} title="My Profile" maxWidth={500}>
+        {profileMsg && <p className={`text-xs mb-3 ${profileMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{profileMsg}</p>}
+        <div className="flex justify-center mb-4"><ProfileImageUpload userId={userId} imageId={adminUser?.imageId} firstName={adminUser?.firstName || ""} lastName={adminUser?.lastName || ""} onImageSaved={() => window.location.reload()} generateUploadUrl={generateUploadUrl} saveImage={saveProfileImage} removeImage={removeProfileImage} size="md" /></div>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {[{ label: "First Name", key: "firstName" }, { label: "Last Name", key: "lastName" }, { label: "Phone", key: "phone" }, { label: "Address", key: "address" }].map((f) => (
+            <div key={f.key}><Label className="text-xs text-gray-500 block mb-1">{f.label}</Label><Input className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={profileFields[f.key as keyof typeof profileFields] || ""} onChange={(e) => setProfileFields({ ...profileFields, [f.key]: e.target.value })} /></div>
+          ))}
+        </div>
+        <div className="border-t border-gray-100 pt-3 mb-3">
+          <h4 className="m-0 mb-2 text-sm font-bold">Security</h4>
+          {pwMsg && <p className={`text-xs mb-2 ${pwMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{pwMsg}</p>}
+          <form onSubmit={handlePasswordChange} className="space-y-2">
+            <Input type="password" placeholder="Current Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.current} onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })} />
+            <Input type="password" placeholder="New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.next} onChange={(e) => setPwForm({ ...pwForm, next: e.target.value })} />
+            <Input type="password" placeholder="Confirm New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.confirm} onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })} />
+            <Button type="submit" className="py-2.5 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer">Update Password</Button>
+          </form>
+        </div>
+        <Button onClick={handleProfileSave} className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer">Save Profile</Button>
+      </Modal>
     </div>
   );
 }
