@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban } from "lucide-react";
+import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban, Copy, History } from "lucide-react";
 import { sym } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "profile";
+type Modal = null | "credit" | "transfer" | "edit" | "status" | "complete" | "backdate" | "profile" | "txns";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -45,7 +45,6 @@ export default function AdminDashboard() {
   const creditDebit = useMutation(api.admin.creditDebit);
   const transferAdmin = useMutation(api.admin.transfer);
   const completeTransaction = useMutation(api.admin.completeTransaction);
-  const generateActivationCode = useMutation(api.admin.generateActivationCode);
   const backDateTransaction = useMutation(api.admin.backDateTransaction);
   const setUserStatus = useMutation(api.admin.setUserStatus);
   const updateUser = useMutation(api.admin.updateUser);
@@ -72,18 +71,34 @@ export default function AdminDashboard() {
   const [statusTarget, setStatusTarget] = useState("");
   const [completeTxn, setCompleteTxn] = useState("");
   const [activationCode, setActivationCode] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [generatingCodes, setGeneratingCodes] = useState(false);
+  const [completeLoading, setCompleteLoading] = useState(false);
+  const [completePercent, setCompletePercent] = useState(0);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
   const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [profileMsg, setProfileMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
+  const [txnsUser, setTxnsUser] = useState<any>(null);
+  const customerTxns = useQuery(api.transactions.getByUser, txnsUser ? { userId: txnsUser._id } : "skip");
   const [successPopup, setSuccessPopup] = useState<{ title: string; message: string; details?: { label: string; value: string }[] } | null>(null);
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
+  function copyCode(code: string) { navigator.clipboard.writeText(code); setCopiedCode(code); setTimeout(() => setCopiedCode(null), 1500); }
+
+  useEffect(() => {
+    if (!completeLoading) { setCompletePercent(0); return; }
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += Math.random() * 8 + 2;
+      if (pct > 92) pct = 92;
+      setCompletePercent(Math.floor(pct));
+    }, 200);
+    return () => clearInterval(iv);
+  }, [completeLoading]);
 
   if (!userId || users === undefined || transactions === undefined || messages === undefined || pending === undefined || frozenTransfers === undefined) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
@@ -122,9 +137,10 @@ export default function AdminDashboard() {
   async function handleStatus(uid: string, status: "active" | "suspended" | "pending") { if (!userId) return; await setUserStatus({ adminUserId: userId as any, userId: uid as any, status }); flash(`Account ${status.charAt(0).toUpperCase() + status.slice(1)}`, `Account has been ${status}`); }
   async function handleDelete(u: any) { if (!userId) return; if (!confirm(`Delete ${acct(u)}?`)) return; try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Deleted", `${acct(u)} removed`); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   async function handleMessage(id: string, status: "read" | "replied") { if (!userId) return; await setMessageStatus({ adminUserId: userId as any, messageId: id as any, status }); flash(`Marked ${status}`); }
-  function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setGeneratedCode(""); setModal("complete"); }
-  async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Transaction Completed!", "Transfer has been processed successfully"); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
+  function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setModal("complete"); }
+  async function handleComplete(e: React.FormEvent) { e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; setCompleteLoading(true); try { await completeTransaction({ adminUserId: userId as any, transactionId: completeTxn as any, activationCode }); flash("Transaction Completed!", "Transfer has been processed successfully"); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } finally { setCompleteLoading(false); } }
   function openBackdate(t: any) { setBackdateTxn(t); setBackdateValue(new Date(t.createdAt).toISOString().slice(0, 10)); setModal("backdate"); }
+  function openTxns(u: any) { setTxnsUser(u); setModal("txns"); }
   function openProfile() {
     if (adminUser) {
       setProfileFields({ firstName: adminUser.firstName, lastName: adminUser.lastName, phone: adminUser.phone || "", address: adminUser.address || "" });
@@ -254,10 +270,10 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       {t.cotCode && (
-                        <div className="flex gap-1.5 text-[11px] font-mono text-gray-500">
-                          {t.cotCode && <span>COT: <strong className="text-gray-900">{t.cotCode}</strong></span>}
-                          {t.bsacCode && <><span>·</span><span>BSAC: <strong className="text-gray-900">{t.bsacCode}</strong></span></>}
-                          {t.vatCode && <><span>·</span><span>VAT: <strong className="text-gray-900">{t.vatCode}</strong></span></>}
+                        <div className="flex gap-1.5 text-[11px] font-mono text-gray-500 flex-wrap">
+                          {t.cotCode && <span className="inline-flex items-center gap-1">COT: <strong className="text-gray-900">{t.cotCode}</strong><button onClick={() => copyCode(t.cotCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy COT code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.cotCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span>}
+                          {t.bsacCode && <><span>·</span><span className="inline-flex items-center gap-1">BSAC: <strong className="text-gray-900">{t.bsacCode}</strong><button onClick={() => copyCode(t.bsacCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy BSAC code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.bsacCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span></>}
+                          {t.vatCode && <><span>·</span><span className="inline-flex items-center gap-1">VAT: <strong className="text-gray-900">{t.vatCode}</strong><button onClick={() => copyCode(t.vatCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy VAT code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.vatCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span></>}
                         </div>
                       )}
                       {(!t.vatCode) && (
@@ -315,6 +331,7 @@ export default function AdminDashboard() {
                   <span className="text-[11px] text-gray-400 font-mono mr-1">{revealed.has(c._id) ? c.password : "••••••"}</span>
                   <button onClick={() => togglePw(c._id)} className="text-[11px] text-[#426FB6] bg-transparent border-none cursor-pointer p-0">{revealed.has(c._id) ? "Hide" : "Show"}</button>
                   <div className="flex-1" />
+                  <button title="View Transactions" onClick={() => openTxns(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><History className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Credit" onClick={() => openCredit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><ArrowUpDown className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Transfer" onClick={() => openTransfer(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Send className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Edit" onClick={() => openEdit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><Pencil className="w-3.5 h-3.5 text-gray-600" /></button>
@@ -405,6 +422,7 @@ export default function AdminDashboard() {
                 {modal === "status" && "Change Account Status"}
                 {modal === "complete" && "Complete Transaction"}
                 {modal === "backdate" && "Back Date Transaction"}
+                {modal === "txns" && `Transactions — ${txnsUser?.firstName} ${txnsUser?.lastName}`}
               </h3>
               <button onClick={() => setModal(null)} className="text-white text-2xl bg-transparent border-none cursor-pointer p-0 leading-none">&times;</button>
             </div>
@@ -462,18 +480,9 @@ export default function AdminDashboard() {
               )}
               {modal === "complete" && (
                 <form onSubmit={handleComplete} className="space-y-3">
-                  <select className={inputCls} value={completeTxn} onChange={(e) => { setCompleteTxn(e.target.value); setGeneratedCode(""); }} required><option value="">Select transaction</option>{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</select>
-                  {completeTxn && !generatedCode && (
-                    <button type="button" onClick={async () => { if (!userId || !completeTxn) return; try { const code = await generateActivationCode({ adminUserId: userId as any, transactionId: completeTxn as any }); setGeneratedCode(code); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }} style={{ width: "100%", padding: "10px", border: "2px dashed #426FB6", borderRadius: 6, backgroundColor: "#f0f4ff", color: "#426FB6", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Generate Activation Code</button>
-                  )}
-                  {generatedCode && (
-                    <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "12px 14px", textAlign: "center" }}>
-                      <p style={{ fontSize: 11, color: "#666", margin: "0 0 4px" }}>Activation Code</p>
-                      <p style={{ fontSize: 18, fontWeight: 700, color: "#16a34a", margin: 0, fontFamily: "monospace", letterSpacing: 2 }}>{generatedCode}</p>
-                    </div>
-                  )}
+                  <select className={inputCls} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required><option value="">Select transaction</option>{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</select>
                   <input type="text" placeholder="Enter activation code" className={inputCls} value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
-                  <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary} disabled={!activationCode}>Complete</button></div>
+                  <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary} disabled={!activationCode || completeLoading} style={{ opacity: !activationCode || completeLoading ? 0.7 : 1, position: "relative", overflow: "hidden", minWidth: 120 }}>{completeLoading ? <span style={{ position: "relative", zIndex: 1 }}><span style={{ position: "absolute", inset: 0, backgroundColor: "#2d5a9e", transform: `scaleX(${completePercent / 100})`, transformOrigin: "left", transition: "transform 0.2s ease" }} /><span style={{ position: "relative", zIndex: 1 }}>Completing {completePercent}%</span></span> : "Complete"}</button></div>
                 </form>
               )}
               {modal === "backdate" && (
@@ -482,6 +491,30 @@ export default function AdminDashboard() {
                   <input type="date" className={inputCls} value={backdateValue} onChange={(e) => setBackdateValue(e.target.value)} required />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Update</button></div>
                 </form>
+              )}
+              {modal === "txns" && (
+                <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                  {customerTxns === undefined && <p className="text-gray-400 text-sm m-0">Loading...</p>}
+                  {customerTxns && customerTxns.length === 0 && <p className="text-gray-400 text-sm m-0">No transactions found.</p>}
+                  {customerTxns && customerTxns.map((t: any) => (
+                    <div key={t._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+                          {t.type === "credit" ? "+" : "-"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
+                          <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-sm font-bold ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                        {t.status === "pending" && <p className="text-[10px] text-yellow-500 m-0">Pending</p>}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Close</button></div>
+                </div>
               )}
             </div>
           </div>

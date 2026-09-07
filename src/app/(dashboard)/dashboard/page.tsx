@@ -52,6 +52,8 @@ export default function DashboardPage() {
   const removeProfileImage = useMutation(api.auth.removeProfileImage);
   const frozenTransfers = useQuery(api.auth.getMyFrozenTransfers, userId ? { userId: userId as any } : "skip");
   const verifyTransferCode = useMutation(api.auth.verifyTransferCode);
+  const myPending = useQuery(api.auth.getMyPendingTransactions, userId ? { userId: userId as any } : "skip");
+  const customerComplete = useMutation(api.auth.customerCompleteTransaction);
 
   const [frozenVerifyTxn, setFrozenVerifyTxn] = useState<any>(null);
   const [frozenStep, setFrozenStep] = useState<"cot" | "bsac" | "vat" | "completed">("cot");
@@ -60,6 +62,13 @@ export default function DashboardPage() {
   const [frozenPercent, setFrozenPercent] = useState(0);
   const [frozenError, setFrozenError] = useState("");
   const [frozenSuccess, setFrozenSuccess] = useState("");
+
+  const [pendingVerifyTxn, setPendingVerifyTxn] = useState<any>(null);
+  const [pendingCode, setPendingCode] = useState("");
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [pendingPercent, setPendingPercent] = useState(0);
+  const [pendingError, setPendingError] = useState("");
+  const [pendingSuccess, setPendingSuccess] = useState("");
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -77,6 +86,17 @@ export default function DashboardPage() {
     }, 200);
     return () => clearInterval(iv);
   }, [frozenLoading]);
+
+  useEffect(() => {
+    if (!pendingLoading) { setPendingPercent(0); return; }
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += Math.random() * 8 + 2;
+      if (pct > 92) pct = 92;
+      setPendingPercent(Math.floor(pct));
+    }, 200);
+    return () => clearInterval(iv);
+  }, [pendingLoading]);
 
   useEffect(() => {
     if (!activeModal) return;
@@ -157,6 +177,18 @@ export default function DashboardPage() {
     } finally {
       setFrozenLoading(false);
     }
+  }
+
+  async function handlePendingVerify() {
+    if (!userId || !pendingVerifyTxn || !pendingCode.trim()) return;
+    setPendingLoading(true); setPendingError(""); setPendingSuccess("");
+    try {
+      await customerComplete({ userId: userId as any, transactionId: pendingVerifyTxn._id, activationCode: pendingCode.trim() });
+      setPendingPercent(100);
+      setPendingSuccess("Transaction completed successfully!");
+      setTimeout(() => { setPendingVerifyTxn(null); setPendingCode(""); setPendingSuccess(""); }, 2000);
+    } catch (err: any) { setPendingError(err?.message ?? "Verification failed"); }
+    finally { setPendingLoading(false); }
   }
 
   async function handlePasswordChange(e: React.FormEvent) {
@@ -280,6 +312,25 @@ export default function DashboardPage() {
                     <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : "BSAC verified"}</p>
                   </div>
                   <button onClick={() => openFrozenVerify(tx)} style={{ padding: "6px 14px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Verify</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {myPending && myPending.length > 0 && (
+        <div className="max-w-[1100px] mx-auto px-4 pt-2">
+          <div style={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 16px" }}>
+            <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 700, color: "#374151" }}>Pending Transactions ({myPending.length})</p>
+            <div className="space-y-2">
+              {myPending.map((tx: any) => (
+                <div key={tx._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: 6, border: "1px solid #f3f4f6" }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#111" }}>{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "#666" }}>{tx.description || tx.type} · {new Date(tx.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <button onClick={() => { setPendingVerifyTxn(tx); setPendingCode(""); setPendingError(""); setPendingSuccess(""); }} style={{ padding: "6px 14px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Complete</button>
                 </div>
               ))}
             </div>
@@ -594,6 +645,48 @@ export default function DashboardPage() {
                   </button>
                 ) : (
                   <button onClick={() => { setFrozenVerifyTxn(null); setFrozenStep("cot"); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingVerifyTxn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setPendingVerifyTxn(null)}>
+          <div className="w-full max-w-[420px] bg-white rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div style={{ backgroundColor: "#426FB6", padding: "16px 20px" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Complete Transaction</h3>
+            </div>
+            <div style={{ padding: 20 }}>
+              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Enter the activation code to complete this transaction.</p>
+              {pendingSuccess && (
+                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#16a34a", fontSize: 13, textAlign: "center", fontWeight: 600 }}>{pendingSuccess}</div>
+              )}
+              {pendingError && (
+                <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#dc2626", fontSize: 13, textAlign: "center" }}>{pendingError}</div>
+              )}
+              {!pendingSuccess && (
+                <>
+                  <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Activation Code</label>
+                  <input value={pendingCode} onChange={(e) => setPendingCode(e.target.value)} placeholder="Enter activation code"
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "monospace", letterSpacing: 2, textAlign: "center", boxSizing: "border-box" }}
+                    onKeyDown={(e) => { if (e.key === "Enter") handlePendingVerify(); }} autoFocus />
+                </>
+              )}
+              <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+                {!pendingSuccess && <button onClick={() => setPendingVerifyTxn(null)} style={{ flex: 1, padding: "12px", border: "1px solid #ccc", borderRadius: 6, backgroundColor: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>Cancel</button>}
+                {!pendingSuccess ? (
+                  <button onClick={handlePendingVerify} disabled={pendingLoading || !pendingCode.trim()} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#426FB6", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, opacity: pendingLoading || !pendingCode.trim() ? 0.7 : 1, position: "relative", overflow: "hidden" }}>
+                    {pendingLoading ? (
+                      <span style={{ position: "relative", zIndex: 1 }}>
+                        <span style={{ position: "absolute", inset: 0, backgroundColor: "#2d5a9e", transform: `scaleX(${pendingPercent / 100})`, transformOrigin: "left", transition: "transform 0.2s ease" }} />
+                        <span style={{ position: "relative", zIndex: 1 }}>Completing {pendingPercent}%</span>
+                      </span>
+                    ) : "Complete"}
+                  </button>
+                ) : (
+                  <button onClick={() => { setPendingVerifyTxn(null); setPendingCode(""); setPendingSuccess(""); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
                 )}
               </div>
             </div>

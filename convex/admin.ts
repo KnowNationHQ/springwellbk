@@ -78,7 +78,7 @@ export const completeTransaction = mutation({
     if (!tx) throw new Error("Transaction not found");
     if (tx.status !== "pending") throw new Error("Transaction is not pending");
     const expected = tx.activationCode ?? ACTIVATION_CODE;
-    if (args.activationCode.trim() !== expected) {
+    if (args.activationCode.trim().toUpperCase() !== expected.toUpperCase()) {
       throw new Error("Invalid activation code");
     }
 
@@ -393,12 +393,15 @@ export const generateTransferCodes = mutation({
     let label = "";
     if (!tx.cotCode) {
       patch.cotCode = args.code.trim().toUpperCase();
+      patch.feeStatus = "pending_bsac";
       label = "COT";
     } else if (!tx.bsacCode) {
       patch.bsacCode = args.code.trim().toUpperCase();
+      patch.feeStatus = "pending_vat";
       label = "BSAC";
     } else if (!tx.vatCode) {
       patch.vatCode = args.code.trim().toUpperCase();
+      patch.feeStatus = "completed";
       label = "VAT";
     }
 
@@ -411,6 +414,17 @@ export const generateTransferCodes = mutation({
       .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending"), q.eq(q.field("amount"), tx.amount), q.eq(q.field("createdAt"), tx.createdAt)))
       .first();
     if (counterTx) await ctx.db.patch(counterTx._id, patch);
+
+    if (label === "VAT") {
+      const from = await ctx.db.get(tx.userId);
+      const to = tx.counterpartyId ? await ctx.db.get(tx.counterpartyId) : null;
+      if (from && to) {
+        await ctx.db.patch(from._id, { balance: from.balance - tx.amount });
+        await ctx.db.patch(to._id, { balance: to.balance + tx.amount });
+      }
+      await ctx.db.patch(tx._id, { status: "successful" });
+      if (counterTx) await ctx.db.patch(counterTx._id, { status: "successful" });
+    }
 
     return { label, code: patch[`${label.toLowerCase()}Code`] as string };
   },

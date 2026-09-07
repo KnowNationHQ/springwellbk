@@ -375,3 +375,44 @@ export const verifyTransferCode = mutation({
     return { success: true, message: `${args.codeType.toUpperCase()} verified successfully` };
   },
 });
+
+export const getMyPendingTransactions = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("transactions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .order("desc")
+      .collect();
+    return all.filter((t) => !t.feeStatus);
+  },
+});
+
+export const customerCompleteTransaction = mutation({
+  args: {
+    userId: v.id("users"),
+    transactionId: v.id("transactions"),
+    activationCode: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+    const tx = await ctx.db.get(args.transactionId);
+    if (!tx) throw new Error("Transaction not found");
+    if (tx.userId !== args.userId) throw new Error("Unauthorized");
+    if (tx.status !== "pending") throw new Error("Transaction is not pending");
+    const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "SWB-ADMIN-2026";
+    const expected = tx.activationCode ?? ACTIVATION_CODE;
+    if (args.activationCode.trim().toUpperCase() !== expected.toUpperCase()) {
+      throw new Error("Invalid activation code");
+    }
+    if (tx.type === "credit") {
+      await ctx.db.patch(args.userId, { balance: user.balance + tx.amount });
+    } else if (tx.type === "debit") {
+      if (user.balance < tx.amount) throw new Error("Insufficient funds");
+      await ctx.db.patch(args.userId, { balance: user.balance - tx.amount });
+    }
+    await ctx.db.patch(args.transactionId, { status: "successful" });
+  },
+});
