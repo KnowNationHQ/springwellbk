@@ -174,7 +174,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Pending Transactions */}
-        <Section title={`Pending Transactions (${pending.length})`}>
+        <Section id="pending" title={`Pending Transactions (${pending.length})`}>
           {pending.length === 0 ? <p className="text-gray-400 text-sm m-0">None.</p> : (
             <div className="space-y-2">
               {pending.map((t: any) => (
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
         </Section>
 
         {/* All Accounts */}
-        <Section title={`All Accounts (${customers.length})`}>
+        <Section id="accounts" title={`All Accounts (${customers.length})`}>
           <div className="space-y-2">
             {customers.map((c: any) => (
               <div key={c._id} className="p-3 bg-gray-50 rounded-lg">
@@ -440,9 +440,9 @@ export default function AdminDashboard() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, id, children }: { title: string; id?: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <section id={id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="px-4 py-3 border-b border-gray-100">
         <h3 className="text-sm font-bold text-gray-900 m-0">{title}</h3>
       </div>
