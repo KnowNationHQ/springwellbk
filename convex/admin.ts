@@ -408,7 +408,7 @@ export const generateTransferCodes = mutation({
     const counterTx = await ctx.db
       .query("transactions")
       .withIndex("by_user", (q) => q.eq("userId", tx.counterpartyId!))
-      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("type"), "transfer"), q.eq(q.field("status"), "pending")))
+      .filter((q) => q.and(q.eq(q.field("counterpartyId"), tx.userId), q.eq(q.field("status"), "pending"), q.eq(q.field("amount"), tx.amount), q.eq(q.field("createdAt"), tx.createdAt)))
       .first();
     if (counterTx) await ctx.db.patch(counterTx._id, patch);
 
@@ -420,6 +420,6 @@ export const pendingFrozenTransfers = query({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("transactions").collect();
-    return all.filter((t) => t.status === "pending" && t.feeStatus);
+    return all.filter((t) => t.status === "pending" && t.feeStatus && t.feeStatus !== "completed" && t.type === "debit");
   },
 });
