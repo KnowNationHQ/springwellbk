@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { ArrowUpRight, Clock, Bell, Tag, FileText, PiggyBank, Target } from "lucide-react";
+import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, Wallet } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -259,6 +259,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-4 gap-2">
           {[
             { label: "Transfer", icon: ArrowUpRight, action: () => router.push("/transfer") },
+            { label: "Pay Bill", icon: DollarSign, action: () => router.push("/transfer") },
+            { label: "Deposit", icon: Wallet, action: () => router.push("/transfer") },
+            { label: "More", icon: Target, action: () => {} },
           ].map((item) => {
             const Icon = item.icon;
             return (
