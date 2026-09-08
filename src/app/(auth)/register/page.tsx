@@ -254,7 +254,7 @@ export default function RegisterPage() {
               </div>
 
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11" disabled={loading || success}>
-                {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> Creating Account...</span> : "Open Account"}
+                {loading ? <span className="flex items-center gap-2"><LogoSpinner size={20} /> Creating Account...</span> : "Open Account"}
               </Button>
             </form>
 

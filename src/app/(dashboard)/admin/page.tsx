@@ -467,7 +467,7 @@ export default function AdminDashboard() {
               )}
               {modal === "txns" && (
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                  {customerTxns === undefined && <LogoSpinner size={24} />}
+                  {customerTxns === undefined && <LogoSpinner size={30} />}
                   {customerTxns && customerTxns.length === 0 && <p className="text-gray-400 text-sm m-0">No transactions found.</p>}
                   {customerTxns && customerTxns.map((t: any) => (
                     <div key={t._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

@@ -139,9 +139,9 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
       {/* Mobile Nav */}
       <nav className="md:hidden bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-4 flex items-center justify-between h-14">
+        <div className="px-4 flex items-center justify-between h-18">
           <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline">
-            <Image src="/logo.svg" alt="SpringWell Bank" width={28} height={28} priority />
+            <Image src="/logo.svg" alt="SpringWell Bank" width={160} height={31} priority style={{ height: "auto" }} />
           </Link>
           <div className="flex items-center gap-1">
             <button onClick={handleSignOut} className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500" title="Sign out">

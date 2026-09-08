@@ -144,7 +144,7 @@ export default function LoginPage() {
                   </Link>
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <><LogoSpinner size={16} /> Signing in...</> : "Sign In"}
+                  {loading ? <><LogoSpinner size={20} /> Signing in...</> : "Sign In"}
                 </Button>
                 <button
                   type="button"
@@ -168,7 +168,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <><LogoSpinner size={16} /> Sending...</> : "Send code"}
+                  {loading ? <><LogoSpinner size={20} /> Sending...</> : "Send code"}
                 </Button>
                 <button
                   type="button"
@@ -192,7 +192,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <><LogoSpinner size={16} /> Verifying...</> : "Verify & sign in"}
+                  {loading ? <><LogoSpinner size={20} /> Verifying...</> : "Verify & sign in"}
                 </Button>
                 <button
                   type="button"

@@ -90,7 +90,7 @@ export function HeroSection() {
                     />
                   </div>
                   <Button type="submit" className="w-full bg-[#426FB6] hover:bg-[#3560a0] text-white h-10" disabled={loading}>
-                    {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> {t("hero.signingIn")}</span> : t("hero.signIn")}
+                    {loading ? <span className="flex items-center gap-2"><LogoSpinner size={20} /> {t("hero.signingIn")}</span> : t("hero.signIn")}
                   </Button>
                 </form>
                 <div className="mt-3 text-center">

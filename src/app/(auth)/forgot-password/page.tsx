@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
                   <Input id="email" type="email" placeholder="name@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> Sending...</span> : "Send Reset Code"}
+                  {loading ? <span className="flex items-center gap-2"><LogoSpinner size={20} /> Sending...</span> : "Send Reset Code"}
                 </Button>
                 <div className="text-center text-sm">
                   <Link href="/login" className="text-blue-700 hover:underline">Back to Login</Link>
@@ -117,7 +117,7 @@ export default function ForgotPasswordPage() {
                   <Input id="confirm" type="password" placeholder="Re-enter password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> Resetting...</span> : "Reset Password"}
+                  {loading ? <span className="flex items-center gap-2"><LogoSpinner size={20} /> Resetting...</span> : "Reset Password"}
                 </Button>
                 <button
                   type="button"
