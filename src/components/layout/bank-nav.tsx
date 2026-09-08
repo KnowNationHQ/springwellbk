@@ -86,32 +86,33 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
       </nav>
 
       {/* Row 1: Primary Navigation — mobile */}
-      <nav className="md:hidden bg-[#434343] text-white">
-        <div className="px-4 flex items-center justify-between h-12">
-          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-8 w-auto" />
+      <nav className="md:hidden bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-4 flex items-center justify-between h-14">
+          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline flex items-center gap-2">
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-7 w-auto" />
+            <span className="text-[#1a3a5c] font-bold text-sm tracking-tight">SpringWell</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <button onClick={handleSignOut} className="text-white p-1" title="Sign out">
-              <LogOut size={20} />
+          <div className="flex items-center gap-1">
+            <button onClick={handleSignOut} className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500" title="Sign out">
+              <LogOut size={18} />
             </button>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="text-white p-1"
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-700"
             >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
         {mobileOpen && (
-          <div className="bg-[#333] border-t border-[#555]">
+          <div className="border-t border-gray-100 bg-white">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`block px-5 py-3.5 text-sm no-underline border-b border-[#444] ${
-                  pathname === item.href ? "text-[#FEDF01] font-bold" : "text-white"
+                className={`flex items-center px-5 py-3.5 text-sm no-underline border-b border-gray-50 transition-colors ${
+                  pathname === item.href ? "text-[#426FB6] font-semibold bg-blue-50" : "text-gray-700 active:bg-gray-50"
                 }`}
               >
                 {item.label}
