@@ -237,6 +237,7 @@ export default function AdminDashboard() {
             { label: "Credit", icon: ArrowUpDown, color: "#16a34a", bg: "#dcfce7", action: () => openCredit(null) },
             { label: "Transfer", icon: ArrowRight, color: "#2563eb", bg: "#dbeafe", action: () => openTransfer(null) },
             { label: "Wire Transfer", icon: Globe, color: "#7c3aed", bg: "#ede9fe", action: () => router.push("/admin/transfer") },
+            { label: "Frozen", icon: ArrowUpDown, color: "#ea580c", bg: "#fff7ed", action: () => router.push("/admin/frozen") },
             { label: "Activate", icon: Shield, color: "#059669", bg: "#d1fae5", action: () => setModal("status") },
             { label: "Suspend", icon: Ban, color: "#dc2626", bg: "#fee2e2", action: () => setModal("status") },
             { label: "Complete", icon: KeyRound, color: "#d97706", bg: "#fef3c7", action: () => openComplete() },
