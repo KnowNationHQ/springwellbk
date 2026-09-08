@@ -331,47 +331,80 @@ export default function DashboardPage() {
         <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-bold text-gray-900 m-0">My Card</h3>
-            <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Card, {cardLast4}</p>
+            <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Debit, {cardLast4}</p>
           </div>
           <div className="p-4">
-            <div className="w-full max-w-[340px] h-[200px] mx-auto [perspective:800px] cursor-pointer group">
-              <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]" style={{ animation: "cardSpin 4s ease-in-out infinite" }}>
+            <div className="w-full max-w-[360px] h-[220px] mx-auto [perspective:1000px] cursor-pointer group">
+              <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
                 {/* Front */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1a3a5c] via-[#2a5a8c] to-[#1a3a5c] p-5 flex flex-col justify-between text-white shadow-lg [backface-visibility:hidden]">
-                  <div className="flex justify-between items-start">
-                    <div className="w-10 h-7 bg-white/30 rounded" />
-                    <span className="text-xl font-bold italic text-[#FEDF01]">VISA</span>
-                  </div>
-                  <div>
-                    <p className="text-lg tracking-widest font-mono font-semibold m-0 mb-3">{cardNumber}</p>
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="text-[9px] tracking-wide m-0 opacity-70">CARD HOLDER</p>
-                        <p className="text-xs font-bold m-0">{user.firstName} {user.lastName}</p>
+                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl [backface-visibility:hidden]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
+                  <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 30% 20%, rgba(66,111,182,0.4) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(254,223,1,0.15) 0%, transparent 40%)" }} />
+                  <div className="absolute inset-0 p-5 flex flex-col justify-between text-white" style={{ position: "relative", zIndex: 1 }}>
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-7 rounded" style={{ background: "linear-gradient(135deg, #d4a843 0%, #f0d78c 40%, #c9952a 60%, #f0d78c 100%)", boxShadow: "inset 0 1px 2px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.3)" }}>
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-6 h-3 border border-[#b8860b]/40 rounded-sm" style={{ background: "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(184,134,11,0.15) 2px, rgba(184,134,11,0.15) 3px)" }} />
+                          </div>
+                        </div>
+                        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 1C5.34 1 4 2.34 4 4C4 5.66 5.34 7 7 7H3V1H7ZM3 8H7C7 9.66 5.66 11 4 11C2.34 11 1 9.66 1 8C1 6.34 2.34 5 4 5H3V8Z" fill="white" fillOpacity="0.5"/>
+                        </svg>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[9px] tracking-wide m-0 opacity-70">EXPIRES</p>
-                        <p className="text-xs font-bold m-0">10/2028</p>
+                      <div className="flex items-center gap-0">
+                        <div className="w-8 h-8 rounded-full bg-[#EB001B] opacity-90" />
+                        <div className="w-8 h-8 rounded-full bg-[#F79E1B] opacity-90 -ml-3" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[17px] tracking-[0.2em] font-mono font-medium m-0 mb-4" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{cardNumber}</p>
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Card Holder</p>
+                          <p className="text-[13px] font-semibold m-0 tracking-wide uppercase">{user.firstName} {user.lastName}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Expires</p>
+                          <p className="text-[13px] font-semibold m-0 tracking-wide">10/2028</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Network</p>
+                          <p className="text-[12px] font-bold m-0 tracking-wider text-[#FEDF01]">MASTERCARD</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 {/* Back */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#2a5a8c] via-[#1a3a5c] to-[#0f2a44] shadow-lg [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  <div className="w-full h-10 bg-black/40 mt-5" />
-                  <div className="px-5 mt-5">
-                    <div className="bg-white/20 rounded px-3 py-2 flex items-center justify-between">
-                      <span className="text-[9px] tracking-wide opacity-70">CCV</span>
-                      <span className="text-lg font-bold tracking-widest font-mono">485</span>
+                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#16213e] via-[#1a1a2e] to-[#0f3460]" />
+                  <div className="absolute inset-0" style={{ position: "relative" }}>
+                    <div className="w-full h-12 bg-black/60 mt-6" />
+                    <div className="px-6 mt-6">
+                      <div className="bg-white/15 backdrop-blur-sm rounded px-4 py-2.5 flex items-center justify-between border border-white/10">
+                        <div className="flex-1" />
+                        <div className="bg-white rounded px-4 py-1.5">
+                          <span className="text-[11px] font-bold tracking-[0.2em] text-[#1a1a2e] font-mono">{cardLast4}</span>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-between items-center">
+                        <div>
+                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-40 uppercase text-white">Customer Service</p>
+                          <p className="text-[11px] font-medium m-0 text-white/70">1-800-SPRWELL</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                          </div>
+                          <span className="text-[9px] text-white/50">springwellbk.com</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="absolute bottom-5 right-5">
-                    <span className="text-xl font-bold italic text-white/60">VISA</span>
                   </div>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-gray-400 text-center mt-2 m-0">Hover card to flip</p>
           </div>
         </section>
 
