@@ -99,6 +99,13 @@ export default function DashboardPage() {
 
   const stats = useQuery(api.auth.getDashboardStats, userId ? { userId: userId as any } : "skip");
 
+  useEffect(() => {
+    if (activeModal === "profile" && stats?.user) {
+      const u = stats.user;
+      setProfileFields({ firstName: u.firstName || "", lastName: u.lastName || "", phone: (u as any).phone || "", address: (u as any).address || "" });
+    }
+  }, [activeModal, stats?.user]);
+
   if (!userId || !stats) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100"><LogoSpinner /></div>;
   }
@@ -106,12 +113,6 @@ export default function DashboardPage() {
   const { user, transactions } = stats;
   const cardLast4 = (userId?.replace(/[^0-9]/g, "").slice(-4)) || "4242";
   const cardNumber = `**** **** **** ${cardLast4}`;
-
-  useEffect(() => {
-    if (activeModal === "profile" && user) {
-      setProfileFields({ firstName: user.firstName || "", lastName: user.lastName || "", phone: user.phone || "", address: user.address || "" });
-    }
-  }, [activeModal, user]);
 
   async function handleProfileSave() {
     setProfileMsg("");
