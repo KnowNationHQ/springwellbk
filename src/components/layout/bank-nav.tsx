@@ -47,8 +47,6 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
     userId && role === "customer" ? { userId: userId as any } : "skip"
   );
 
-  const pendingCount = frozenTransfers?.length ?? 0;
-
   const customerNav = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Transfer", href: "/transfer" },
@@ -64,7 +62,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
   return (
     <>
-      {/* Row 1: Primary Navigation — desktop */}
+      {/* Desktop Nav */}
       <nav className="hidden md:block bg-[#434343] text-white">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-9">
           <div className="flex items-center gap-0">
@@ -85,7 +83,60 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
         </div>
       </nav>
 
-      {/* Row 1: Primary Navigation — mobile */}
+      {/* Desktop Logo Bar */}
+      <div className="hidden md:block bg-white border-b border-gray-300">
+        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between py-2.5">
+          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center gap-2 no-underline">
+            <img src="/logo.svg" alt="SpringWell Bank" className="h-[40px]" />
+          </Link>
+          <div className="flex items-center gap-5">
+            <Link href="/forgot-password" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
+              <HelpCircle size={16} className="text-[#426FB6]" /> Help & Support
+            </Link>
+            <Link href="/#contact" className="text-[#333] text-sm no-underline">Contact Us</Link>
+            <div className="relative">
+              <button
+                onClick={() => setSignOutOpen(!signOutOpen)}
+                className="flex items-center gap-1 text-[14px] p-1.5"
+              >
+                <span className="text-[#426FB6] font-semibold">Sign Out</span> <ChevronDown size={14} />
+              </button>
+              {signOutOpen && (
+                <div className="absolute right-0 top-full bg-white border border-gray-300 rounded p-2 min-w-[160px] shadow-lg z-50">
+                  <button onClick={handleSignOut} className="block w-full text-left px-3 py-2 text-sm text-[#333]">Sign Out</button>
+                </div>
+              )}
+            </div>
+            <div className="bg-[#FEDF01] px-4 py-2 rounded font-bold text-[13px] text-black whitespace-nowrap">
+              Signed In As {user.firstName} {user.lastName}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Profile Row */}
+      <div className="hidden md:block bg-white border-b border-gray-300 py-5">
+        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={220} />
+            <div className="flex items-center gap-5">
+              <h2 className="text-2xl font-bold m-0 text-black">Hello, {user.firstName}</h2>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
+            </div>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="How can we help you?"
+              className="py-2 pr-9 pl-3 border border-gray-300 rounded text-sm w-[220px] font-[inherit] text-gray-500"
+            />
+            <Search size={16} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Nav */}
       <nav className="md:hidden bg-white border-b border-gray-200 shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
           <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline flex items-center gap-2">
@@ -122,60 +173,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
         )}
       </nav>
 
-      {/* Row 2: Logo Bar — desktop */}
-      <div className="hidden md:block bg-white border-b border-gray-300">
-        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between py-2.5">
-          <Link href="/dashboard" className="flex items-center gap-2 no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-[40px]" />
-          </Link>
-          <div className="flex items-center gap-5">
-            <Link href="/forgot-password" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
-              <HelpCircle size={16} className="text-[#426FB6]" /> Help & Support
-            </Link>
-            <Link href="/#contact" className="text-[#333] text-sm no-underline">Contact Us</Link>
-            <div className="relative">
-              <button
-                onClick={() => setSignOutOpen(!signOutOpen)}
-                className="flex items-center gap-1 text-[14px] p-1.5"
-              >
-                <span className="text-[#426FB6] font-semibold">Sign Out</span> <ChevronDown size={14} />
-              </button>
-              {signOutOpen && (
-                <div className="absolute right-0 top-full bg-white border border-gray-300 rounded p-2 min-w-[160px] shadow-lg z-50">
-                  <button onClick={handleSignOut} className="block w-full text-left px-3 py-2 text-sm text-[#333]">Sign Out</button>
-                </div>
-              )}
-            </div>
-            <div className="bg-[#FEDF01] px-4 py-2 rounded font-bold text-[13px] text-black whitespace-nowrap">
-              Signed In As {user.firstName} {user.lastName}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 3: Profile Row — desktop */}
-      <div className="hidden md:block bg-white border-b border-gray-300 py-5">
-        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={220} />
-            <div className="flex items-center gap-5">
-              <h2 className="text-2xl font-bold m-0 text-black">Hello, {user.firstName}</h2>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-base no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
-            </div>
-          </div>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="How can we help you?"
-              className="py-2 pr-9 pl-3 border border-gray-300 rounded text-sm w-[220px] font-[inherit] text-gray-500"
-            />
-            <Search size={16} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
-      </div>
-
-      {/* Row 3: Profile Row — mobile */}
+      {/* Mobile Profile Row */}
       <div className="md:hidden bg-white border-b border-gray-300 py-4 px-4 overflow-hidden">
         <div className="flex items-center gap-3">
           <div className="shrink-0">
