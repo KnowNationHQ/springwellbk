@@ -29,13 +29,17 @@ export const creditDebit = mutation({
     if (!user) throw new Error("User not found");
 
     const ts = args.date ? new Date(args.date + "T12:00:00").getTime() : Date.now();
+    const newBalance = args.type === "credit" ? user.balance + args.amount : user.balance - args.amount;
+    if (args.type === "debit" && newBalance < 0) throw new Error("Insufficient funds");
+    await ctx.db.patch(args.userId, { balance: newBalance });
+
     return await ctx.db.insert("transactions", {
       userId: args.userId,
       type: args.type,
       amount: args.amount,
       currency: user.currency,
       description: args.description ?? (args.type === "credit" ? "Admin credit" : "Admin debit"),
-      status: "pending",
+      status: "successful",
       createdAt: ts,
       backDate: args.date ?? undefined,
     });
