@@ -206,14 +206,17 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
       {/* Mobile Profile Row */}
       <div className="md:hidden bg-white border-b border-gray-300 py-4 px-4 overflow-hidden">
         <div className="flex items-center gap-3">
-          <div className="shrink-0">
-            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={80} />
+          <div className="shrink-0 relative">
+            <UserAvatar imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} size={64} />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
-            <h2 className="text-lg font-bold m-0 text-black truncate">Hello, {user.firstName}</h2>
-            <div className="flex items-center gap-3 mt-1 flex-wrap">
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Update profile</button>
-              <button onClick={onOpenProfile} className="text-[#426FB6] text-xs no-underline bg-transparent border-none cursor-pointer p-0">Security center</button>
+            <p className="text-[11px] text-gray-400 m-0 font-mono">SWB-{userId?.slice(-8).toUpperCase() ?? ""}</p>
+            <h2 className="text-base font-bold m-0 text-gray-900 truncate">{user.firstName} {user.lastName}</h2>
+            <p className="text-[11px] text-gray-400 m-0 capitalize">{role} Account</p>
+            <div className="flex items-center gap-3 mt-2">
+              <button onClick={onOpenProfile} className="text-[#426FB6] text-[11px] font-medium no-underline bg-blue-50 border-none cursor-pointer px-2.5 py-1 rounded-md">Edit Profile</button>
+              <button onClick={onOpenProfile} className="text-gray-500 text-[11px] font-medium no-underline bg-gray-100 border-none cursor-pointer px-2.5 py-1 rounded-md">Security</button>
             </div>
           </div>
         </div>
