@@ -52,7 +52,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
   const customerNav = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Transfer", href: "/transfer" },
-    ...(pendingCount > 0 ? [{ label: `Pending Verification (${pendingCount})`, href: "/dashboard/pending" }] : []),
+    { label: "Pending Verification", href: "/dashboard/pending" },
   ];
 
   const navItems = role === "admin" ? ADMIN_NAV : customerNav;

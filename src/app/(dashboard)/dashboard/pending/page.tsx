@@ -117,6 +117,9 @@ export default function PendingVerificationPage() {
                         </button>
                       </div>
                     )}
+                    {!next && tx.status === "pending" && (
+                      <p className="text-[11px] text-gray-400 m-0 mt-2">Waiting for code from bank...</p>
+                    )}
                   </div>
                 );
               })}
