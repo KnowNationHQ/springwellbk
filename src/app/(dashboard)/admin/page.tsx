@@ -170,7 +170,8 @@ export default function AdminDashboard() {
     if (!userId) return;
     try {
       await updateProfile({ userId: userId as any, firstName: profileFields.firstName, lastName: profileFields.lastName, phone: profileFields.phone, address: profileFields.address });
-      setProfileMsg("Profile updated successfully");
+      setModal(null);
+      flash("Profile Updated!", "Your profile has been saved successfully");
     } catch (err: any) { setProfileMsg(err?.message ?? "Failed"); }
   }
   async function handlePasswordChange(e: React.FormEvent) {
