@@ -16,6 +16,7 @@ export default function PendingVerificationPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successPopup, setSuccessPopup] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -43,7 +44,11 @@ export default function PendingVerificationPage() {
     setLoading(true); setError(""); setSuccess("");
     try {
       await verifyTransferCode({ transactionId: txn._id, codeType: codeType as any, code: codeValue.trim(), userId: userId as any });
-      setSuccess(`${codeType.toUpperCase()} verified!`);
+      if (codeType === "vat") {
+        setSuccessPopup({ title: "Transfer Completed!", message: "Your transfer has been processed successfully. Funds have been released." });
+      } else {
+        setSuccess(`${codeType.toUpperCase()} verified!`);
+      }
       setCode(""); setVerifyTxn(null);
     } catch (err: any) { setError(err?.message ?? "Failed"); }
     setLoading(false);
@@ -175,6 +180,19 @@ export default function PendingVerificationPage() {
         {error && <p className="text-red-500 text-sm m-0">{error}</p>}
         {success && <p className="text-[#426FB6] text-sm m-0">{success}</p>}
       </main>
+
+      {successPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setSuccessPopup(null)}>
+          <div className="bg-white rounded-2xl p-8 max-w-[400px] w-[90%] text-center shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 m-0 mb-1">{successPopup.title}</h3>
+            <p className="text-sm text-gray-500 m-0 mb-6">{successPopup.message}</p>
+            <button onClick={() => setSuccessPopup(null)} className="px-6 py-2.5 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer w-full">Done</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
