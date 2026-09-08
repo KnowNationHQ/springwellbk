@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, UserPlus, Wallet } from "lucide-react";
+import { ArrowUpRight, Clock, Bell, Tag, FileText, PiggyBank, Target } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { Modal } from "@/components/ui/modal";
 import { Toast } from "@/components/ui/toast";
 import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
 
-type ModalName = "transfer" | "profile" | "alerts" | "billPay" | "transactions" | "offers" | "messages" | "spending" | "goals" | "openAccount" | "deposit";
+type ModalName = "transfer" | "profile" | "alerts" | "transactions" | "offers" | "messages" | "spending" | "goals";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -31,18 +31,9 @@ export default function DashboardPage() {
   const [pwMsg, setPwMsg] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
-  const [billPayForm, setBillPayForm] = useState({ payee: "", accountNumber: "", amount: "", memo: "" });
-  const [billPayMsg, setBillPayMsg] = useState("");
-  const [billPayBusy, setBillPayBusy] = useState(false);
   const [msgForm, setMsgForm] = useState({ subject: "", message: "" });
   const [msgMsg, setMsgMsg] = useState("");
   const [msgBusy, setMsgBusy] = useState(false);
-  const [depositAmount, setDepositAmount] = useState("");
-  const [depositMsg, setDepositMsg] = useState("");
-  const [depositBusy, setDepositBusy] = useState(false);
-  const [openAcctType, setOpenAcctType] = useState("");
-  const [openAcctMsg, setOpenAcctMsg] = useState("");
-  const [openAcctBusy, setOpenAcctBusy] = useState(false);
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
   const transfer = useMutation(api.auth.transfer);
@@ -202,21 +193,6 @@ export default function DashboardPage() {
     } catch (err: any) { setPwMsg(err.message || "Could not update password"); }
   }
 
-  async function handleBillPay(e: React.FormEvent) {
-    e.preventDefault();
-    setBillPayMsg(""); setBillPayBusy(true);
-    try {
-      const amt = parseFloat(billPayForm.amount);
-      if (!billPayForm.payee || isNaN(amt) || amt <= 0) throw new Error("Enter a valid payee and amount");
-      await transfer({ fromUserId: userId as any, toEmail: `billpay-${billPayForm.payee.toLowerCase().replace(/\s+/g, "-")}@springwellbk.com`, amount: amt, description: `Bill Pay: ${billPayForm.payee}${billPayForm.memo ? ` — ${billPayForm.memo}` : ""}` });
-      setBillPayForm({ payee: "", accountNumber: "", amount: "", memo: "" });
-      setBillPayMsg("Payment submitted successfully!");
-      setToastMsg("Bill payment submitted!");
-      setTimeout(() => { setActiveModal(null); setBillPayMsg(""); }, 500);
-    } catch (err: any) { setBillPayMsg(err.message || "Payment failed"); }
-    finally { setBillPayBusy(false); }
-  }
-
   async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault();
     setMsgMsg(""); setMsgBusy(true);
@@ -231,45 +207,16 @@ export default function DashboardPage() {
     finally { setMsgBusy(false); }
   }
 
-  async function handleDeposit(e: React.FormEvent) {
-    e.preventDefault();
-    setDepositMsg(""); setDepositBusy(true);
-    try {
-      const amt = parseFloat(depositAmount);
-      if (isNaN(amt) || amt <= 0) throw new Error("Enter a valid amount");
-      await transfer({ fromUserId: userId as any, toEmail: user.email, amount: amt, description: "Mobile Deposit" });
-      setDepositAmount("");
-      setDepositMsg("Deposit submitted successfully!");
-      setToastMsg("Deposit submitted successfully!");
-      setTimeout(() => { setActiveModal(null); setDepositMsg(""); }, 500);
-    } catch (err: any) { setDepositMsg(err.message || "Deposit failed"); }
-    finally { setDepositBusy(false); }
-  }
-
-  async function handleOpenAccount() {
-    if (!openAcctType) return;
-    setOpenAcctMsg(""); setOpenAcctBusy(true);
-    try {
-      await updateProfile({ userId: userId as any, accountType: openAcctType as any });
-      setOpenAcctMsg(`${openAcctType.charAt(0).toUpperCase() + openAcctType.slice(1)} account opened!`);
-      setToastMsg(`${openAcctType.charAt(0).toUpperCase() + openAcctType.slice(1)} account opened!`);
-      setTimeout(() => { setActiveModal(null); setOpenAcctMsg(""); setOpenAcctType(""); }, 500);
-    } catch (err: any) { setOpenAcctMsg(err.message || "Failed"); }
-    finally { setOpenAcctBusy(false); }
-  }
-
   const openModal = (name: ModalName) => setActiveModal(name);
 
   const activityItems = [
     { label: "Alerts", icon: Bell, modal: "alerts" as const },
-    { label: "Bill Pay", icon: DollarSign, modal: "billPay" as const },
     { label: "Transactions", icon: Clock, modal: "transactions" as const },
     { label: "Transfer Funds", icon: ArrowUpRight, route: "/transfer" },
     { label: "Special Offers", icon: Tag, modal: "offers" as const },
     { label: "Messages", icon: FileText, modal: "messages" as const },
     { label: "Spending & Budgeting", icon: PiggyBank, modal: "spending" as const },
     { label: "Profile", icon: Target, modal: "profile" as const },
-    { label: "Open Account", icon: UserPlus, modal: "openAccount" as const },
   ];
 
   return (
@@ -312,9 +259,6 @@ export default function DashboardPage() {
         <div className="grid grid-cols-4 gap-2">
           {[
             { label: "Transfer", icon: ArrowUpRight, action: () => router.push("/transfer") },
-            { label: "Pay Bill", icon: DollarSign, modal: "billPay" as const },
-            { label: "Deposit", icon: Wallet, modal: "deposit" as const },
-            { label: "More", icon: Target, modal: "openAccount" as const },
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -483,18 +427,6 @@ export default function DashboardPage() {
         <div className="p-6 text-center text-gray-400"><Bell className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm m-0">No new alerts</p></div>
       </Modal>
 
-      <Modal open={activeModal === "billPay"} onClose={() => setActiveModal(null)} title="Bill Pay">
-        <form onSubmit={handleBillPay} className="space-y-3">
-          {billPayMsg && <p className={`text-xs ${billPayMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{billPayMsg}</p>}
-          <div><Label className="text-xs text-gray-500 block mb-1">Payee Name</Label><Input required placeholder="e.g. Electric Company" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.payee} onChange={(e) => setBillPayForm({ ...billPayForm, payee: e.target.value })} /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Account Number</Label><Input placeholder="Account number" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.accountNumber} onChange={(e) => setBillPayForm({ ...billPayForm, accountNumber: e.target.value })} /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Amount ({user.currency})</Label><Input type="number" required min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.amount} onChange={(e) => setBillPayForm({ ...billPayForm, amount: e.target.value })} /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Memo (optional)</Label><Input placeholder="Invoice or reference" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={billPayForm.memo} onChange={(e) => setBillPayForm({ ...billPayForm, memo: e.target.value })} /></div>
-          <p className="text-xs text-gray-400 m-0">Available: {sym(user.currency)}{user.balance.toLocaleString()}</p>
-          <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={billPayBusy}>{billPayBusy ? "Processing..." : "Submit Payment"}</Button>
-        </form>
-      </Modal>
-
       <Modal open={activeModal === "transactions"} onClose={() => setActiveModal(null)} title="Transaction History" maxWidth={500}>
         {transactions.length === 0 ? (
           <div className="p-6 text-center text-gray-400"><Clock className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm m-0">No transactions yet</p></div>
@@ -538,30 +470,6 @@ export default function DashboardPage() {
             <div key={b.cat}><div className="flex justify-between mb-1"><span className="text-xs font-medium text-gray-700">{b.cat}</span><span className="text-[10px] text-gray-400">${b.spent} / ${b.budget}</span></div><div className="h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${(b.spent / b.budget) * 100}%`, backgroundColor: b.color }} /></div></div>
           ))}
         </div>
-      </Modal>
-
-      <Modal open={activeModal === "openAccount"} onClose={() => { setActiveModal(null); setOpenAcctType(""); setOpenAcctMsg(""); }} title="Open a New Account">
-        <div className="space-y-2">
-          {openAcctMsg && <p className={`text-xs ${openAcctMsg.includes("success") || openAcctMsg.includes("opened") ? "text-[#426FB6]" : "text-red-500"}`}>{openAcctMsg}</p>}
-          {[{ name: "checking", label: "Checking Account", desc: "Everyday banking, no monthly fees" }, { name: "savings", label: "Savings Account", desc: "Earn interest on your savings" }, { name: "business", label: "Business Account", desc: "For business transactions" }].map((a) => (
-            <div key={a.name} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer active:bg-gray-50 transition-colors ${openAcctType === a.name ? "border-[#426FB6] bg-blue-50" : "border-gray-200"}`} onClick={() => setOpenAcctType(a.name)}>
-              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><DollarSign className="w-4 h-4 text-[#426FB6]" /></div>
-              <div className="flex-1"><p className="m-0 text-sm font-semibold text-gray-700">{a.label}</p><p className="mt-0.5 m-0 text-xs text-gray-400">{a.desc}</p></div>
-              {openAcctType === a.name && <div className="w-5 h-5 bg-[#426FB6] rounded-full flex items-center justify-center"><span className="text-white text-xs">✓</span></div>}
-            </div>
-          ))}
-          {openAcctType && <Button onClick={handleOpenAccount} className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer mt-3" disabled={openAcctBusy}>{openAcctBusy ? "Opening..." : "Open Account"}</Button>}
-        </div>
-      </Modal>
-
-      {/* Deposit Modal */}
-      <Modal open={activeModal === "deposit"} onClose={() => { setActiveModal(null); setDepositMsg(""); setDepositAmount(""); }} title="Make a Deposit" maxWidth={420}>
-        <form onSubmit={handleDeposit} className="space-y-3">
-          {depositMsg && <p className={`text-xs ${depositMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{depositMsg}</p>}
-          <div><Label className="text-xs text-gray-500 block mb-1">Amount ({user.currency})</Label><Input type="number" required min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} /></div>
-          <p className="text-xs text-gray-400 m-0">Funds will be available in your account shortly.</p>
-          <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={depositBusy}>{depositBusy ? "Processing..." : "Submit Deposit"}</Button>
-        </form>
       </Modal>
 
       {frozenVerifyTxn && (
