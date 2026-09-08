@@ -307,18 +307,13 @@ export default function DashboardPage() {
             {transactions.length === 0 ? (
               <p className="text-gray-400 text-sm p-4 m-0">No transactions yet.</p>
             ) : transactions.slice(0, 5).map((t: any) => (
-              <div key={t._id} className="px-4 py-3 border-b border-gray-50 last:border-0">
+              <div key={t._id} className={`px-4 py-3 border-b border-gray-50 last:border-0 relative ${t.type === "credit" ? "border-t-2 border-t-green-400" : "border-t-2 border-t-red-300"}`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
-                      {t.type === "credit" ? "+" : "-"}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
-                      <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
+                    <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
                   </div>
-                  <span className={`text-sm font-bold ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
+                  <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
                     {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                   </span>
                 </div>
