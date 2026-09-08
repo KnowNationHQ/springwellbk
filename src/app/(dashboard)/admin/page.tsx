@@ -290,6 +290,7 @@ export default function AdminDashboard() {
                   <span className="text-sm font-bold text-gray-900">{sym(c.currency)}{c.balance.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] text-gray-500 font-semibold mr-1">{c.username}</span>
                   <span className="text-[11px] text-gray-400 font-mono mr-1">{revealed.has(c._id) ? c.password : "••••••"}</span>
                   <button onClick={() => togglePw(c._id)} className="text-[11px] text-[#426FB6] bg-transparent border-none cursor-pointer p-0">{revealed.has(c._id) ? "Hide" : "Show"}</button>
                   <div className="flex-1" />
