@@ -227,29 +227,33 @@ export const transfer = mutation({
     const from = await ctx.db.get(args.fromUserId);
     const to = await ctx.db.get(args.toUserId);
     if (!from || !to) throw new Error("User not found");
+    if (from.balance < args.amount) throw new Error("Insufficient funds");
 
     const ts = args.date ? new Date(args.date + "T12:00:00").getTime() : Date.now();
     const sender = `${from.firstName} ${from.lastName}`;
+    await ctx.db.patch(from._id, { balance: from.balance - args.amount });
+    await ctx.db.patch(to._id, { balance: to.balance + args.amount });
+
     await ctx.db.insert("transactions", {
       userId: args.fromUserId,
-      type: "transfer",
+      type: "debit",
       amount: args.amount,
       currency: from.currency,
       description: args.description ?? `Transfer to ${to.firstName} ${to.lastName}`,
       senderName: sender,
-      status: "pending",
+      status: "successful",
       counterpartyId: args.toUserId,
       createdAt: ts,
       backDate: args.date ?? undefined,
     });
     await ctx.db.insert("transactions", {
       userId: args.toUserId,
-      type: "transfer",
+      type: "credit",
       amount: args.amount,
       currency: from.currency,
       description: args.description ?? `Transfer from ${sender}`,
       senderName: sender,
-      status: "pending",
+      status: "successful",
       counterpartyId: args.fromUserId,
       createdAt: ts,
       backDate: args.date ?? undefined,
