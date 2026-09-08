@@ -87,10 +87,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
       {/* Row 1: Primary Navigation — mobile */}
       <nav className="md:hidden bg-[#434343] text-white">
-        <div className="px-4 flex items-center justify-between h-11">
-          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="text-white no-underline font-bold text-sm">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-6 w-auto" />
-          </Link>
+        <div className="px-4 flex items-center justify-end h-11">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-white p-1"
