@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Menu, X, Search, HelpCircle, ChevronDown } from "lucide-react";
+import { Menu, X, Search, HelpCircle, ChevronDown, LogOut } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
 
 interface BankNavProps {
@@ -87,7 +87,10 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
       {/* Row 1: Primary Navigation — mobile */}
       <nav className="md:hidden bg-[#434343] text-white">
-        <div className="px-4 flex items-center justify-end h-11">
+        <div className="px-4 flex items-center justify-end gap-2 h-11">
+          <button onClick={handleSignOut} className="text-white p-1" title="Sign out">
+            <LogOut size={20} />
+          </button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-white p-1"
@@ -109,12 +112,6 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
                 {item.label}
               </Link>
             ))}
-            <button
-              onClick={handleSignOut}
-              className="w-full text-left px-5 py-3.5 text-sm text-red-400 border-b border-[#444]"
-            >
-              Sign out
-            </button>
           </div>
         )}
       </nav>
@@ -152,18 +149,10 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
       {/* Row 2: Logo Bar — mobile */}
       <div className="md:hidden bg-white border-b border-gray-300">
-        <div className="px-4 flex items-center justify-between py-2.5">
+        <div className="px-4 flex items-center py-2.5">
           <Link href="/dashboard" className="flex items-center gap-2 no-underline">
             <img src="/logo.svg" alt="SpringWell Bank" className="h-[36px]" />
           </Link>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSignOut}
-              className="text-[#426FB6] text-sm font-semibold p-0 bg-transparent border-none cursor-pointer"
-            >
-              Sign Out
-            </button>
-          </div>
         </div>
       </div>
 
