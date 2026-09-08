@@ -177,8 +177,12 @@
 }
 
 @keyframes logoPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.95); }
+  0% { opacity: 0.4; transform: scale(0.96); filter: blur(0px); }
+  50% { opacity: 1; transform: scale(1); filter: blur(0px); }
+  100% { opacity: 0.4; transform: scale(0.96); filter: blur(0px); }
 }
 
-.logo-loading { animation: logoPulse 1.5s ease-in-out infinite; }
+.logo-loading {
+  animation: logoPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: drop-shadow(0 0 12px rgba(66, 111, 182, 0.3));
+}

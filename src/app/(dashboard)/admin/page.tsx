@@ -136,19 +136,23 @@ export default function AdminDashboard() {
     e.preventDefault(); if (!userId || !activeUser) return;
     try { await updateUser({ adminUserId: userId as any, userId: activeUser._id, firstName: edit.firstName, lastName: edit.lastName, email: edit.email, accountType: edit.accountType as any, currency: edit.currency as any, status: edit.status as any, balance: Number(edit.balance), creditBalance: Number(edit.creditBalance) || 0 }); flash("Account Updated", `${edit.firstName} ${edit.lastName} profile saved`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
   }
-  async function handleStatus(uid: string, status: "active" | "suspended" | "pending") { if (!userId) return; await setUserStatus({ adminUserId: userId as any, userId: uid as any, status }); flash(`Account ${status.charAt(0).toUpperCase() + status.slice(1)}`, `Account has been ${status}`); }
+  async function handleStatus(uid: string, status: "active" | "suspended" | "pending") { if (!userId) return; try { await setUserStatus({ adminUserId: userId as any, userId: uid as any, status }); flash(`Account ${status.charAt(0).toUpperCase() + status.slice(1)}`, `Account has been ${status}`); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   async function handleDelete(u: any) { if (!userId) return; if (!confirm(`Delete ${acct(u)}?`)) return; try { await deleteUser({ adminUserId: userId as any, userId: u._id }); flash("Deleted", `${acct(u)} removed`); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
-  async function handleMessage(id: string, status: "read" | "replied") { if (!userId) return; await setMessageStatus({ adminUserId: userId as any, messageId: id as any, status }); flash(`Marked ${status}`); }
+  async function handleMessage(id: string, status: "read" | "replied") { if (!userId) return; try { await setMessageStatus({ adminUserId: userId as any, messageId: id as any, status }); flash(`Marked ${status}`); } catch (err: any) { flash("Error", err?.message ?? "Failed"); } }
   function openComplete(id?: string) { setCompleteTxn(id ?? ""); setActivationCode(""); setModal("complete"); }
   async function handleComplete(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !completeTxn || !activationCode) return; setCompleteLoading(true);
     try {
       const frozenTx = frozenTransfers?.find((t: any) => t._id === completeTxn);
       if (frozenTx) {
+        const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: completeTxn as any, code: activationCode });
         const sender = users?.find((u: any) => u._id === frozenTx.userId);
-        await generateTransferCodes({ adminUserId: userId as any, transactionId: completeTxn as any, code: activationCode });
         if (sender?.email) {
-          try { await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: frozenTx.cotCode || activationCode, bsacCode: frozenTx.bsacCode || "", vatCode: frozenTx.vatCode || "" }); } catch {}
+          try {
+            const codes: Record<string, string> = { cotCode: frozenTx.cotCode || "", bsacCode: frozenTx.bsacCode || "", vatCode: frozenTx.vatCode || "" };
+            codes[result.label.toLowerCase() + "Code"] = result.code;
+            await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, ...codes });
+          } catch {}
         }
         flash("Code Sent!", `Verification code sent to ${sender?.email ?? "customer"}`);
       } else {
@@ -342,19 +346,19 @@ export default function AdminDashboard() {
           {transactions.length === 0 ? <p className="text-gray-400 text-sm m-0">None yet.</p> : (
             <div className="space-y-2">
               {transactions.map((t: any) => (
-                <div key={t._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+                <div key={t._id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
                       {t.type === "credit" ? "+" : "-"}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
                       <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                    <button onClick={() => openBackdate(t)} className="flex items-center gap-1 px-2 py-1 border border-gray-200 rounded-lg bg-white text-[11px] text-gray-500 cursor-pointer"><CalendarClock className="w-3.5 h-3.5" /><span className="hidden sm:inline">Backdate</span></button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                    <button onClick={() => openBackdate(t)} className="flex items-center gap-1 px-2 py-1 border border-gray-200 rounded-lg bg-white text-[11px] text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors shrink-0"><CalendarClock className="w-3.5 h-3.5" /><span className="hidden sm:inline">Backdate</span></button>
                   </div>
                 </div>
               ))}
@@ -470,18 +474,18 @@ export default function AdminDashboard() {
                   {customerTxns === undefined && <LogoSpinner size={30} />}
                   {customerTxns && customerTxns.length === 0 && <p className="text-gray-400 text-sm m-0">No transactions found.</p>}
                   {customerTxns && customerTxns.map((t: any) => (
-                    <div key={t._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+                    <div key={t._id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
                           {t.type === "credit" ? "+" : "-"}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
                           <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-sm font-bold ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                      <div className="text-right shrink-0">
+                        <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
                         {t.status === "pending" && <p className="text-[11px] text-yellow-500 m-0">Pending</p>}
                       </div>
                     </div>

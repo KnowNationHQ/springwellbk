@@ -107,6 +107,12 @@ export default function DashboardPage() {
   const cardLast4 = (userId?.replace(/[^0-9]/g, "").slice(-4)) || "4242";
   const cardNumber = `**** **** **** ${cardLast4}`;
 
+  useEffect(() => {
+    if (activeModal === "profile" && user) {
+      setProfileFields({ firstName: user.firstName || "", lastName: user.lastName || "", phone: user.phone || "", address: user.address || "" });
+    }
+  }, [activeModal, user]);
+
   async function handleProfileSave() {
     setProfileMsg("");
     try {

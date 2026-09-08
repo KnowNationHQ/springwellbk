@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
                 </Button>
                 <button
                   type="button"
-                  onClick={() => { setError(""); setInfo(""); setStep("email"); }}
+                  onClick={() => { setError(""); setInfo(""); setCode(""); setPassword(""); setConfirm(""); setStep("email"); }}
                   className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
                   Use a different email

@@ -196,7 +196,7 @@ export default function LoginPage() {
                 </Button>
                 <button
                   type="button"
-                  onClick={() => { setError(""); setCode(""); setOtpStep("request"); }}
+                  onClick={() => { setError(""); setCode(""); setUsername(""); setOtpStep("request"); }}
                   className="w-full text-center text-sm text-blue-700 hover:underline font-medium"
                 >
                   Use a different username

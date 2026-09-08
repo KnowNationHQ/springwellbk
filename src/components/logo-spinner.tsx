@@ -6,20 +6,20 @@ export function LogoSpinner({ size }: { size?: number }) {
   if (size) {
     const h = Math.round(size * 48 / 248);
     return (
-      <div className="logo-loading inline-block">
+      <span className="logo-loading inline-flex justify-center items-center">
         <Image src="/logo.svg" alt="" width={size} height={h} priority />
-      </div>
+      </span>
     );
   }
   return (
-    <div className="logo-loading mx-auto">
+    <div className="logo-loading w-full flex justify-center items-center">
       <Image
         src="/logo.svg"
         alt="SpringWell Bank"
         width={320}
         height={62}
         priority
-        style={{ display: "block", margin: "0 auto", width: "min(80vw, 320px)", height: "auto" }}
+        style={{ width: "min(80vw, 320px)", height: "auto" }}
       />
     </div>
   );

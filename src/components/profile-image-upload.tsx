@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Camera, X } from "lucide-react";
@@ -32,6 +32,7 @@ export function ProfileImageUpload({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
 
   const imageUrl = useQuery(
     api.auth.getImageUrl,
@@ -95,16 +96,16 @@ export function ProfileImageUpload({
 
   const displaySrc = preview || imageUrl;
 
+  useEffect(() => { setImgError(false); }, [displaySrc]);
+
   return (
     <div className={`relative group ${sizeClasses[size]} rounded-full overflow-hidden flex-shrink-0`}>
-      {displaySrc ? (
+      {displaySrc && !imgError ? (
         <img
           src={displaySrc}
           alt={`${firstName} ${lastName}`}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
+          onError={() => setImgError(true)}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-[#426FB6] text-white font-bold">

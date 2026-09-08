@@ -16,6 +16,7 @@ export default function AdminFrozenTransfersPage() {
   const [generatingCodes, setGeneratingCodes] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -39,20 +40,25 @@ export default function AdminFrozenTransfersPage() {
     const codeVal = (codeInputs[t._id] || "").trim();
     if (!codeVal) return;
     setGeneratingCodes(true);
+    setErrorMsg("");
     try {
       const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: t._id, code: codeVal });
       const sender = users?.find((u: any) => u._id === t.userId);
+      let emailSent = false;
       if (sender?.email) {
         try {
           await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: result.label === "COT" ? result.code : "", bsacCode: result.label === "BSAC" ? result.code : "", vatCode: result.label === "VAT" ? result.code : "" });
-        } catch {}
+          emailSent = true;
+        } catch (e: any) {
+          setErrorMsg(`Code saved but email failed: ${e?.message ?? "unknown error"}`);
+        }
       }
       setCodeInputs((prev) => { const n = { ...prev }; delete n[t._id]; return n; });
-      setSuccessMsg(`${result.label} code sent to ${sender?.email ?? "customer"}`);
-      setTimeout(() => setSuccessMsg(""), 3000);
+      setSuccessMsg(emailSent ? `${result.label} code sent to ${sender?.email ?? "customer"}` : `${result.label} code saved (email delivery failed)`);
+      setTimeout(() => { setSuccessMsg(""); setErrorMsg(""); }, 3000);
     } catch (err: any) {
-      setSuccessMsg(err?.message ?? "Failed");
-      setTimeout(() => setSuccessMsg(""), 3000);
+      setErrorMsg(err?.message ?? "Failed");
+      setTimeout(() => setErrorMsg(""), 3000);
     } finally {
       setGeneratingCodes(false);
     }
@@ -77,6 +83,9 @@ export default function AdminFrozenTransfersPage() {
 
         {successMsg && (
           <div className="bg-[#426FB6] text-white text-sm font-semibold px-4 py-2 rounded-lg">{successMsg}</div>
+        )}
+        {errorMsg && (
+          <div className="bg-red-500 text-white text-sm font-semibold px-4 py-2 rounded-lg">{errorMsg}</div>
         )}
 
         {frozenTransfers.length === 0 ? (

