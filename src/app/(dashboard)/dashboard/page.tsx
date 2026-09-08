@@ -241,7 +241,7 @@ export default function DashboardPage() {
             <span style={{ fontSize: 18 }}>⚠</span>
             <div>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#92400e" }}>Your account is frozen</p>
-              <p style={{ margin: 0, fontSize: 12, color: "#a16207" }}>Transfers require verification codes from support. Contact your administrator for COT, BSAC, and VAT codes.</p>
+              <p style={{ margin: 0, fontSize: 12, color: "#a16207" }}>Transfers require verification codes from SpringWell Bank. Contact your account manager for COT, BSAC, and VAT codes.</p>
             </div>
           </div>
         </div>
@@ -479,7 +479,7 @@ export default function DashboardPage() {
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>Verify Transfer Code</h3>
             </div>
             <div style={{ padding: 20 }}>
-              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Your account is frozen. Enter the verification code sent to your email.</p>
+              <p style={{ fontSize: 13, color: "#666", margin: "0 0 16px" }}>Your account is frozen. Contact your account manager for the verification code.</p>
               {frozenSuccess && (
                 <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, color: "#16a34a", fontSize: 13, textAlign: "center", fontWeight: 600 }}>{frozenSuccess}</div>
               )}
