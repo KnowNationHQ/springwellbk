@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { ArrowLeft, ArrowUpDown, Copy, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Copy } from "lucide-react";
 import { sym } from "@/lib/format";
 import { BankNav } from "@/components/layout/bank-nav";
 
@@ -12,9 +12,7 @@ export default function AdminFrozenTransfersPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
-  const [activCode, setActivCode] = useState<Record<string, string>>({});
   const [generatingCodes, setGeneratingCodes] = useState(false);
-  const [completingId, setCompletingId] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -27,7 +25,6 @@ export default function AdminFrozenTransfersPage() {
   const users = useQuery(api.users.list);
   const frozenTransfers = useQuery(api.admin.pendingFrozenTransfers);
   const generateTransferCodes = useMutation(api.admin.generateTransferCodes);
-  const completeTransaction = useMutation(api.admin.completeTransaction);
   const sendVerificationCodes = useAction(api.email.sendVerificationCodes);
 
   function copyCode(code: string) {
@@ -57,24 +54,6 @@ export default function AdminFrozenTransfersPage() {
       setTimeout(() => setSuccessMsg(""), 3000);
     } finally {
       setGeneratingCodes(false);
-    }
-  }
-
-  async function handleComplete(t: any) {
-    if (!userId) return;
-    const codeVal = (activCode[t._id] || "").trim();
-    if (!codeVal) return;
-    setCompletingId(t._id);
-    try {
-      await completeTransaction({ adminUserId: userId as any, transactionId: t._id, activationCode: codeVal });
-      setActivCode((prev) => { const n = { ...prev }; delete n[t._id]; return n; });
-      setSuccessMsg("Transfer completed successfully!");
-      setTimeout(() => setSuccessMsg(""), 3000);
-    } catch (err: any) {
-      setSuccessMsg(err?.message ?? "Failed");
-      setTimeout(() => setSuccessMsg(""), 3000);
-    } finally {
-      setCompletingId(null);
     }
   }
 
@@ -129,7 +108,6 @@ export default function AdminFrozenTransfersPage() {
                     </div>
                   )}
 
-                  <div className="flex flex-col gap-2">
                     {(!t.vatCode) && (
                       <div className="flex items-center gap-1.5">
                         <input
@@ -150,26 +128,6 @@ export default function AdminFrozenTransfersPage() {
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="text"
-                        placeholder="Enter activation code (SWB-ADMIN-2026)"
-                        value={activCode[t._id] || ""}
-                        onChange={(e) => setActivCode((prev) => ({ ...prev, [t._id]: e.target.value }))}
-                        onKeyDown={(e) => { if (e.key === "Enter") handleComplete(t); }}
-                        className="flex-1 px-2 py-1 border border-green-300 rounded text-xs font-mono outline-none focus:border-green-500"
-                      />
-                      <button
-                        onClick={() => handleComplete(t)}
-                        disabled={completingId === t._id || !(activCode[t._id] || "").trim()}
-                        className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white border-none rounded text-xs font-bold cursor-pointer"
-                        style={{ opacity: completingId === t._id || !(activCode[t._id] || "").trim() ? 0.5 : 1 }}
-                      >
-                        <CheckCircle className="w-3 h-3" />
-                        {completingId === t._id ? "Completing..." : "Complete"}
-                      </button>
-                    </div>
-                  </div>
                 </div>
               );
             })}
