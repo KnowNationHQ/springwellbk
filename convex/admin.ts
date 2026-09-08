@@ -46,6 +46,16 @@ export const creditDebit = mutation({
   },
 });
 
+export const clearPendingTransactions = mutation({
+  args: { adminUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const pending = await ctx.db.query("transactions").filter((q) => q.eq(q.field("status"), "pending")).collect();
+    for (const tx of pending) await ctx.db.delete(tx._id);
+    return { deleted: pending.length };
+  },
+});
+
 // Activation code required to release (complete) a pending transaction.
 // Override via Convex env var ACTIVATION_CODE in production.
 const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "SWB-ADMIN-2026";
@@ -401,11 +411,9 @@ export const generateTransferCodes = mutation({
     let label = "";
     if (!tx.cotCode) {
       patch.cotCode = args.code.trim().toUpperCase();
-      patch.feeStatus = "pending_bsac";
       label = "COT";
     } else if (!tx.bsacCode) {
       patch.bsacCode = args.code.trim().toUpperCase();
-      patch.feeStatus = "pending_vat";
       label = "BSAC";
     } else if (!tx.vatCode) {
       patch.vatCode = args.code.trim().toUpperCase();

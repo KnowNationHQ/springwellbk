@@ -266,7 +266,6 @@ export const transfer = mutation({
 
     if (from.status === "suspended") {
       if (from.balance < args.amount) throw new Error("Insufficient funds");
-      const code = () => Math.random().toString(36).substring(2, 8).toUpperCase();
       const txId = await ctx.db.insert("transactions", {
         userId: from._id,
         type: "debit",
@@ -277,7 +276,6 @@ export const transfer = mutation({
         status: "pending",
         counterpartyId: to._id,
         feeStatus: "pending_cot",
-        cotCode: code(),
         createdAt: ts,
       });
       await ctx.db.insert("transactions", {

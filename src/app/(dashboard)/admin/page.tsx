@@ -51,6 +51,7 @@ export default function AdminDashboard() {
   const deleteUser = useMutation(api.admin.deleteUser);
   const setMessageStatus = useMutation(api.admin.setMessageStatus);
   const generateTransferCodes = useMutation(api.admin.generateTransferCodes);
+  const clearPendingTransactions = useMutation(api.admin.clearPendingTransactions);
   const sendVerificationCodes = useAction(api.email.sendVerificationCodes);
   const updateProfile = useMutation(api.auth.updateProfile);
   const changePassword = useMutation(api.auth.changePassword);
@@ -249,6 +250,9 @@ export default function AdminDashboard() {
 
         {/* Pending Transactions */}
         <Section id="pending" title={`Pending Transactions (${pending.length})`}>
+          {pending.length > 0 && (
+            <button onClick={async () => { if (!userId) return; const r = await clearPendingTransactions({ adminUserId: userId as any }); flash("Cleared", `${r.deleted} pending transactions removed`); }} className="text-[11px] text-red-500 bg-transparent border border-red-300 rounded px-2 py-0.5 cursor-pointer hover:bg-red-50 mb-2">Clear All</button>
+          )}
           {pending.length === 0 ? <p className="text-gray-400 text-sm m-0">None.</p> : (
             <div className="space-y-2">
               {pending.map((t: any) => (
