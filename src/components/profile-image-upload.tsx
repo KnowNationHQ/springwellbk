@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Camera, X, Loader2 } from "lucide-react";
+import { Camera, X } from "lucide-react";
+import Image from "next/image";
 
 interface ProfileImageUploadProps {
   userId: string;
@@ -107,7 +108,7 @@ export function ProfileImageUpload({
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-[#426FB6] text-white font-bold">
-          {uploading ? <Loader2 className="animate-spin" size={iconSize + 8} /> : initials}
+          {uploading ? <div className="logo-loading"><Image src="/logo.svg" alt="" width={iconSize + 8} height={iconSize + 8} /></div> : initials}
         </div>
       )}
 
@@ -118,7 +119,7 @@ export function ProfileImageUpload({
         className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer disabled:cursor-wait"
       >
         {uploading ? (
-          <Loader2 className="text-white animate-spin" size={iconSize + 4} />
+          <div className="logo-loading"><Image src="/logo.svg" alt="" width={iconSize + 4} height={iconSize + 4} className="brightness-0 invert" /></div>
         ) : (
           <Camera className="text-white" size={iconSize + 4} />
         )}

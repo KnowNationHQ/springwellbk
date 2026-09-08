@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +39,7 @@ export function HeroSection() {
 
   return (
     <section className="relative bg-[#426FB6] overflow-hidden">
-      <img src="/images/hero.jpeg" alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover opacity-20" />
+      <Image src="/images/hero.jpeg" alt="" aria-hidden="true" fill priority className="object-cover opacity-20" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#426FB6]/90 via-[#426FB6]/70 to-[#426FB6]/50" />
       <div className="relative max-w-7xl mx-auto px-4 py-24 sm:py-32 md:py-40 lg:py-48">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -88,7 +90,7 @@ export function HeroSection() {
                     />
                   </div>
                   <Button type="submit" className="w-full bg-[#426FB6] hover:bg-[#3560a0] text-white h-10" disabled={loading}>
-                    {loading ? t("hero.signingIn") : t("hero.signIn")}
+                    {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> {t("hero.signingIn")}</span> : t("hero.signIn")}
                   </Button>
                 </form>
                 <div className="mt-3 text-center">

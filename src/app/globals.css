@@ -157,3 +157,10 @@
   50%, 90% { transform: rotateY(180deg); }
   100% { transform: rotateY(0deg); }
 }
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.95); }
+}
+
+.logo-loading { animation: logoPulse 1.5s ease-in-out infinite; }

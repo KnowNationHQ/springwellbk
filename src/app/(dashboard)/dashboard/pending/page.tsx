@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { ArrowLeft } from "lucide-react";
 import { sym } from "@/lib/format";
 import { BankNav } from "@/components/layout/bank-nav";
@@ -31,7 +32,7 @@ export default function PendingVerificationPage() {
   const customerCompleteTransaction = useMutation(api.auth.customerCompleteTransaction);
 
   if (!userId || users === undefined || frozenTransfers === undefined || myPending === undefined) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><LogoSpinner /></div>;
   }
 
   const user = users.find((u: any) => u._id === userId);

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { ArrowLeft, ArrowUpDown, Copy } from "lucide-react";
 import { sym } from "@/lib/format";
 import { BankNav } from "@/components/layout/bank-nav";
@@ -58,7 +59,7 @@ export default function AdminFrozenTransfersPage() {
   }
 
   if (!userId || users === undefined || frozenTransfers === undefined) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><LogoSpinner /></div>;
   }
 
   const adminUser = users.find((u: any) => u._id === userId);

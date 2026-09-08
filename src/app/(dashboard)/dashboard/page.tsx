@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, Wallet } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,7 @@ export default function DashboardPage() {
   const stats = useQuery(api.auth.getDashboardStats, userId ? { userId: userId as any } : "skip");
 
   if (!userId || !stats) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">Loading...</p></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><LogoSpinner /></div>;
   }
 
   const { user, transactions } = stats;
@@ -265,7 +266,7 @@ export default function DashboardPage() {
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <button key={item.label} onClick={() => "action" in item && item.action ? item.action() : openModal(item.modal!)} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
+              <button key={item.label} onClick={() => item.action()} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
                 <Icon className="w-5 h-5 text-[#426FB6]" />
                 <span className="text-[11px] text-gray-600 font-medium">{item.label}</span>
               </button>

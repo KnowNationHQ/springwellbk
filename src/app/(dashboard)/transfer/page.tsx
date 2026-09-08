@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, ArrowRightLeft, User, Loader2, Building2, Globe, CheckCircle2 } from "lucide-react";
+import { Landmark, ArrowRightLeft, User, Building2, Globe, CheckCircle2 } from "lucide-react";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,7 +84,7 @@ export default function TransferPage() {
   const currentUser = users?.find((u: any) => u._id === userId);
 
   if (!userId || users === undefined) {
-    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 className="animate-spin h-8 w-8 text-[#426FB6]" /></div>;
+    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><LogoSpinner /></div>;
   }
 
   async function handleDomestic(e: React.FormEvent) {

@@ -1,4 +1,5 @@
 import { T } from "@/lib/i18n";
+import Image from "next/image";
 
 export function AboutSection() {
   return (
@@ -26,8 +27,8 @@ export function AboutSection() {
               </div>
             </div>
           </div>
-          <div className="relative">
-            <img src="/images/about.jpeg" alt="About SpringWell Bank" className="rounded-2xl w-full h-80 object-cover shadow-lg" />
+          <div className="relative h-80">
+            <Image src="/images/about.jpeg" alt="About SpringWell Bank" fill priority className="rounded-2xl object-cover shadow-lg" />
           </div>
         </div>
       </div>

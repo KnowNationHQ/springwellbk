@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,7 +68,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
-            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 50 }} />
+            <Image src="/logo.svg" alt="SpringWell Bank" width={50} height={50} priority />
           </Link>
         </div>
 
@@ -90,7 +92,7 @@ export default function ForgotPasswordPage() {
                   <Input id="email" type="email" placeholder="name@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? "Sending..." : "Send Reset Code"}
+                  {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> Sending...</span> : "Send Reset Code"}
                 </Button>
                 <div className="text-center text-sm">
                   <Link href="/login" className="text-blue-700 hover:underline">Back to Login</Link>
@@ -115,7 +117,7 @@ export default function ForgotPasswordPage() {
                   <Input id="confirm" type="password" placeholder="Re-enter password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? "Resetting..." : "Reset Password"}
+                  {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> Resetting...</span> : "Reset Password"}
                 </Button>
                 <button
                   type="button"

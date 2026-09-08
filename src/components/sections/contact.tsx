@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, MapPin, Phone } from "lucide-react";
@@ -44,7 +45,9 @@ export function ContactSection() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div>
-            <img src="/images/contact.jpeg" alt="Contact SpringWell Bank" className="rounded-2xl w-full h-48 object-cover mb-6 shadow" />
+            <div className="relative h-48 mb-6">
+              <Image src="/images/contact.jpeg" alt="Contact SpringWell Bank" fill priority className="rounded-2xl object-cover shadow" />
+            </div>
             <div className="grid grid-cols-2 gap-4 mb-8">
               {[
                 { icon: Phone, label: "Phone number", value: "+1 (555) 123-4567" },

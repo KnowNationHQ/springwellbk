@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -42,7 +43,7 @@ export function Header() {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto flex h-14 md:h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg md:text-xl text-[#426FB6]">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-10 w-auto md:h-12" />
+            <Image src="/logo.svg" alt="SpringWell Bank" width={48} height={48} priority className="h-10 w-auto md:h-12" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
@@ -72,7 +73,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto bg-white text-gray-900 border-gray-200 p-0">
                 <SheetHeader className="px-5 h-14 border-b border-gray-200 flex-row items-center justify-start gap-2 space-y-0">
-                  <img src="/logo.svg" alt="" className="h-6 w-auto" />
+                  <Image src="/logo.svg" alt="" width={24} height={24} />
                   <SheetTitle className="text-gray-900">{t("header.menu")}</SheetTitle>
                 </SheetHeader>
                 <div className="p-3 border-b border-gray-200">

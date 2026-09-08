@@ -2,11 +2,13 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -128,7 +130,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
-            <img src="/logo.svg" alt="SpringWell Bank" style={{ height: 50 }} />
+            <Image src="/logo.svg" alt="SpringWell Bank" width={50} height={50} priority />
           </Link>
           <p style={{ color: "rgba(255,255,255,0.8)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }} className="mt-3 text-sm">Create your account in minutes</p>
         </div>
@@ -252,7 +254,7 @@ export default function RegisterPage() {
               </div>
 
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11" disabled={loading || success}>
-                {loading ? "Creating Account..." : "Open Account"}
+                {loading ? <span className="flex items-center gap-2"><LogoSpinner size={16} /> Creating Account...</span> : "Open Account"}
               </Button>
             </form>
 

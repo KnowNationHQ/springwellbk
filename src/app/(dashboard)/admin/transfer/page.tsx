@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Landmark, ArrowRightLeft, User, Loader2, Building2 } from "lucide-react";
+import { Landmark, ArrowRightLeft, User, Building2 } from "lucide-react";
+import { LogoSpinner } from "@/components/logo-spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,7 +58,7 @@ export default function AdminTransferPage() {
   const nonAdmins = users?.filter((u: any) => u.role !== "admin") ?? [];
 
   if (!userId || users === undefined) {
-    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 className="animate-spin h-8 w-8 text-[#426FB6]" /></div>;
+    return <div style={{ backgroundColor: "#eee", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><LogoSpinner /></div>;
   }
 
   const userSelectCls = "w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] bg-white font-[inherit]";

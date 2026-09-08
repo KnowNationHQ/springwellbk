@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Menu, X, Search, HelpCircle, ChevronDown, LogOut } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
+import Image from "next/image";
 
 interface BankNavProps {
   user: {
@@ -87,7 +88,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
       <div className="hidden md:block bg-white border-b border-gray-300">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between py-2.5">
           <Link href={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center gap-2 no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-[40px]" />
+            <Image src="/logo.svg" alt="SpringWell Bank" width={40} height={40} priority />
           </Link>
           <div className="flex items-center gap-5">
             <Link href="/forgot-password" className="flex items-center gap-1.5 text-[#333] text-sm no-underline">
@@ -140,7 +141,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
       <nav className="md:hidden bg-white border-b border-gray-200 shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
           <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-7 w-auto" />
+            <Image src="/logo.svg" alt="SpringWell Bank" width={28} height={28} priority />
           </Link>
           <div className="flex items-center gap-1">
             <button onClick={handleSignOut} className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500" title="Sign out">
