@@ -111,7 +111,7 @@ export default function PendingVerificationPage() {
                           onFocus={() => { setVerifyTxn(tx); setCode(""); setError(""); setSuccess(""); }}
                           onChange={(e) => setCode(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Enter") handleVerify(tx, next, code); }}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6]"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors"
                         />
                         <button
                           onClick={() => handleVerify(tx, next, code)}
@@ -155,7 +155,7 @@ export default function PendingVerificationPage() {
                       onFocus={() => { setVerifyTxn(tx); setCode(""); setError(""); setSuccess(""); }}
                       onChange={(e) => setCode(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handlePendingComplete(tx); }}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6]"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors"
                     />
                     <button
                       onClick={() => handlePendingComplete(tx)}

@@ -103,26 +103,26 @@ export default function AdminFrozenTransfersPage() {
 
                   {t.cotCode && (
                     <div className="flex gap-1.5 text-[11px] font-mono text-gray-500 flex-wrap mb-2">
-                      {t.cotCode && <span className="inline-flex items-center gap-1">COT: <strong className="text-gray-900">{t.cotCode}</strong><button onClick={() => copyCode(t.cotCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy COT code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.cotCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span>}
-                      {t.bsacCode && <><span>·</span><span className="inline-flex items-center gap-1">BSAC: <strong className="text-gray-900">{t.bsacCode}</strong><button onClick={() => copyCode(t.bsacCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy BSAC code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.bsacCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span></>}
-                      {t.vatCode && <><span>·</span><span className="inline-flex items-center gap-1">VAT: <strong className="text-gray-900">{t.vatCode}</strong><button onClick={() => copyCode(t.vatCode)} className="p-0.5 rounded hover:bg-gray-200 transition-colors" title="Copy VAT code"><Copy className="w-3 h-3 text-gray-400" /></button>{copiedCode === t.vatCode && <span className="text-green-600 text-[10px] font-sans">Copied!</span>}</span></>}
+                      {t.cotCode && <span className="inline-flex items-center gap-1">COT: <strong className="text-gray-900">{t.cotCode}</strong><button onClick={() => copyCode(t.cotCode)} className="p-1 rounded hover:bg-gray-200 transition-colors" title="Copy COT code"><Copy className="w-3.5 h-3.5 text-gray-400" /></button>{copiedCode === t.cotCode && <span className="text-green-600 text-[11px] font-sans">Copied!</span>}</span>}
+                      {t.bsacCode && <><span>·</span><span className="inline-flex items-center gap-1">BSAC: <strong className="text-gray-900">{t.bsacCode}</strong><button onClick={() => copyCode(t.bsacCode)} className="p-1 rounded hover:bg-gray-200 transition-colors" title="Copy BSAC code"><Copy className="w-3.5 h-3.5 text-gray-400" /></button>{copiedCode === t.bsacCode && <span className="text-green-600 text-[11px] font-sans">Copied!</span>}</span></>}
+                      {t.vatCode && <><span>·</span><span className="inline-flex items-center gap-1">VAT: <strong className="text-gray-900">{t.vatCode}</strong><button onClick={() => copyCode(t.vatCode)} className="p-1 rounded hover:bg-gray-200 transition-colors" title="Copy VAT code"><Copy className="w-3.5 h-3.5 text-gray-400" /></button>{copiedCode === t.vatCode && <span className="text-green-600 text-[11px] font-sans">Copied!</span>}</span></>}
                     </div>
                   )}
 
                     {(!t.vatCode) && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <input
                           type="text"
                           placeholder={`Enter ${!t.cotCode ? "COT" : !t.bsacCode ? "BSAC" : "VAT"} code`}
                           value={codeInputs[t._id] || ""}
                           onChange={(e) => setCodeInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
                           onKeyDown={(e) => { if (e.key === "Enter") handleSendCode(t); }}
-                          className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs font-mono outline-none focus:border-[#426FB6]"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono outline-none focus:border-[#426FB6] transition-colors"
                         />
                         <button
                           onClick={() => handleSendCode(t)}
                           disabled={generatingCodes || !(codeInputs[t._id] || "").trim()}
-                          className="px-3 py-1 bg-[#426FB6] text-white border-none rounded text-xs font-bold cursor-pointer"
+                          className="px-4 py-2 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer"
                           style={{ opacity: generatingCodes || !(codeInputs[t._id] || "").trim() ? 0.5 : 1 }}
                         >
                           {generatingCodes ? "Sending..." : "Send Code"}

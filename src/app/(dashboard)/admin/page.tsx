@@ -243,9 +243,9 @@ export default function AdminDashboard() {
             { label: "Suspend", icon: Ban, color: "#dc2626", bg: "#fee2e2", action: () => setModal("status") },
             { label: "Complete", icon: KeyRound, color: "#d97706", bg: "#fef3c7", action: () => openComplete() },
           ].map((b) => (
-            <button key={b.label} onClick={b.action} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-xl border border-gray-200 cursor-pointer active:bg-gray-50">
+            <button key={b.label} onClick={b.action} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
               <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: b.bg }}><b.icon className="w-4 h-4" style={{ color: b.color }} /></div>
-              <span className="text-[10px] text-gray-600 font-medium">{b.label}</span>
+              <span className="text-[11px] text-gray-600 font-medium">{b.label}</span>
             </button>
           ))}
         </div>
@@ -482,7 +482,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="text-right">
                         <span className={`text-sm font-bold ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                        {t.status === "pending" && <p className="text-[10px] text-yellow-500 m-0">Pending</p>}
+                        {t.status === "pending" && <p className="text-[11px] text-yellow-500 m-0">Pending</p>}
                       </div>
                     </div>
                   ))}

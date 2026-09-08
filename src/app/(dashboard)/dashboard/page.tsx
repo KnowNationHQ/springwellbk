@@ -396,9 +396,9 @@ export default function DashboardPage() {
         <form onSubmit={handleTransfer} className="space-y-3">
           {transferError && <p className="text-xs bg-red-50 p-2 rounded text-red-600">{transferError}</p>}
           {transferSuccess && <p className="text-xs bg-blue-50 p-2 rounded text-[#426FB6]">{transferSuccess}</p>}
-          <div><Label className="text-xs text-gray-500 block mb-1">Recipient email</Label><Input type="email" required placeholder="friend@springwellbk.com" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={transferForm.toEmail} onChange={(e) => setTransferForm({ ...transferForm, toEmail: e.target.value })} /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Amount ({user.currency})</Label><Input type="number" required min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={transferForm.amount} onChange={(e) => setTransferForm({ ...transferForm, amount: e.target.value })} /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Note (optional)</Label><Input placeholder="Dinner, rent, etc." className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={transferForm.description} onChange={(e) => setTransferForm({ ...transferForm, description: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Recipient email</Label><Input type="email" required placeholder="friend@springwellbk.com" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors outline-none focus:border-[#426FB6] transition-colors" value={transferForm.toEmail} onChange={(e) => setTransferForm({ ...transferForm, toEmail: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Amount ({user.currency})</Label><Input type="number" required min="0.01" step="0.01" placeholder="0.00" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors outline-none focus:border-[#426FB6] transition-colors" value={transferForm.amount} onChange={(e) => setTransferForm({ ...transferForm, amount: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Note (optional)</Label><Input placeholder="Dinner, rent, etc." className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors outline-none focus:border-[#426FB6] transition-colors" value={transferForm.description} onChange={(e) => setTransferForm({ ...transferForm, description: e.target.value })} /></div>
           <p className="text-xs text-gray-400 m-0">Available: {sym(user.currency)}{user.balance.toLocaleString()}</p>
           <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={transferBusy}>{transferBusy ? "Sending..." : "Send Transfer"}</Button>
         </form>
@@ -410,16 +410,16 @@ export default function DashboardPage() {
         <div className="flex justify-center mb-4"><ProfileImageUpload userId={userId} imageId={user.imageId} firstName={user.firstName} lastName={user.lastName} onImageSaved={() => window.location.reload()} generateUploadUrl={generateUploadUrl} saveImage={saveProfileImage} removeImage={removeProfileImage} size="md" /></div>
         <div className="grid grid-cols-2 gap-3 mb-4">
           {[{ label: "First Name", key: "firstName" }, { label: "Last Name", key: "lastName" }, { label: "Phone", key: "phone" }, { label: "Address", key: "address" }].map((f) => (
-            <div key={f.key}><Label className="text-xs text-gray-500 block mb-1">{f.label}</Label><Input className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={profileFields[f.key] || ""} onChange={(e) => setProfileFields({ ...profileFields, [f.key]: e.target.value })} /></div>
+            <div key={f.key}><Label className="text-xs text-gray-500 block mb-1">{f.label}</Label><Input className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors" value={profileFields[f.key] || ""} onChange={(e) => setProfileFields({ ...profileFields, [f.key]: e.target.value })} /></div>
           ))}
         </div>
         <div className="border-t border-gray-100 pt-3 mb-3">
           <h4 className="m-0 mb-2 text-sm font-bold">Security</h4>
           {pwMsg && <p className={`text-xs mb-2 ${pwMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{pwMsg}</p>}
           <form onSubmit={handlePasswordChange} className="space-y-2">
-            <Input type="password" placeholder="Current Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.current} onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })} />
-            <Input type="password" placeholder="New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.next} onChange={(e) => setPwForm({ ...pwForm, next: e.target.value })} />
-            <Input type="password" placeholder="Confirm New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.confirm} onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })} />
+            <Input type="password" placeholder="Current Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors" value={pwForm.current} onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })} />
+            <Input type="password" placeholder="New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors" value={pwForm.next} onChange={(e) => setPwForm({ ...pwForm, next: e.target.value })} />
+            <Input type="password" placeholder="Confirm New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors" value={pwForm.confirm} onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })} />
             <Button type="submit" className="py-2.5 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer">Update Password</Button>
           </form>
         </div>
@@ -450,7 +450,7 @@ export default function DashboardPage() {
         <div className="space-y-3">
           {[{ title: "5% Cash Back on Dining", desc: "Use your SpringWell card at restaurants this month.", badge: "Limited" }, { title: "0% APR for 12 Months", desc: "Open a new credit card with 0% intro APR.", badge: "New" }, { title: "Refer a Friend, Get $50", desc: "Invite friends and you both earn $50.", badge: "Ongoing" }].map((o, i) => (
             <div key={i} className="p-3 border border-gray-200 rounded-lg">
-              <div className="flex items-center justify-between mb-1"><h4 className="m-0 text-sm font-bold text-gray-700">{o.title}</h4><span className="text-[10px] bg-[#FEDF01] text-black px-2 py-0.5 rounded-full font-semibold">{o.badge}</span></div>
+              <div className="flex items-center justify-between mb-1"><h4 className="m-0 text-sm font-bold text-gray-700">{o.title}</h4><span className="text-[11px] bg-[#FEDF01] text-black px-2 py-0.5 rounded-full font-semibold">{o.badge}</span></div>
               <p className="m-0 text-xs text-gray-500">{o.desc}</p>
             </div>
           ))}
@@ -460,9 +460,9 @@ export default function DashboardPage() {
       <Modal open={activeModal === "messages"} onClose={() => setActiveModal(null)} title="Messages">
         <form onSubmit={handleSendMessage} className="space-y-3">
           {msgMsg && <p className={`text-xs ${msgMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{msgMsg}</p>}
-          <div><Label className="text-xs text-gray-500 block mb-1">To</Label><Input value="SpringWell Support" disabled className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm bg-gray-50" /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Subject</Label><Input placeholder="How can we help?" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={msgForm.subject} onChange={(e) => setMsgForm({ ...msgForm, subject: e.target.value })} /></div>
-          <div><Label className="text-xs text-gray-500 block mb-1">Message</Label><textarea required placeholder="Type your message..." rows={4} className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm font-sans resize-y" value={msgForm.message} onChange={(e) => setMsgForm({ ...msgForm, message: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">To</Label><Input value="SpringWell Support" disabled className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors bg-gray-50" /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Subject</Label><Input placeholder="How can we help?" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors" value={msgForm.subject} onChange={(e) => setMsgForm({ ...msgForm, subject: e.target.value })} /></div>
+          <div><Label className="text-xs text-gray-500 block mb-1">Message</Label><textarea required placeholder="Type your message..." rows={4} className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors font-sans resize-y" value={msgForm.message} onChange={(e) => setMsgForm({ ...msgForm, message: e.target.value })} /></div>
           <Button type="submit" className="w-full py-3 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer" disabled={msgBusy}>{msgBusy ? "Sending..." : "Send Message"}</Button>
         </form>
       </Modal>
