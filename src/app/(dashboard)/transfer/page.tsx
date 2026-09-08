@@ -118,7 +118,7 @@ export default function TransferPage() {
     setLoading(true);
     try {
       const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
-      const result = await transfer({ fromUserId: userId as any, toEmail: recipient!.email, amount: amt, description: desc });
+      const result = await transfer({ fromUserId: userId as any, toUserId: recipient!._id, amount: amt, description: desc });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);
         setCodeStep(stepFromFeeStatus((result as any).feeStatus));
@@ -169,9 +169,10 @@ export default function TransferPage() {
     const amt = confirmData.amount;
     setLoading(true);
     try {
+      const adminUser = users?.find((u: any) => u.role === "admin");
       const result = await transfer({
         fromUserId: userId as any,
-        toEmail: "admin@springwellbk.com",
+        toUserId: adminUser!._id,
         amount: amt,
         description: `International wire to ${intlForm.recipientName} at ${intlForm.recipientBank}${intlForm.swiftCode ? ` (SWIFT: ${intlForm.swiftCode})` : ""}${intlForm.iban ? ` (IBAN: ${intlForm.iban})` : ""}`,
       });
@@ -227,7 +228,7 @@ export default function TransferPage() {
     try {
       const result = await transfer({
         fromUserId: userId as any,
-        toEmail: recipient!.email,
+        toUserId: recipient!._id,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName}`,
       });

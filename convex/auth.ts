@@ -242,7 +242,8 @@ export const getMyFrozenTransfers = query({
 export const transfer = mutation({
   args: {
     fromUserId: v.id("users"),
-    toEmail: v.string(),
+    toEmail: v.optional(v.string()),
+    toUserId: v.optional(v.id("users")),
     amount: v.number(),
     description: v.optional(v.string()),
   },
@@ -253,11 +254,16 @@ export const transfer = mutation({
     if (!from) throw new Error("Sender account not found");
     if (from.status !== "active" && from.status !== "suspended") throw new Error("Your account is not active");
 
-    const to = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.toEmail.trim().toLowerCase()))
-      .unique();
-    if (!to) throw new Error("No SpringWell user found with that email");
+    let to;
+    if (args.toUserId) {
+      to = await ctx.db.get(args.toUserId);
+    } else if (args.toEmail) {
+      to = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.toEmail!.trim().toLowerCase()))
+        .unique();
+    }
+    if (!to) throw new Error("No SpringWell user found");
     if (to._id === from._id) throw new Error("Cannot transfer to your own account");
 
     const senderName = `${from.firstName} ${from.lastName}`;
