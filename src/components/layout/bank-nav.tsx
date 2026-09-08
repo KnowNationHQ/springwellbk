@@ -152,15 +152,6 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
         </div>
       </div>
 
-      {/* Row 2: Logo Bar — mobile */}
-      <div className="md:hidden bg-white border-b border-gray-300">
-        <div className="px-4 flex items-center py-2.5">
-          <Link href="/dashboard" className="flex items-center gap-2 no-underline">
-            <img src="/logo.svg" alt="SpringWell Bank" className="h-[36px]" />
-          </Link>
-        </div>
-      </div>
-
       {/* Row 3: Profile Row — desktop */}
       <div className="hidden md:block bg-white border-b border-gray-300 py-5">
         <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between">
