@@ -67,10 +67,10 @@ export const sendWelcomeEmail = action({
     const html = layout(
       "Welcome to SpringWell Bank",
       `<p style="color:#333;font-size:15px;line-height:1.6;">Hi ${name},</p>
-       <p style="color:#333;font-size:15px;line-height:1.6;">Welcome to <strong>SpringWell Bank</strong> — your trusted financial partner. Your account has been created and is currently <strong>pending review</strong>. Our team will activate it shortly, and you'll be able to sign in and manage your finances right away.</p>
+       <p style="color:#333;font-size:15px;line-height:1.6;">Welcome to <strong>SpringWell Bank</strong>, your trusted financial partner. Your account has been created and is currently <strong>pending review</strong>. Our team will activate it shortly, and you'll be able to sign in and manage your finances right away.</p>
        <p style="color:#333;font-size:15px;line-height:1.6;">If you have any questions, just reply to this email or contact our support team.</p>`
     );
-    const text = `Hi ${name},\n\nWelcome to SpringWell Bank — your trusted financial partner. Your account has been created and is pending review. We'll activate it shortly.\n\nIf you have any questions, contact our support team.`;
+    const text = `Hi ${name},\n\nWelcome to SpringWell Bank, your trusted financial partner. Your account has been created and is pending review. We'll activate it shortly.\n\nIf you have any questions, contact our support team.`;
     await transport().sendMail({ from: from(), to, subject: "Welcome to SpringWell Bank", html, text });
     return { ok: true as const };
   },

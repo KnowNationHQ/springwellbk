@@ -93,12 +93,12 @@ export default function PendingVerificationPage() {
                 const next = nextCodeType(tx);
                 return (
                   <div key={tx._id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <div>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 m-0">{tx.description || tx.type}</p>
+                        <p className="text-[11px] text-gray-400 m-0 truncate">{tx.description || tx.type}</p>
                       </div>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 shrink-0 whitespace-nowrap">
                         {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : tx.feeStatus === "pending_vat" ? "BSAC verified" : "Completed"}
                       </span>
                     </div>
@@ -142,9 +142,9 @@ export default function PendingVerificationPage() {
               {myPending.map((tx: any) => (
                 <div key={tx._id} className="p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-1">
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                      <p className="text-[11px] text-gray-400 m-0">{tx.description || tx.type}</p>
+                      <p className="text-[11px] text-gray-400 m-0 truncate">{tx.description || tx.type}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-2">

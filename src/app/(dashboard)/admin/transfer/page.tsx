@@ -90,7 +90,7 @@ export default function AdminTransferPage() {
     const amt = confirmData.amount;
     setLoading(true);
     try {
-      const desc = domesticForm.bankName ? `Domestic transfer to ${domesticForm.recipientName || "recipient"} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber || "N/A"})${domesticForm.description ? ` — ${domesticForm.description}` : ""}` : domesticForm.description || "Domestic transfer";
+      const desc = domesticForm.bankName ? `Domestic transfer to ${domesticForm.recipientName || "recipient"} at ${domesticForm.bankName} (Acct: ${domesticForm.accountNumber || "N/A"})${domesticForm.description ? `, ${domesticForm.description}` : ""}` : domesticForm.description || "Domestic transfer";
       await transferAdmin({ adminUserId: userId as any, fromUserId: domesticForm.fromUserId as any, toUserId: domesticForm.toUserId as any, amount: amt, description: desc });
       setSuccess(`$${amt.toLocaleString()} transferred successfully`);
       setDomesticForm({ fromUserId: "", toUserId: "", recipientName: "", bankName: "", accountNumber: "", amount: "", description: "" });

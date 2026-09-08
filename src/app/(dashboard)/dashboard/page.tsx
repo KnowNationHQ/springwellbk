@@ -324,7 +324,7 @@ export default function DashboardPage() {
         <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-bold text-gray-900 m-0">My Card</h3>
-            <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Card - {cardLast4}</p>
+            <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Card, {cardLast4}</p>
           </div>
           <div className="p-4">
             <div className="w-full max-w-[340px] h-[200px] mx-auto [perspective:800px] cursor-pointer group">
@@ -450,7 +450,7 @@ export default function DashboardPage() {
         <div className="space-y-3">
           {[{ title: "5% Cash Back on Dining", desc: "Use your SpringWell card at restaurants this month.", badge: "Limited" }, { title: "0% APR for 12 Months", desc: "Open a new credit card with 0% intro APR.", badge: "New" }, { title: "Refer a Friend, Get $50", desc: "Invite friends and you both earn $50.", badge: "Ongoing" }].map((o, i) => (
             <div key={i} className="p-3 border border-gray-200 rounded-lg">
-              <div className="flex items-center justify-between mb-1"><h4 className="m-0 text-sm font-bold text-gray-700">{o.title}</h4><span className="text-[11px] bg-[#FEDF01] text-black px-2 py-0.5 rounded-full font-semibold">{o.badge}</span></div>
+              <div className="flex items-start justify-between gap-2 mb-1"><h4 className="m-0 text-sm font-bold text-gray-700 min-w-0 flex-1 truncate">{o.title}</h4><span className="text-[11px] bg-[#FEDF01] text-black px-2 py-0.5 rounded-full font-semibold shrink-0 whitespace-nowrap">{o.badge}</span></div>
               <p className="m-0 text-xs text-gray-500">{o.desc}</p>
             </div>
           ))}

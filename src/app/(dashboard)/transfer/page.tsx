@@ -118,7 +118,7 @@ export default function TransferPage() {
     const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
     setLoading(true);
     try {
-      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? ` — ${domesticForm.description}` : ""}`;
+      const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? `, ${domesticForm.description}` : ""}`;
       const result = await transfer({ fromUserId: userId as any, toUserId: recipient!._id, amount: amt, description: desc });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);

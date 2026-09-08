@@ -108,7 +108,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
                 </div>
               )}
             </div>
-            <div className="bg-[#FEDF01] px-4 py-2 rounded font-bold text-[13px] text-black whitespace-nowrap">
+            <div className="bg-[#FEDF01] px-4 py-2 rounded font-bold text-[13px] text-black whitespace-nowrap shrink-0">
               Signed In As {user.firstName} {user.lastName}
             </div>
           </div>

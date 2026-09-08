@@ -282,15 +282,15 @@ export default function AdminDashboard() {
           <div className="space-y-2">
             {customers.map((c: any) => (
               <div key={c._id} className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <UserAvatar imageId={c.imageId} firstName={c.firstName} lastName={c.lastName} size={40} />
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 m-0">{c.firstName} {c.lastName}</p>
-                      <p className="text-[11px] text-gray-400 m-0 font-mono">{acct(c)}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 m-0 truncate">{c.firstName} {c.lastName}</p>
+                      <p className="text-[11px] text-gray-400 m-0 font-mono truncate">{acct(c)}</p>
                     </div>
                   </div>
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusColor(c.status)}`}>{c.status}</span>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${statusColor(c.status)}`}>{c.status}</span>
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-500 capitalize">{c.accountType}</span>
@@ -321,9 +321,9 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               {messages.map((m: any) => (
                 <div key={m._id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-semibold text-gray-900 m-0">{m.name}</p>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${m.status === "unread" ? "bg-red-100 text-red-700" : m.status === "replied" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{m.status}</span>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-sm font-semibold text-gray-900 m-0 min-w-0 flex-1 truncate">{m.name}</p>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${m.status === "unread" ? "bg-red-100 text-red-700" : m.status === "replied" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{m.status}</span>
                   </div>
                   <p className="text-[11px] text-gray-400 m-0">{m.email}</p>
                   <p className="text-xs text-gray-700 m-0 mt-1">{m.subject ?? "N/A"}</p>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
                 {modal === "status" && "Change Account Status"}
                 {modal === "complete" && "Complete Transaction"}
                 {modal === "backdate" && "Back Date Transaction"}
-                {modal === "txns" && `Transactions — ${txnsUser?.firstName} ${txnsUser?.lastName}`}
+                {modal === "txns" && `Transactions for ${txnsUser?.firstName} ${txnsUser?.lastName}`}
               </h3>
               <button onClick={() => setModal(null)} className="text-white text-2xl bg-transparent border-none cursor-pointer p-0 leading-none">&times;</button>
             </div>

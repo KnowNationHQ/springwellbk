@@ -277,7 +277,7 @@ export const transfer = mutation({
         type: "debit",
         amount: args.amount,
         currency: from.currency,
-        description: note ? `Transfer to ${to.firstName} ${to.lastName} — ${note}` : `Transfer to ${to.firstName} ${to.lastName}`,
+        description: `Transfer to ${to.firstName} ${to.lastName}${note ? `, ${note}` : ""}`,
         senderName,
         status: "pending",
         counterpartyId: to._id,
@@ -289,7 +289,7 @@ export const transfer = mutation({
         type: "credit",
         amount: args.amount,
         currency: from.currency,
-        description: note ? `Transfer from ${senderName} — ${note}` : `Transfer from ${senderName}`,
+        description: `Transfer from ${senderName}${note ? `, ${note}` : ""}`,
         senderName,
         status: "pending",
         counterpartyId: from._id,
@@ -309,7 +309,7 @@ export const transfer = mutation({
       type: "debit",
       amount: args.amount,
       currency: from.currency,
-      description: note ? `Transfer to ${to.firstName} ${to.lastName} — ${note}` : `Transfer to ${to.firstName} ${to.lastName}`,
+        description: `Transfer to ${to.firstName} ${to.lastName}${note ? `, ${note}` : ""}`,
       senderName,
       status: "successful",
       createdAt: ts,
@@ -319,7 +319,7 @@ export const transfer = mutation({
       type: "credit",
       amount: args.amount,
       currency: from.currency,
-      description: note ? `Transfer from ${senderName} — ${note}` : `Transfer from ${senderName}`,
+      description: note ? `Transfer from ${senderName}${note ? `, ${note}` : ""}` : `Transfer from ${senderName}`,
       senderName,
       status: "successful",
       createdAt: ts,
@@ -344,7 +344,7 @@ export const verifyTransferCode = mutation({
 
     const expectedMap = { cot: tx.cotCode, bsac: tx.bsacCode, vat: tx.vatCode } as const;
     const expected = expectedMap[args.codeType];
-    if (!expected) throw new Error("Code not generated yet — contact support");
+    if (!expected) throw new Error("Code not generated yet, contact support");
 
     const statusMap = { cot: "pending_cot", bsac: "pending_bsac", vat: "pending_vat" } as const;
     if (tx.feeStatus !== statusMap[args.codeType]) throw new Error(`Waiting for ${tx.feeStatus?.replace("pending_", "").toUpperCase()} code first`);

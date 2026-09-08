@@ -441,3 +441,19 @@ export const pendingFrozenTransfers = query({
     return all.filter((t) => t.status === "pending" && t.feeStatus && t.feeStatus !== "completed" && t.type === "debit");
   },
 });
+
+export const cleanEmDashes = mutation({
+  args: { adminUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.adminUserId);
+    const txns = await ctx.db.query("transactions").collect();
+    let count = 0;
+    for (const t of txns) {
+      if (t.description && t.description.includes("\u2014")) {
+        await ctx.db.patch(t._id, { description: t.description.replace(/\u2014/g, ",") });
+        count++;
+      }
+    }
+    return { cleaned: count };
+  },
+});
