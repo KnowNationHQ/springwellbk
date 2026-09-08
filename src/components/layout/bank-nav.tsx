@@ -139,9 +139,8 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
       {/* Mobile Nav */}
       <nav className="md:hidden bg-white border-b border-gray-200 shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
-          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline flex items-center gap-2">
+          <Link href={role === "admin" ? "/admin" : "/dashboard"} className="no-underline">
             <img src="/logo.svg" alt="SpringWell Bank" className="h-7 w-auto" />
-            <span className="text-[#1a3a5c] font-bold text-sm tracking-tight">SpringWell</span>
           </Link>
           <div className="flex items-center gap-1">
             <button onClick={handleSignOut} className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500" title="Sign out">
