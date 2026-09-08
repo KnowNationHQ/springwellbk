@@ -346,7 +346,7 @@ export default function AdminDashboard() {
           {transactions.length === 0 ? <p className="text-gray-400 text-sm m-0">None yet.</p> : (
             <div className="space-y-2">
               {transactions.map((t: any) => (
-                <div key={t._id} className={`flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg relative ${t.type === "credit" ? "border-l-4 border-l-green-400" : "border-l-4 border-l-red-300"}`}>
+                <div key={t._id} className={`flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg relative ${t.type === "credit" ? "border-l-4 border-l-green-300/50" : "border-l-4 border-l-red-300/50"}`}>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
                     <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
@@ -469,15 +469,10 @@ export default function AdminDashboard() {
                   {customerTxns === undefined && <LogoSpinner size={30} />}
                   {customerTxns && customerTxns.length === 0 && <p className="text-gray-400 text-sm m-0">No transactions found.</p>}
                   {customerTxns && customerTxns.map((t: any) => (
-                    <div key={t._id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${t.type === "credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
-                          {t.type === "credit" ? "+" : "-"}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
-                          <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
-                        </div>
+                    <div key={t._id} className={`flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg relative ${t.type === "credit" ? "border-l-4 border-l-green-300/50" : "border-l-4 border-l-red-300/50"}`}>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
+                        <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>

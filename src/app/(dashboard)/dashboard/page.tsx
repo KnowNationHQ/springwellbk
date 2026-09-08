@@ -307,7 +307,7 @@ export default function DashboardPage() {
             {transactions.length === 0 ? (
               <p className="text-gray-400 text-sm p-4 m-0">No transactions yet.</p>
             ) : transactions.slice(0, 5).map((t: any) => (
-              <div key={t._id} className={`px-4 py-3 border-b border-gray-50 last:border-0 relative ${t.type === "credit" ? "border-t-2 border-t-green-400" : "border-t-2 border-t-red-300"}`}>
+              <div key={t._id} className={`px-4 py-3 border-b border-gray-50 last:border-0 relative ${t.type === "credit" ? "border-t-2 border-t-green-300/50" : "border-t-2 border-t-red-300/50"}`}>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
@@ -472,9 +472,12 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-2">
             {transactions.map((tx: any) => (
-              <div key={tx._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div><p className="m-0 text-sm font-medium text-gray-700">{tx.description || tx.type}</p><p className="mt-0.5 m-0 text-[11px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString()}</p></div>
-                <span className={`text-sm font-bold ${tx.type === "credit" ? "text-green-600" : "text-red-500"}`}>{tx.type === "credit" ? "+" : "-"}{sym(user.currency)}{tx.amount.toLocaleString()}</span>
+              <div key={tx._id} className={`flex items-center justify-between p-3 bg-gray-50 rounded-lg relative ${tx.type === "credit" ? "border-l-4 border-l-green-300/50" : "border-l-4 border-l-red-300/50"}`}>
+                <div>
+                  <p className="m-0 text-sm font-medium text-gray-700">{tx.description || tx.type}</p>
+                  <p className="mt-0.5 m-0 text-[11px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString()}</p>
+                </div>
+                <span className={`text-sm font-bold whitespace-nowrap ${tx.type === "credit" ? "text-green-600" : "text-red-500"}`}>{tx.type === "credit" ? "+" : "-"}{sym(user.currency)}{tx.amount.toLocaleString()}</span>
               </div>
             ))}
           </div>
