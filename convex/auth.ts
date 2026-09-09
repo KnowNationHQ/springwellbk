@@ -230,11 +230,12 @@ export const getDashboardStats = query({
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) return null;
-    const transactions = await ctx.db
+    const transactions = (await ctx.db
       .query("transactions")
-      .withIndex("by_user_createdAt", (q) => q.eq("userId", args.userId))
-      .order("desc")
-      .take(100);
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect())
+      .sort((a, b) => b._creationTime - a._creationTime)
+      .slice(0, 100);
     const loanApplications = await ctx.db
       .query("loanApplications")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))

@@ -11,7 +11,8 @@ export const list = query({
 export const getByUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    return await ctx.db.query("transactions").withIndex("by_user_createdAt", (q) => q.eq("userId", args.userId)).order("desc").collect();
+    return (await ctx.db.query("transactions").withIndex("by_user", (q) => q.eq("userId", args.userId)).collect())
+      .sort((a, b) => b._creationTime - a._creationTime);
   },
 });
 
@@ -19,6 +20,8 @@ export const recent = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10;
-    return await ctx.db.query("transactions").withIndex("by_createdAt").order("desc").take(limit);
+    return (await ctx.db.query("transactions").collect())
+      .sort((a, b) => b._creationTime - a._creationTime)
+      .slice(0, limit);
   },
 });
