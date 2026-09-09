@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                 <form onSubmit={handleCredit} className="space-y-3">
                   <div className="select-wrapper"><select className={inputCls} value={activeUser?._id ?? ""} onChange={(e) => { const u = users.find((x: any) => x._id === e.target.value); setActiveUser(u); }}>
                     <option value="">Select user</option>
-                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({acct(u)})</option>)}
                   </select></div>
                   {activeUser && (
                     <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
@@ -435,7 +435,7 @@ export default function AdminDashboard() {
               )}
               {modal === "status" && (
                 <div className="space-y-3">
-                  <div className="select-wrapper"><select className={inputCls} value={statusTarget} onChange={(e) => setStatusTarget(e.target.value)} required><option value="">Select account</option>{nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}</select></div>
+                  <div className="select-wrapper"><select className={inputCls} value={statusTarget} onChange={(e) => setStatusTarget(e.target.value)} required><option value="">Select account</option>{nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({acct(u)})</option>)}</select></div>
                   <div className="flex gap-2 justify-end pt-2">
                     <button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button>
                     <button disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }} className={btnPrimary + (statusTarget ? "" : " opacity-50")}>Activate</button>
