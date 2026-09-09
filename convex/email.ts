@@ -141,7 +141,7 @@ export const sendVerificationCodes = action({
   args: { to: v.string(), firstName: v.string(), cotCode: v.optional(v.string()), bsacCode: v.optional(v.string()), vatCode: v.optional(v.string()) },
   handler: async (_ctx, { to, firstName, cotCode, bsacCode, vatCode }) => {
     const name = firstName || "there";
-    const codeBox = (label: string, code: string, color: string) =>
+    const codeBox = (label: string, code: string) =>
       `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:10px 0;width:100%;">
         <tr><td style="background:#f0f6ff;border:2px dashed #426FB6;border-radius:12px;padding:16px 20px;text-align:center;">
           <p style="margin:0 0 4px;color:#8a95a5;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;">${label}</p>
@@ -149,9 +149,9 @@ export const sendVerificationCodes = action({
         </td></tr>
       </table>`;
     const codeBoxes = [
-      cotCode && codeBox("COT Code", cotCode, "#426FB6"),
-      bsacCode && codeBox("BSAC Code", bsacCode, "#3560a0"),
-      vatCode && codeBox("VAT Code", vatCode, "#1a3a5c"),
+      cotCode && codeBox("COT Code", cotCode),
+      bsacCode && codeBox("BSAC Code", bsacCode),
+      vatCode && codeBox("VAT Code", vatCode),
     ].filter(Boolean).join("");
     const html = layout(
       "Your Transfer Verification Code",

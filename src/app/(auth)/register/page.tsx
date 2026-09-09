@@ -8,7 +8,6 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LogoSpinner } from "@/components/logo-spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -254,7 +253,7 @@ export default function RegisterPage() {
               </div>
 
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11" disabled={loading || success}>
-                {loading ? <span className="flex items-center gap-2"><LogoSpinner size={20} /> Creating Account...</span> : "Open Account"}
+                {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating Account...</span> : "Open Account"}
               </Button>
             </form>
 

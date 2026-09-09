@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, UserCircle } from "lucide-react";
+import { Menu, X, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useT } from "@/lib/i18n";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
@@ -60,8 +58,8 @@ export function Header() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 md:hidden">
-            <a href="mailto:support@springwellbk.com" className="text-gray-500 hover:text-[#426FB6] text-xs transition-colors">support@springwellbk.com</a>
+          <div className="flex items-center gap-2 md:hidden">
+            <LanguageSwitcher className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 w-28" />
             <Link href="/login" aria-label={t("header.logIn")} className="text-gray-600 hover:text-[#426FB6] transition-colors">
               <UserCircle className="h-5 w-5" />
             </Link>
@@ -72,10 +70,13 @@ export function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto bg-white text-gray-900 border-gray-200 p-0">
-                <SheetHeader className="px-5 h-14 border-b border-gray-200 flex-row items-center justify-start gap-2 space-y-0">
-                  <Image src="/logo.svg" alt="" width={24} height={24} />
-                  <SheetTitle className="text-gray-900">{t("header.menu")}</SheetTitle>
-                </SheetHeader>
+                <div className="px-5 h-14 border-b border-gray-200 flex items-center">
+                  <SheetClose asChild>
+                    <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500" aria-label="Close menu">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </SheetClose>
+                </div>
                 <div className="p-3 border-b border-gray-200">
                   <LanguageSwitcher className="w-full bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200" />
                 </div>

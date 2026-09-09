@@ -55,6 +55,10 @@ export default function AdminTransferPage() {
   }, [router]);
 
   const currentUser = users?.find((u: any) => u._id === userId);
+  if (currentUser && currentUser.role !== "admin") {
+    router.push("/login");
+    return null;
+  }
   const nonAdmins = users?.filter((u: any) => u.role !== "admin") ?? [];
 
   if (!userId || users === undefined) {
@@ -75,8 +79,8 @@ export default function AdminTransferPage() {
       type: "domestic",
       title: "Confirm Domestic Transfer",
       details: [
-        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (SWB-${domesticForm.fromUserId.slice(-8).toUpperCase()})` },
-        { label: "To", value: `${toUser?.firstName} ${toUser?.lastName} (SWB-${domesticForm.toUserId.slice(-8).toUpperCase()})` },
+        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (${fromUser?.accountNumber ?? "SWB-" + fromUser?._id.slice(-8).toUpperCase()})` },
+        { label: "To", value: `${toUser?.firstName} ${toUser?.lastName} (${toUser?.accountNumber ?? "SWB-" + toUser?._id.slice(-8).toUpperCase()})` },
         ...(domesticForm.bankName ? [{ label: "Bank", value: domesticForm.bankName }] : []),
         ...(domesticForm.description ? [{ label: "Note", value: domesticForm.description }] : []),
       ],
@@ -116,7 +120,7 @@ export default function AdminTransferPage() {
       type: "international",
       title: "Confirm International Transfer",
       details: [
-        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (SWB-${intlForm.fromUserId.slice(-8).toUpperCase()})` },
+        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (${fromUser?.accountNumber ?? "SWB-" + fromUser?._id.slice(-8).toUpperCase()})` },
         { label: "To", value: intlForm.recipientName },
         { label: "Bank", value: intlForm.recipientBank },
         ...(intlForm.iban ? [{ label: "IBAN", value: intlForm.iban }] : []),
@@ -157,15 +161,15 @@ export default function AdminTransferPage() {
     setError(""); setSuccess("");
     const amt = parseFloat(businessForm.amount);
     if (!businessForm.fromUserId || !businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
-    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct);
+    const acctNum = businessForm.accountNumber.trim().toUpperCase();
+    const recipient = users?.find((u: any) => u.accountNumber === acctNum || ("SWB-" + u._id.slice(-8).toUpperCase()) === acctNum);
     if (!recipient) { setError("No SpringWell user found with that account number"); return; }
     const fromUser = nonAdmins.find((u: any) => u._id === businessForm.fromUserId);
     setConfirmData({
       type: "business",
       title: "Confirm Business Transfer",
       details: [
-        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (SWB-${businessForm.fromUserId.slice(-8).toUpperCase()})` },
+        { label: "From", value: `${fromUser?.firstName} ${fromUser?.lastName} (${fromUser?.accountNumber ?? "SWB-" + fromUser?._id.slice(-8).toUpperCase()})` },
         { label: "To", value: businessForm.businessName },
         { label: "Account", value: businessForm.accountNumber },
         ...(businessForm.description ? [{ label: "Note", value: businessForm.description }] : []),
@@ -178,8 +182,8 @@ export default function AdminTransferPage() {
   async function confirmBusiness() {
     if (!confirmData) return;
     const amt = confirmData.amount;
-    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct);
+    const acctNum = businessForm.accountNumber.trim().toUpperCase();
+    const recipient = users?.find((u: any) => u.accountNumber === acctNum || ("SWB-" + u._id.slice(-8).toUpperCase()) === acctNum);
     setLoading(true);
     try {
       await transferAdmin({
@@ -204,7 +208,7 @@ export default function AdminTransferPage() {
     <div className="bg-gray-100 min-h-screen font-sans page-container">
       <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} role="admin" />
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "30px 20px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "30px 20px" }}>
         {error && (
           <div style={{ backgroundColor: "#fff", border: "1px solid #fecaca", borderRadius: 4, padding: "12px 20px", marginBottom: 20, color: "#dc2626", fontSize: 14 }}>
             {error}
@@ -286,17 +290,17 @@ export default function AdminTransferPage() {
                 <div className="form-row">
                   <div>
                     <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>From Account *</Label>
-                    <select required className={userSelectCls} value={domesticForm.fromUserId} onChange={(e) => setDomesticForm({ ...domesticForm, fromUserId: e.target.value })}>
+                    <div className="select-wrapper"><select required className={userSelectCls} value={domesticForm.fromUserId} onChange={(e) => setDomesticForm({ ...domesticForm, fromUserId: e.target.value })}>
                       <option value="">Select source account</option>
-                      {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
-                    </select>
+                      {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.accountNumber ?? "SWB-" + u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                    </select></div>
                   </div>
                   <div>
                     <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>To Account *</Label>
-                    <select required className={userSelectCls} value={domesticForm.toUserId} onChange={(e) => setDomesticForm({ ...domesticForm, toUserId: e.target.value })}>
+                    <div className="select-wrapper"><select required className={userSelectCls} value={domesticForm.toUserId} onChange={(e) => setDomesticForm({ ...domesticForm, toUserId: e.target.value })}>
                       <option value="">Select destination account</option>
-                      {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
-                    </select>
+                      {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.accountNumber ?? "SWB-" + u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                    </select></div>
                   </div>
                 </div>
                 <div className="form-row">
@@ -343,10 +347,10 @@ export default function AdminTransferPage() {
                 <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to any bank account worldwide</p>
                 <div>
                   <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Debit From Account *</Label>
-                  <select required className={userSelectCls} value={intlForm.fromUserId} onChange={(e) => setIntlForm({ ...intlForm, fromUserId: e.target.value })}>
+                  <div className="select-wrapper"><select required className={userSelectCls} value={intlForm.fromUserId} onChange={(e) => setIntlForm({ ...intlForm, fromUserId: e.target.value })}>
                     <option value="">Select account to debit</option>
-                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
-                  </select>
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.accountNumber ?? "SWB-" + u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                  </select></div>
                 </div>
                 <div className="form-row">
                   <div>
@@ -379,7 +383,7 @@ export default function AdminTransferPage() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Currency</Label>
-                    <select value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
+                    <div className="select-wrapper"><select value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                       <option value="GBP">GBP</option>
@@ -387,7 +391,7 @@ export default function AdminTransferPage() {
                       <option value="CHF">CHF</option>
                       <option value="CAD">CAD</option>
                       <option value="AUD">AUD</option>
-                    </select>
+                    </select></div>
                   </div>
                 </div>
                 <div>
@@ -416,10 +420,10 @@ export default function AdminTransferPage() {
                 <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to another person or business</p>
                 <div>
                   <Label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Debit From Account *</Label>
-                  <select required className={userSelectCls} value={businessForm.fromUserId} onChange={(e) => setBusinessForm({ ...businessForm, fromUserId: e.target.value })}>
+                  <div className="select-wrapper"><select required className={userSelectCls} value={businessForm.fromUserId} onChange={(e) => setBusinessForm({ ...businessForm, fromUserId: e.target.value })}>
                     <option value="">Select account to debit</option>
-                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>SWB-{u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
-                  </select>
+                    {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.accountNumber ?? "SWB-" + u._id.slice(-8).toUpperCase()} · {u.firstName} {u.lastName} (${(u.balance ?? 0).toLocaleString()})</option>)}
+                  </select></div>
                 </div>
                 <div className="form-row">
                   <div>

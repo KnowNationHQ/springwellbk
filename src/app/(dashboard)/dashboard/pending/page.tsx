@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { LogoSpinner } from "@/components/logo-spinner";
-import { ArrowLeft } from "lucide-react";
-import { sym } from "@/lib/format";
+import { ArrowLeft, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { sym, displayDate } from "@/lib/format";
 import { BankNav } from "@/components/layout/bank-nav";
 
 export default function PendingVerificationPage() {
@@ -37,8 +37,6 @@ export default function PendingVerificationPage() {
 
   const user = users.find((u: any) => u._id === userId);
   if (!user) return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p className="text-gray-500">User not found</p></div>;
-
-  function acct(t: any) { return "SWB-" + t._id.slice(-8).toUpperCase(); }
 
   async function handleVerify(txn: any, codeType: string, codeValue: string) {
     if (!codeValue.trim()) return;
@@ -93,14 +91,20 @@ export default function PendingVerificationPage() {
                 const next = nextCodeType(tx);
                 return (
                   <div key={tx._id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 m-0 truncate">{tx.description || tx.type}</p>
+                    <div className="flex items-center gap-3 mb-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === "credit" ? "bg-green-50" : "bg-red-50"}`}>
+                        {tx.type === "credit" ? <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" /> : <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />}
                       </div>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 shrink-0 whitespace-nowrap">
-                        {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : tx.feeStatus === "pending_vat" ? "BSAC verified" : "Completed"}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 shrink-0 whitespace-nowrap">
+                            {tx.feeStatus === "pending_cot" ? "Awaiting COT" : tx.feeStatus === "pending_bsac" ? "COT verified" : tx.feeStatus === "pending_vat" ? "BSAC verified" : "Completed"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-400 m-0 truncate">{tx.description || tx.type}</p>
+                        <p className="text-[11px] text-gray-400 m-0">{displayDate(tx).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(tx).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
+                      </div>
                     </div>
                     {next && (
                       <div className="flex items-center gap-2 mt-2">
@@ -141,10 +145,17 @@ export default function PendingVerificationPage() {
             <div className="p-4 space-y-2">
               {myPending.map((tx: any) => (
                 <div key={tx._id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === "credit" ? "bg-green-50" : "bg-red-50"}`}>
+                      {tx.type === "credit" ? <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" /> : <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${(tx.status === "completed" || tx.status === "successful") ? "bg-green-100 text-green-700" : tx.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(tx.status === "completed" || tx.status === "successful") ? "Credited" : tx.status === "pending" ? "Pending" : "Debited"}</span>
+                      </div>
                       <p className="text-[11px] text-gray-400 m-0 truncate">{tx.description || tx.type}</p>
+                      <p className="text-[11px] text-gray-400 m-0">{displayDate(tx).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(tx).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-2">

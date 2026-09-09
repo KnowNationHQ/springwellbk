@@ -52,10 +52,16 @@ export const login = mutation({
     password: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
+    if (!user && args.username.includes("@")) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.username.trim().toLowerCase()))
+        .unique();
+    }
     if (!user) throw new Error("No account found with this username");
     if (user.password !== args.password) throw new Error("Incorrect password");
     await ctx.db.patch(user._id, { lastLogin: Date.now() });
@@ -75,10 +81,16 @@ const OTP_TTL_MS = 10 * 60 * 1000;
 export const requestLoginCode = mutation({
   args: { username: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
+    if (!user && args.username.includes("@")) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.username.trim().toLowerCase()))
+        .unique();
+    }
     if (!user) return { ok: true as const };
 
     const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -94,10 +106,16 @@ export const requestLoginCode = mutation({
 export const verifyLoginCode = mutation({
   args: { username: v.string(), code: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
+    if (!user && args.username.includes("@")) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.username.trim().toLowerCase()))
+        .unique();
+    }
     if (!user || !user.otpCode || !user.otpExpiresAt) {
       throw new Error("Invalid or expired code");
     }
@@ -216,7 +234,7 @@ export const getDashboardStats = query({
       .query("transactions")
       .withIndex("by_user_createdAt", (q) => q.eq("userId", args.userId))
       .order("desc")
-      .take(20);
+      .take(100);
     const loanApplications = await ctx.db
       .query("loanApplications")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -237,8 +255,8 @@ export const getMyFrozenTransfers = query({
   },
 });
 
-// Customer-initiated transfer to another SpringWell user (by email). Moves
-// money atomically and records both sides of the transaction.
+// Customer-initiated transfer. Supports both internal (SpringWell-to-SpringWell)
+// and external (to any bank account) transfers.
 export const transfer = mutation({
   args: {
     fromUserId: v.id("users"),
@@ -254,21 +272,22 @@ export const transfer = mutation({
     if (!from) throw new Error("Sender account not found");
     if (from.status !== "active" && from.status !== "suspended") throw new Error("Your account is not active");
 
-    let to;
+    let to = null;
     if (args.toUserId) {
       to = await ctx.db.get(args.toUserId);
+      if (!to) throw new Error("Recipient account not found");
+      if (to._id === from._id) throw new Error("Cannot transfer to your own account");
     } else if (args.toEmail) {
       to = await ctx.db
         .query("users")
         .withIndex("by_email", (q) => q.eq("email", args.toEmail!.trim().toLowerCase()))
         .unique();
     }
-    if (!to) throw new Error("No SpringWell user found");
-    if (to._id === from._id) throw new Error("Cannot transfer to your own account");
 
     const senderName = `${from.firstName} ${from.lastName}`;
     const note = args.description?.trim();
     const ts = Date.now();
+    const recipientLabel = to ? `${to.firstName} ${to.lastName}` : (note ?? "External transfer");
 
     if (from.status === "suspended") {
       if (from.balance < args.amount) throw new Error("Insufficient funds");
@@ -277,13 +296,49 @@ export const transfer = mutation({
         type: "debit",
         amount: args.amount,
         currency: from.currency,
-        description: `Transfer to ${to.firstName} ${to.lastName}${note ? `, ${note}` : ""}`,
+        description: `Transfer to ${recipientLabel}${note ? `, ${note}` : ""}`,
         senderName,
         status: "pending",
-        counterpartyId: to._id,
+        counterpartyId: to?._id,
         feeStatus: "pending_cot",
         createdAt: ts,
       });
+      if (to) {
+        await ctx.db.insert("transactions", {
+          userId: to._id,
+          type: "credit",
+          amount: args.amount,
+          currency: from.currency,
+          description: `Transfer from ${senderName}${note ? `, ${note}` : ""}`,
+          senderName,
+          status: "pending",
+          counterpartyId: from._id,
+          feeStatus: "pending_cot",
+          createdAt: ts,
+        });
+      }
+      return { frozen: true, transactionId: txId };
+    }
+
+    if (from.balance < args.amount) throw new Error("Insufficient funds");
+
+    await ctx.db.patch(from._id, { balance: from.balance - args.amount });
+    if (to) {
+      await ctx.db.patch(to._id, { balance: to.balance + args.amount });
+    }
+
+    await ctx.db.insert("transactions", {
+      userId: from._id,
+      type: "debit",
+      amount: args.amount,
+      currency: from.currency,
+      description: `Transfer to ${recipientLabel}${note ? `, ${note}` : ""}`,
+      senderName,
+      status: "successful",
+      counterpartyId: to?._id,
+      createdAt: ts,
+    });
+    if (to) {
       await ctx.db.insert("transactions", {
         userId: to._id,
         type: "credit",
@@ -291,39 +346,11 @@ export const transfer = mutation({
         currency: from.currency,
         description: `Transfer from ${senderName}${note ? `, ${note}` : ""}`,
         senderName,
-        status: "pending",
+        status: "successful",
         counterpartyId: from._id,
-        feeStatus: "pending_cot",
         createdAt: ts,
       });
-      return { frozen: true, transactionId: txId };
     }
-
-    if (from.balance < args.amount) throw new Error("Insufficient funds");
-
-    await ctx.db.patch(from._id, { balance: from.balance - args.amount });
-    await ctx.db.patch(to._id, { balance: to.balance + args.amount });
-
-    await ctx.db.insert("transactions", {
-      userId: from._id,
-      type: "debit",
-      amount: args.amount,
-      currency: from.currency,
-        description: `Transfer to ${to.firstName} ${to.lastName}${note ? `, ${note}` : ""}`,
-      senderName,
-      status: "successful",
-      createdAt: ts,
-    });
-    await ctx.db.insert("transactions", {
-      userId: to._id,
-      type: "credit",
-      amount: args.amount,
-      currency: from.currency,
-      description: note ? `Transfer from ${senderName}${note ? `, ${note}` : ""}` : `Transfer from ${senderName}`,
-      senderName,
-      status: "successful",
-      createdAt: ts,
-    });
 
     return { ok: true as const };
   },

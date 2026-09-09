@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
+
 import { Menu, X, HelpCircle, ChevronDown, LogOut, Bell, Settings, Shield, CreditCard } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
+import { acct } from "@/lib/format";
 import Image from "next/image";
 
 interface BankNavProps {
@@ -15,6 +15,7 @@ interface BankNavProps {
     lastName: string;
     email: string;
     imageId?: string;
+    accountNumber?: string;
   };
   onOpenProfile?: () => void;
   role?: "admin" | "customer";
@@ -33,10 +34,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { setUserId(localStorage.getItem("userId")); }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -55,8 +53,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
   ];
 
   const navItems = role === "admin" ? ADMIN_NAV : customerNav;
-  const acctNum = userId?.slice(-8).toUpperCase() ?? "";
-  const initials = `${user.firstName?.charAt(0) ?? ""}${user.lastName?.charAt(0) ?? ""}`.toUpperCase();
+  const acctNum = acct(user);
 
   function handleSignOut() {
     localStorage.removeItem("userId");
@@ -67,7 +64,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
     <>
       {/* Desktop Top Bar */}
       <div className="hidden md:block bg-[#1a3a5c] text-white">
-        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-9">
+        <div className="max-w-[900px] mx-auto px-5 flex items-center justify-between h-9">
           <div className="flex items-center gap-1">
             {navItems.map((item) => (
               <Link
@@ -91,7 +88,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
       {/* Desktop Main Bar: Logo + Profile */}
       <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between h-[68px]">
+        <div className="max-w-[900px] mx-auto px-5 flex items-center justify-between h-[68px]">
           <Link href={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center no-underline shrink-0">
             <Image src="/logo.svg" alt="SpringWell Bank" width={130} height={25} priority style={{ height: "auto" }} />
           </Link>
@@ -122,7 +119,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="text-[13px] font-semibold text-gray-900 leading-tight">{user.firstName} {user.lastName}</span>
-                  <span className="text-[10px] text-gray-400 font-mono leading-tight">SWB-{acctNum}</span>
+                  <span className="text-[10px] text-gray-400 font-mono leading-tight">{acctNum}</span>
                 </div>
                 <ChevronDown size={14} className={`text-gray-400 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
               </button>
@@ -211,7 +208,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
-            <p className="text-[11px] text-gray-400 m-0 font-mono">SWB-{userId?.slice(-8).toUpperCase() ?? ""}</p>
+            <p className="text-[11px] text-gray-400 m-0 font-mono">{acctNum}</p>
             <h2 className="text-base font-bold m-0 text-gray-900 truncate">{user.firstName} {user.lastName}</h2>
             <p className="text-[11px] text-gray-400 m-0 capitalize">{role} Account</p>
             <div className="flex items-center gap-3 mt-2">

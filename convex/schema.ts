@@ -14,6 +14,7 @@ export default defineSchema({
     state: v.optional(v.string()),
     country: v.optional(v.string()),
     zip: v.optional(v.string()),
+    accountNumber: v.optional(v.string()),
     accountType: v.union(v.literal("checking"), v.literal("savings"), v.literal("business")),
     currency: v.union(v.literal("USD"), v.literal("GBP"), v.literal("EUR")),
     balance: v.number(),
@@ -30,6 +31,7 @@ export default defineSchema({
   })
     .index("by_username", ["username"])
     .index("by_email", ["email"])
+    .index("by_accountNumber", ["accountNumber"])
     .index("by_status", ["status"]),
 
   transactions: defineTable({

@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { LogoSpinner } from "@/components/logo-spinner";
-import { ArrowUpRight, Clock, Bell, DollarSign, Tag, FileText, PiggyBank, Target, Wallet } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, Bell, DollarSign, Tag, FileText, PiggyBank, Target, Wallet } from "lucide-react";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { sym } from "@/lib/format";
+import { sym, displayDate } from "@/lib/format";
 import { ProfileImageUpload } from "@/components/profile-image-upload";
 import { Modal } from "@/components/ui/modal";
 import { Toast } from "@/components/ui/toast";
 import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
 
-type ModalName = "transfer" | "profile" | "alerts" | "transactions" | "offers" | "messages" | "spending" | "goals";
+  type ModalName = "transfer" | "profile" | "alerts" | "offers" | "messages" | "spending" | "goals";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -31,7 +31,6 @@ export default function DashboardPage() {
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [pwMsg, setPwMsg] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
-  const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const [msgForm, setMsgForm] = useState({ subject: "", message: "" });
   const [msgMsg, setMsgMsg] = useState("");
   const [msgBusy, setMsgBusy] = useState(false);
@@ -42,9 +41,7 @@ export default function DashboardPage() {
   const generateUploadUrl = useMutation(api.auth.generateUploadUrl);
   const saveProfileImage = useMutation(api.auth.saveProfileImage);
   const removeProfileImage = useMutation(api.auth.removeProfileImage);
-  const frozenTransfers = useQuery(api.auth.getMyFrozenTransfers, userId ? { userId: userId as any } : "skip");
   const verifyTransferCode = useMutation(api.auth.verifyTransferCode);
-  const myPending = useQuery(api.auth.getMyPendingTransactions, userId ? { userId: userId as any } : "skip");
   const customerComplete = useMutation(api.auth.customerCompleteTransaction);
 
   const [frozenVerifyTxn, setFrozenVerifyTxn] = useState<any>(null);
@@ -139,20 +136,6 @@ export default function DashboardPage() {
     finally { setTransferBusy(false); }
   }
 
-  function stepFromFeeStatus(fs?: string): "cot" | "bsac" | "vat" {
-    if (fs === "pending_bsac") return "bsac";
-    if (fs === "pending_vat") return "vat";
-    return "cot";
-  }
-
-  function openFrozenVerify(tx: any) {
-    setFrozenVerifyTxn(tx);
-    setFrozenStep(stepFromFeeStatus(tx.feeStatus));
-    setFrozenCode("");
-    setFrozenError("");
-    setFrozenSuccess("");
-  }
-
   async function handleFrozenVerify() {
     if (!frozenVerifyTxn || !frozenCode.trim() || frozenStep === "completed") return;
     setFrozenLoading(true);
@@ -219,7 +202,6 @@ export default function DashboardPage() {
 
   const activityItems = [
     { label: "Alerts", icon: Bell, modal: "alerts" as const },
-    { label: "Transactions", icon: Clock, modal: "transactions" as const },
     { label: "Transfer Funds", icon: ArrowUpRight, route: "/transfer" },
     { label: "Special Offers", icon: Tag, modal: "offers" as const },
     { label: "Messages", icon: FileText, modal: "messages" as const },
@@ -232,7 +214,7 @@ export default function DashboardPage() {
       <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} onOpenProfile={() => setActiveModal("profile")} />
 
       {user.status === "pending" && (
-        <div className="max-w-[1100px] mx-auto px-4 pt-2">
+        <div className="max-w-[900px] mx-auto px-4 pt-2">
           <div style={{ backgroundColor: "#dbeafe", border: "1px solid #3b82f6", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 18 }}>⏳</span>
             <div>
@@ -244,7 +226,7 @@ export default function DashboardPage() {
       )}
 
       {user.status === "suspended" && (
-        <div className="max-w-[1100px] mx-auto px-4 pt-2">
+        <div className="max-w-[900px] mx-auto px-4 pt-2">
           <div style={{ backgroundColor: "#fef3c7", border: "1px solid #f59e0b", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 18 }}>⚠</span>
             <div>
@@ -255,7 +237,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-[900px] mx-auto px-4 py-4 space-y-4">
         {/* Balance Card */}
         <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
           <p className="text-white/60 text-xs uppercase tracking-wider m-0">Available Balance</p>
@@ -299,28 +281,64 @@ export default function DashboardPage() {
 
         {/* Transactions */}
         <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-bold text-gray-900 m-0">Recent Transactions</h3>
-            <button onClick={() => openModal("transactions")} className="text-xs text-[#426FB6] font-medium bg-transparent border-none cursor-pointer p-0">View All</button>
           </div>
-          <div>
+          <div className="p-3 space-y-2">
             {transactions.length === 0 ? (
-              <p className="text-gray-400 text-sm p-4 m-0">No transactions yet.</p>
-            ) : transactions.slice(0, 5).map((t: any) => (
-              <div key={t._id} className={`px-4 py-3 border-b border-gray-50 last:border-0 relative ${t.type === "credit" ? "border-t-2 border-t-green-300/50" : "border-t-2 border-t-red-300/50"}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-800 m-0">{t.description || t.type}</p>
-                    <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+              <p className="text-gray-400 text-sm m-0">No transactions yet.</p>
+            ) : transactions.slice(0, 10).map((t: any) => (
+              <div key={t._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.type === "credit" ? "bg-green-50" : "bg-red-50"}`}>
+                    {t.type === "credit" ? <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" /> : <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />}
                   </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 m-0">{t.description || t.type}</p>
+                    {t.senderName && <p className="text-[11px] text-gray-500 m-0">From: {t.senderName}</p>}
+                    <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
+                  </div>
+                </div>
+                <div className="text-right">
                   <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
                     {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                   </span>
+                  <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
+
+        {/* Incoming Transactions */}
+        {transactions.some((t: any) => t.type === "credit") && (
+          <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900 m-0">Incoming Transactions</h3>
+              <span className="text-[11px] text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full">{transactions.filter((t: any) => t.type === "credit").length} credits</span>
+            </div>
+            <div className="p-3 space-y-2">
+              {transactions.filter((t: any) => t.type === "credit").slice(0, 10).map((t: any) => (
+                <div key={t._id} className="flex items-center justify-between p-3 bg-green-50/50 rounded-lg border-l-4 border-l-green-400">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                      <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 m-0">{t.description || "Incoming transfer"}</p>
+                      {t.senderName && <p className="text-[11px] text-gray-500 m-0">From: {t.senderName}</p>}
+                      <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-green-600 whitespace-nowrap">+{sym(t.currency)}{t.amount.toLocaleString()}</span>
+<p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Card */}
         <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -464,24 +482,6 @@ export default function DashboardPage() {
       {/* Modals */}
       <Modal open={activeModal === "alerts"} onClose={() => setActiveModal(null)} title="Alerts">
         <div className="p-6 text-center text-gray-400"><Bell className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm m-0">No new alerts</p></div>
-      </Modal>
-
-      <Modal open={activeModal === "transactions"} onClose={() => setActiveModal(null)} title="Transaction History" maxWidth={500}>
-        {transactions.length === 0 ? (
-          <div className="p-6 text-center text-gray-400"><Clock className="w-8 h-8 mx-auto mb-2 opacity-30" /><p className="text-sm m-0">No transactions yet</p></div>
-        ) : (
-          <div className="space-y-2">
-            {transactions.map((tx: any) => (
-              <div key={tx._id} className={`flex items-center justify-between p-3 bg-gray-50 rounded-lg relative ${tx.type === "credit" ? "border-l-4 border-l-green-300/50" : "border-l-4 border-l-red-300/50"}`}>
-                <div>
-                  <p className="m-0 text-sm font-medium text-gray-700">{tx.description || tx.type}</p>
-                  <p className="mt-0.5 m-0 text-[11px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString()}</p>
-                </div>
-                <span className={`text-sm font-bold whitespace-nowrap ${tx.type === "credit" ? "text-green-600" : "text-red-500"}`}>{tx.type === "credit" ? "+" : "-"}{sym(user.currency)}{tx.amount.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </Modal>
 
       <Modal open={activeModal === "offers"} onClose={() => setActiveModal(null)} title="Special Offers" maxWidth={500}>

@@ -94,10 +94,6 @@ export default function TransferPage() {
     const amt = parseFloat(domesticForm.amount);
     if (!domesticForm.recipientName || !domesticForm.bankName || !domesticForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
-    const acct = domesticForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
-    if (!recipient) { setError("No SpringWell user found with that account number"); return; }
-    if (recipient._id === userId) { setError("Cannot transfer to your own account"); return; }
     setConfirmData({
       type: "domestic",
       title: "Confirm Domestic Transfer",
@@ -115,13 +111,10 @@ export default function TransferPage() {
   async function confirmDomestic() {
     if (!confirmData) return;
     const amt = confirmData.amount;
-    const acct = domesticForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
-    if (!recipient) { setError("No SpringWell user found with that account number"); setConfirmData(null); return; }
     setLoading(true);
     try {
       const desc = `Domestic transfer to ${domesticForm.recipientName} at ${domesticForm.bankName}${domesticForm.description ? `, ${domesticForm.description}` : ""}`;
-      const result = await transfer({ fromUserId: userId as any, toUserId: recipient._id, amount: amt, description: desc });
+      const result = await transfer({ fromUserId: userId as any, amount: amt, description: desc });
       if ((result as any)?.frozen) {
         setFrozenTxnId((result as any).transactionId);
         setCodeStep(stepFromFeeStatus((result as any).feeStatus));
@@ -208,10 +201,6 @@ export default function TransferPage() {
     const amt = parseFloat(businessForm.amount);
     if (!businessForm.businessName || !businessForm.accountNumber || isNaN(amt) || amt <= 0) { setError("Fill in all required fields"); return; }
     if (amt > (currentUser?.balance ?? 0)) { setError("Insufficient funds"); return; }
-    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
-    if (!recipient) { setError("No SpringWell user found with that account number"); return; }
-    if (recipient._id === userId) { setError("Cannot transfer to your own account"); return; }
     setConfirmData({
       type: "business",
       title: "Confirm Business Transfer",
@@ -228,14 +217,10 @@ export default function TransferPage() {
   async function confirmBusiness() {
     if (!confirmData) return;
     const amt = confirmData.amount;
-    const acct = businessForm.accountNumber.trim().toUpperCase().replace(/^SWB-/, "");
-    const recipient = users?.find((u: any) => u._id.slice(-8).toUpperCase() === acct && u.role !== "admin");
-    if (!recipient) { setError("No SpringWell user found with that account number"); setConfirmData(null); return; }
     setLoading(true);
     try {
       const result = await transfer({
         fromUserId: userId as any,
-        toUserId: recipient._id,
         amount: amt,
         description: businessForm.description || `Business payment to ${businessForm.businessName}`,
       });
@@ -288,10 +273,10 @@ export default function TransferPage() {
   return (
     <div style={{ backgroundColor: "#eee", minHeight: "100vh", fontFamily: "'Hind', Arial, sans-serif" }} className="page-container">
       {/* Navigation */}
-      <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId }} />
+      <BankNav user={{ firstName: currentUser?.firstName || "", lastName: currentUser?.lastName || "", email: currentUser?.email || "", imageId: currentUser?.imageId, accountNumber: currentUser?.accountNumber ?? (currentUser?._id ? "SWB-" + currentUser._id.slice(-8).toUpperCase() : "") }} />
 
       {/* Main content */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "30px 20px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "30px 20px" }}>
 
         {/* Error / Success */}
         {error && (
@@ -451,7 +436,7 @@ export default function TransferPage() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <Label htmlFor="intl-currency" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Currency</Label>
-                    <select id="intl-currency" value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
+                    <div className="select-wrapper"><select id="intl-currency" value={intlForm.currency} onChange={(e) => setIntlForm({ ...intlForm, currency: e.target.value })} style={{ width: "100%", padding: "10px 12px", border: "1px solid #ccc", borderRadius: 4, fontSize: 14, fontFamily: "inherit", backgroundColor: "#fff" }}>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                       <option value="GBP">GBP</option>
@@ -459,7 +444,7 @@ export default function TransferPage() {
                       <option value="CHF">CHF</option>
                       <option value="CAD">CAD</option>
                       <option value="AUD">AUD</option>
-                    </select>
+                    </select></div>
                   </div>
                 </div>
                 <div>
@@ -486,7 +471,7 @@ export default function TransferPage() {
             </div>
             <div style={{ padding: 20 }}>
               <form onSubmit={handleBusiness} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to a business or person's SpringWell account</p>
+                <p style={{ fontSize: 13, color: "#666", margin: "0 0 4px" }}>Send money to a business or person&apos;s SpringWell account</p>
                 <div className="form-row">
                   <div>
                     <Label htmlFor="biz-name" style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>Business / Recipient Name *</Label>

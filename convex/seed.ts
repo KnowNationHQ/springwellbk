@@ -1,5 +1,12 @@
 import { mutation } from "./_generated/server";
 
+function genAccountNumber(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return `SWB-${code}`;
+}
+
 export const seedAdmin = mutation({
   handler: async (ctx) => {
     const existing = await ctx.db
@@ -16,6 +23,7 @@ export const seedAdmin = mutation({
       lastName: "User",
       role: "admin",
       status: "active",
+      accountNumber: "SWB-ADMIN001",
       balance: 100000,
       creditBalance: 25000,
       accountType: "checking",
@@ -43,6 +51,7 @@ export const seedCustomer = mutation({
       lastName: "Doe",
       role: "customer",
       status: "active",
+      accountNumber: "SWB-CUST001",
       balance: 50000,
       creditBalance: 12000,
       accountType: "savings",
@@ -51,5 +60,19 @@ export const seedCustomer = mutation({
       lastLogin: 0,
     });
     return "Customer created: customer / Test123!@";
+  },
+});
+
+export const migrateAccountNumbers = mutation({
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    let count = 0;
+    for (const user of users) {
+      if (!(user as any).accountNumber) {
+        await ctx.db.patch(user._id, { accountNumber: genAccountNumber() } as any);
+        count++;
+      }
+    }
+    return `Patched ${count} users with account numbers`;
   },
 });

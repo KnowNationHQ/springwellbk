@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { LogoSpinner } from "@/components/logo-spinner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -88,7 +87,6 @@ export default function LoginPage() {
         position: "relative",
       }}
     >
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* Dark overlay */}
       <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.55)" }} />
 
@@ -144,7 +142,7 @@ export default function LoginPage() {
                   </Link>
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <><LogoSpinner size={20} /> Signing in...</> : "Sign In"}
+                  {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Signing in...</span> : "Sign In"}
                 </Button>
                 <button
                   type="button"
@@ -168,7 +166,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <><LogoSpinner size={20} /> Sending...</> : "Send code"}
+                  {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending...</span> : "Send code"}
                 </Button>
                 <button
                   type="button"
@@ -192,7 +190,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                  {loading ? <><LogoSpinner size={20} /> Verifying...</> : "Verify & sign in"}
+                  {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Verifying...</span> : "Verify & sign in"}
                 </Button>
                 <button
                   type="button"

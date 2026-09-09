@@ -6,7 +6,7 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { LogoSpinner } from "@/components/logo-spinner";
 import { ArrowLeft, ArrowUpDown, Copy } from "lucide-react";
-import { sym } from "@/lib/format";
+import { sym, displayDate } from "@/lib/format";
 import { BankNav } from "@/components/layout/bank-nav";
 
 export default function AdminFrozenTransfersPage() {
@@ -69,6 +69,10 @@ export default function AdminFrozenTransfersPage() {
   }
 
   const adminUser = users.find((u: any) => u._id === userId);
+  if (!adminUser || adminUser.role !== "admin") {
+    router.push("/login");
+    return null;
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
@@ -104,10 +108,13 @@ export default function AdminFrozenTransfersPage() {
                       <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center"><ArrowUpDown className="w-3.5 h-3.5 text-orange-600" /></div>
                       <div>
                         <p className="text-sm font-bold text-gray-900 m-0">{sym(t.currency)}{t.amount.toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 m-0">{sender?.firstName} {sender?.lastName} · {new Date(t.createdAt).toLocaleDateString()}</p>
+                        <p className="text-[11px] text-gray-400 m-0">{sender?.firstName} {sender?.lastName} · {displayDate(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
+                    <div className="text-right">
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1 ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</span>
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
+                    </div>
                   </div>
 
                   {t.cotCode && (

@@ -2,6 +2,13 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
+function genAccountNumber(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return `SWB-${code}`;
+}
+
 export const list = query({
   args: {},
   handler: async (ctx) => {
@@ -13,6 +20,13 @@ export const getByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", args.email)).unique();
+  },
+});
+
+export const getByAccountNumber = query({
+  args: { accountNumber: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db.query("users").withIndex("by_accountNumber", (q) => q.eq("accountNumber", args.accountNumber.toUpperCase().trim())).unique();
   },
 });
 
@@ -39,6 +53,7 @@ export const create = mutation({
     if (existingUser) throw new Error("Username already taken");
     const userId = await ctx.db.insert("users", {
       ...args,
+      accountNumber: genAccountNumber(),
       balance: 0,
       creditBalance: 0,
       status: "pending",

@@ -19,6 +19,7 @@ export const creditDebit = mutation({
     type: v.union(v.literal("credit"), v.literal("debit")),
     amount: v.number(),
     description: v.optional(v.string()),
+    senderName: v.optional(v.string()),
     date: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -39,6 +40,7 @@ export const creditDebit = mutation({
       amount: args.amount,
       currency: user.currency,
       description: args.description ?? (args.type === "credit" ? "Admin credit" : "Admin debit"),
+      senderName: args.senderName?.trim() || undefined,
       status: "successful",
       createdAt: ts,
       backDate: args.date ?? undefined,
@@ -152,8 +154,7 @@ export const backDateTransaction = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.adminUserId);
-    const ts = new Date(args.date + "T12:00:00").getTime();
-    await ctx.db.patch(args.transactionId, { createdAt: ts, backDate: args.date });
+    await ctx.db.patch(args.transactionId, { backDate: args.date });
   },
 });
 
@@ -227,6 +228,7 @@ export const transfer = mutation({
     toUserId: v.id("users"),
     amount: v.number(),
     description: v.optional(v.string()),
+    senderName: v.optional(v.string()),
     date: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -240,7 +242,7 @@ export const transfer = mutation({
     if (from.balance < args.amount) throw new Error("Insufficient funds");
 
     const ts = args.date ? new Date(args.date + "T12:00:00").getTime() : Date.now();
-    const sender = `${from.firstName} ${from.lastName}`;
+    const sender = args.senderName?.trim() || `${from.firstName} ${from.lastName}`;
     await ctx.db.patch(from._id, { balance: from.balance - args.amount });
     await ctx.db.patch(to._id, { balance: to.balance + args.amount });
 

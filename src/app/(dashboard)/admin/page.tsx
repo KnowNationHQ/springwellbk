@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { LogoSpinner } from "@/components/logo-spinner";
-import { Search, Users, ArrowUpDown, CheckCircle, XCircle, MessageSquare, Wallet, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban, Copy, History } from "lucide-react";
-import { sym } from "@/lib/format";
+import { Search, ArrowUpDown, CheckCircle, XCircle, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban, History } from "lucide-react";
+import { sym, displayDate } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
 import { Modal } from "@/components/ui/modal";
@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const [creditType, setCreditType] = useState<"credit" | "debit">("credit");
   const [creditAmount, setCreditAmount] = useState("");
   const [creditDesc, setCreditDesc] = useState("");
+  const [creditSender, setCreditSender] = useState("");
   const [creditDate, setCreditDate] = useState("");
   const [fromUser, setFromUser] = useState("");
   const [toUser, setToUser] = useState("");
@@ -76,11 +77,8 @@ export default function AdminDashboard() {
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [generatingCodes, setGeneratingCodes] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
   const [completePercent, setCompletePercent] = useState(0);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
   const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [profileMsg, setProfileMsg] = useState("");
@@ -89,7 +87,6 @@ export default function AdminDashboard() {
   const customerTxns = useQuery(api.transactions.getByUser, txnsUser ? { userId: txnsUser._id } : "skip");
   const [successPopup, setSuccessPopup] = useState<{ title: string; message: string; details?: { label: string; value: string }[] } | null>(null);
   function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
-  function copyCode(code: string) { navigator.clipboard.writeText(code); setCopiedCode(code); setTimeout(() => setCopiedCode(null), 1500); }
 
   useEffect(() => {
     if (!completeLoading) { setCompletePercent(0); return; }
@@ -107,30 +104,34 @@ export default function AdminDashboard() {
   }
 
   const adminUser = users.find((u: any) => u._id === userId);
+  if (!adminUser || adminUser.role !== "admin") {
+    router.push("/login");
+    return null;
+  }
   const customers = users.filter((u: any) => {
     if (u.role === "admin") return false;
     const q = search.toLowerCase();
     if (!q) return true;
-    return u.firstName.toLowerCase().includes(q) || u.lastName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u._id.slice(-8).toUpperCase().includes(q.toUpperCase());
+    return u.firstName.toLowerCase().includes(q) || u.lastName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.accountNumber ?? "SWB-" + u._id.slice(-8).toUpperCase()).toLowerCase().includes(q);
   });
   const nonAdmins = users.filter((u: any) => u.role !== "admin");
   const totalBalance = nonAdmins.reduce((s: number, u: any) => s + (u.balance ?? 0), 0);
   const unreadMsgs = messages.filter((m: any) => m.status === "unread").length;
 
   function flash(title: string, message?: string) { setSuccessPopup({ title, message: message ?? "" }); }
-  function acct(u: any) { return "SWB-" + u._id.slice(-8).toUpperCase(); }
+  function acct(u: any) { return u.accountNumber ?? "SWB-" + u._id.slice(-8).toUpperCase(); }
 
-  function openCredit(u: any) { setActiveUser(u); setCreditAmount(""); setCreditDesc(""); setCreditType("credit"); setCreditDate(new Date().toISOString().slice(0, 10)); setModal("credit"); }
-  function openTransfer(u: any) { setActiveUser(u); setFromUser(u?._id ?? ""); setToUser(""); setTransferAmount(""); setTransferDesc(""); setTransferDate(new Date().toISOString().slice(0, 10)); setModal("transfer"); }
+  function openCredit(u: any) { setActiveUser(u); setCreditAmount(""); setCreditDesc(""); setCreditSender(""); setCreditType("credit"); setCreditDate(new Date().toISOString().slice(0, 10)); setModal("credit"); }
+  function openTransfer(u: any) { setActiveUser(u); setFromUser(u?._id ?? ""); setToUser(""); setTransferAmount(""); setTransferDesc(""); setCreditSender(""); setTransferDate(new Date().toISOString().slice(0, 10)); setModal("transfer"); }
   function openEdit(u: any) { setActiveUser(u); setEdit({ firstName: u.firstName, lastName: u.lastName, email: u.email, accountType: u.accountType, currency: u.currency, status: u.status, balance: String(u.balance ?? 0), creditBalance: String(u.creditBalance ?? 0) }); setModal("edit"); }
 
   async function handleCredit(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !activeUser || !creditAmount) return;
-    try { await creditDebit({ adminUserId: userId as any, userId: activeUser._id, type: creditType, amount: Number(creditAmount), description: creditDesc || (creditType === "credit" ? "Admin credit" : "Admin debit"), date: creditDate || undefined }); flash("Transaction Successful!", `${creditType === "credit" ? "Credit" : "Debit"} of $${Number(creditAmount).toLocaleString()} created`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
+    try { await creditDebit({ adminUserId: userId as any, userId: activeUser._id, type: creditType, amount: Number(creditAmount), description: creditDesc || (creditType === "credit" ? "Admin credit" : "Admin debit"), senderName: creditSender || undefined, date: creditDate || undefined }); flash("Transaction Successful!", `${creditType === "credit" ? "Credit" : "Debit"} of $${Number(creditAmount).toLocaleString()} created`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
   }
   async function handleTransfer(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !fromUser || !toUser || !transferAmount) return;
-    try { await transferAdmin({ adminUserId: userId as any, fromUserId: fromUser as any, toUserId: toUser as any, amount: Number(transferAmount), description: transferDesc || "Admin transfer", date: transferDate || undefined }); flash("Transfer Successful!", `$${Number(transferAmount).toLocaleString()} transferred`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
+    try { await transferAdmin({ adminUserId: userId as any, fromUserId: fromUser as any, toUserId: toUser as any, amount: Number(transferAmount), description: transferDesc || "Admin transfer", senderName: creditSender || undefined, date: transferDate || undefined }); flash("Transfer Successful!", `$${Number(transferAmount).toLocaleString()} transferred`); setModal(null); } catch (err: any) { flash("Error", err?.message ?? "Failed"); }
   }
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault(); if (!userId || !activeUser) return;
@@ -189,28 +190,6 @@ export default function AdminDashboard() {
     } catch (err: any) { setPwMsg(err?.message ?? "Failed"); }
   }
 
-  async function handleGenerateCodes(txn: any) {
-    if (!userId) return;
-    const codeVal = (codeInputs[txn._id] || "").trim();
-    if (!codeVal) return;
-    setGeneratingCodes(true);
-    try {
-      const result = await generateTransferCodes({ adminUserId: userId as any, transactionId: txn._id, code: codeVal });
-      const sender = users?.find((u: any) => u._id === txn.userId);
-      if (sender?.email) {
-        try {
-          await sendVerificationCodes({ to: sender.email, firstName: sender.firstName, cotCode: result.label === "COT" ? result.code : "", bsacCode: result.label === "BSAC" ? result.code : "", vatCode: result.label === "VAT" ? result.code : "" });
-        } catch { /* email best-effort */ }
-      }
-      setCodeInputs((prev) => { const n = { ...prev }; delete n[txn._id]; return n; });
-      flash(`${result.label} Code Sent!`, `Code sent to ${sender?.email ?? "customer"}`);
-    } catch (err: any) {
-      flash("Error", err?.message ?? "Failed to generate codes");
-    } finally {
-      setGeneratingCodes(false);
-    }
-  }
-
   const inputCls = "w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#426FB6] transition-colors";
   const btnPrimary = "px-4 py-2 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer";
   const btnGhost = "px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm cursor-pointer text-gray-700";
@@ -220,7 +199,7 @@ export default function AdminDashboard() {
     <div className="bg-gray-100 min-h-screen font-sans page-container">
       {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} role="admin" onOpenProfile={openProfile} />}
 
-      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-[900px] mx-auto px-4 py-4 space-y-4">
         {/* Search */}
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
@@ -267,10 +246,14 @@ export default function AdminDashboard() {
                     <div className="w-8 h-8 bg-yellow-50 rounded-full flex items-center justify-center"><ArrowUpDown className="w-3.5 h-3.5 text-yellow-600" /></div>
                     <div>
                       <p className="text-sm font-bold text-gray-900 m-0">{sym(t.currency)}{t.amount.toLocaleString()}</p>
-                      <p className="text-[11px] text-gray-400 m-0">{acct(t)} · {new Date(t.createdAt).toLocaleDateString()}</p>
+                      <p className="text-[11px] text-gray-400 m-0">{acct(t)} · {displayDate(t).toLocaleDateString()}</p>
+                      <p className="text-[11px] text-gray-500 m-0">{t.description || t.type}</p>
                     </div>
                   </div>
-                  <button onClick={() => openComplete(t._id)} className={btnPrimary + " text-xs"}>Complete</button>
+                  <div className="text-right">
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1 ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</span>
+                    <button onClick={() => openComplete(t._id)} className={btnPrimary + " text-xs"}>Complete</button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -349,7 +332,7 @@ export default function AdminDashboard() {
                 <div key={t._id} className={`flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg relative ${t.type === "credit" ? "border-l-4 border-l-green-300/50" : "border-l-4 border-l-red-300/50"}`}>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
-                    <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
+                    <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString()}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
@@ -398,25 +381,38 @@ export default function AdminDashboard() {
             <div className="p-5 space-y-3">
               {modal === "credit" && (
                 <form onSubmit={handleCredit} className="space-y-3">
-                  <select className={inputCls} value={activeUser?._id ?? ""} onChange={(e) => { const u = users.find((x: any) => x._id === e.target.value); setActiveUser(u); }}>
+                  <div className="select-wrapper"><select className={inputCls} value={activeUser?._id ?? ""} onChange={(e) => { const u = users.find((x: any) => x._id === e.target.value); setActiveUser(u); }}>
                     <option value="">Select user</option>
                     {nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}
-                  </select>
-                  <select className={inputCls} value={creditType} onChange={(e) => setCreditType(e.target.value as any)}>
+                  </select></div>
+                  {activeUser && (
+                    <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
+                      <div className="w-8 h-8 rounded-full bg-[#426FB6] text-white flex items-center justify-center text-xs font-bold">{activeUser.firstName?.[0]}{activeUser.lastName?.[0]}</div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 m-0">{activeUser.firstName} {activeUser.lastName}</p>
+                        <p className="text-[11px] text-gray-500 m-0 font-mono">{acct(activeUser)} · {activeUser.email}</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="select-wrapper"><select className={inputCls} value={creditType} onChange={(e) => setCreditType(e.target.value as any)}>
                     <option value="credit">Credit</option><option value="debit">Debit</option>
-                  </select>
+                  </select></div>
                   <input type="number" placeholder="Amount" className={inputCls} value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)} required />
                   <input placeholder="Description" className={inputCls} value={creditDesc} onChange={(e) => setCreditDesc(e.target.value)} />
+                  <input placeholder="Sender name (e.g. John Smith, Payroll, Wire Transfer)" className={inputCls} value={creditSender} onChange={(e) => setCreditSender(e.target.value)} />
                   <input type="date" className={inputCls} value={creditDate} onChange={(e) => setCreditDate(e.target.value)} />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Submit</button></div>
                 </form>
               )}
               {modal === "transfer" && (
                 <form onSubmit={handleTransfer} className="space-y-3">
-                  <select className={inputCls} value={fromUser} onChange={(e) => setFromUser(e.target.value)} required><option value="">From</option>{users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName}</option>)}</select>
-                  <select className={inputCls} value={toUser} onChange={(e) => setToUser(e.target.value)} required><option value="">To</option>{users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName}</option>)}</select>
+                  <div className="select-wrapper"><select className={inputCls} value={fromUser} onChange={(e) => setFromUser(e.target.value)} required><option value="">From</option>{users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName}</option>)}</select></div>
+                  {fromUser && (() => { const fu = users.find((u: any) => u._id === fromUser); return fu ? (<div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100"><div className="w-8 h-8 rounded-full bg-[#426FB6] text-white flex items-center justify-center text-xs font-bold">{fu.firstName?.[0]}{fu.lastName?.[0]}</div><div><p className="text-sm font-semibold text-gray-900 m-0">{fu.firstName} {fu.lastName}</p><p className="text-[11px] text-gray-500 m-0 font-mono">{acct(fu)} · Bal: {sym(fu.currency)}{(fu.balance ?? 0).toLocaleString()}</p></div></div>) : null; })()}
+                  <div className="select-wrapper"><select className={inputCls} value={toUser} onChange={(e) => setToUser(e.target.value)} required><option value="">To</option>{users.map((u: any) => <option key={u._id} value={u._id}>{acct(u)} · {u.firstName}</option>)}</select></div>
+                  {toUser && (() => { const tu = users.find((u: any) => u._id === toUser); return tu ? (<div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg border border-green-100"><div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">{tu.firstName?.[0]}{tu.lastName?.[0]}</div><div><p className="text-sm font-semibold text-gray-900 m-0">{tu.firstName} {tu.lastName}</p><p className="text-[11px] text-gray-500 m-0 font-mono">{acct(tu)} · Bal: {sym(tu.currency)}{(tu.balance ?? 0).toLocaleString()}</p></div></div>) : null; })()}
                   <input type="number" placeholder="Amount" className={inputCls} value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} required />
                   <input placeholder="Description" className={inputCls} value={transferDesc} onChange={(e) => setTransferDesc(e.target.value)} />
+                  <input placeholder="Sender name (e.g. John Smith, Payroll)" className={inputCls} value={creditSender} onChange={(e) => setCreditSender(e.target.value)} />
                   <input type="date" className={inputCls} value={transferDate} onChange={(e) => setTransferDate(e.target.value)} />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary}>Transfer</button></div>
                 </form>
@@ -426,11 +422,11 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-2"><input placeholder="First name" className={inputCls} value={edit.firstName} onChange={(e) => setEdit({ ...edit, firstName: e.target.value })} /><input placeholder="Last name" className={inputCls} value={edit.lastName} onChange={(e) => setEdit({ ...edit, lastName: e.target.value })} /></div>
                   <input placeholder="Email" className={inputCls} value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
                   <div className="grid grid-cols-2 gap-2">
-                    <select className={inputCls} value={edit.accountType} onChange={(e) => setEdit({ ...edit, accountType: e.target.value })}><option value="checking">Checking</option><option value="savings">Savings</option><option value="business">Business</option></select>
-                    <select className={inputCls} value={edit.currency} onChange={(e) => setEdit({ ...edit, currency: e.target.value })}><option value="USD">USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option></select>
+                    <div className="select-wrapper"><select className={inputCls} value={edit.accountType} onChange={(e) => setEdit({ ...edit, accountType: e.target.value })}><option value="checking">Checking</option><option value="savings">Savings</option><option value="business">Business</option></select></div>
+                    <div className="select-wrapper"><select className={inputCls} value={edit.currency} onChange={(e) => setEdit({ ...edit, currency: e.target.value })}><option value="USD">USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option></select></div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <select className={inputCls} value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}><option value="active">active</option><option value="suspended">suspended</option><option value="pending">pending</option></select>
+                    <div className="select-wrapper"><select className={inputCls} value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}><option value="active">active</option><option value="suspended">suspended</option><option value="pending">pending</option></select></div>
                     <input type="number" placeholder="Balance" className={inputCls} value={edit.balance} onChange={(e) => setEdit({ ...edit, balance: e.target.value })} />
                   </div>
                   <input type="number" placeholder="Credit Balance" className={inputCls} value={edit.creditBalance} onChange={(e) => setEdit({ ...edit, creditBalance: e.target.value })} />
@@ -439,7 +435,7 @@ export default function AdminDashboard() {
               )}
               {modal === "status" && (
                 <div className="space-y-3">
-                  <select className={inputCls} value={statusTarget} onChange={(e) => setStatusTarget(e.target.value)} required><option value="">Select account</option>{nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}</select>
+                  <div className="select-wrapper"><select className={inputCls} value={statusTarget} onChange={(e) => setStatusTarget(e.target.value)} required><option value="">Select account</option>{nonAdmins.map((u: any) => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}</select></div>
                   <div className="flex gap-2 justify-end pt-2">
                     <button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button>
                     <button disabled={!statusTarget} onClick={() => { if (statusTarget) { handleStatus(statusTarget, "active"); setModal(null); } }} className={btnPrimary + (statusTarget ? "" : " opacity-50")}>Activate</button>
@@ -449,10 +445,15 @@ export default function AdminDashboard() {
               )}
               {modal === "complete" && (
                 <form onSubmit={handleComplete} className="space-y-3">
-                  <select className={inputCls} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required><option value="">Select transaction</option>
+                  <div className="select-wrapper"><select className={inputCls} value={completeTxn} onChange={(e) => setCompleteTxn(e.target.value)} required><option value="">Select transaction</option>
                     {pending.length > 0 && <optgroup label="Pending Transactions">{pending.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.type} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</optgroup>}
                     {frozenTransfers.length > 0 && <optgroup label="Frozen Transfers">{frozenTransfers.map((t: any) => <option key={t._id} value={t._id}>{acct(t)} · {t.description?.slice(0, 30)} · {sym(t.currency)}{t.amount.toLocaleString()}</option>)}</optgroup>}
-                  </select>
+                  </select></div>
+                  {completeTxn && (() => {
+                    const tx = [...pending, ...frozenTransfers].find((t: any) => t._id === completeTxn);
+                    const sender = tx ? users.find((u: any) => u._id === tx.userId) : null;
+                    return sender ? (<div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100"><div className="w-8 h-8 rounded-full bg-[#426FB6] text-white flex items-center justify-center text-xs font-bold">{sender.firstName?.[0]}{sender.lastName?.[0]}</div><div><p className="text-sm font-semibold text-gray-900 m-0">{sender.firstName} {sender.lastName}</p><p className="text-[11px] text-gray-500 m-0 font-mono">{acct(sender)} · {tx?.description || tx?.type}</p></div></div>) : null;
+                  })()}
                   <input type="text" placeholder="Enter activation code" className={inputCls} value={activationCode} onChange={(e) => setActivationCode(e.target.value)} required />
                   <div className="flex gap-2 justify-end pt-2"><button type="button" onClick={() => setModal(null)} className={btnGhost}>Cancel</button><button type="submit" className={btnPrimary} disabled={!activationCode || completeLoading} style={{ opacity: !activationCode || completeLoading ? 0.7 : 1, position: "relative", overflow: "hidden", minWidth: 120 }}>{completeLoading ? <span style={{ position: "relative", zIndex: 1 }}><span style={{ position: "absolute", inset: 0, backgroundColor: "#2d5a9e", transform: `scaleX(${completePercent / 100})`, transformOrigin: "left", transition: "transform 0.2s ease" }} /><span style={{ position: "relative", zIndex: 1 }}>Completing {completePercent}%</span></span> : "Complete"}</button></div>
                 </form>
@@ -472,11 +473,12 @@ export default function AdminDashboard() {
                     <div key={t._id} className={`flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg relative ${t.type === "credit" ? "border-l-4 border-l-green-300/50" : "border-l-4 border-l-red-300/50"}`}>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-800 m-0 truncate">{t.description || t.type}</p>
-                        <p className="text-[11px] text-gray-400 m-0">{new Date(t.createdAt).toLocaleDateString()}</p>
+                        {t.senderName && <p className="text-[11px] text-gray-500 m-0">From: {t.senderName}</p>}
+                        <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString()} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                        {t.status === "pending" && <p className="text-[11px] text-yellow-500 m-0">Pending</p>}
+                        <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</p>
                       </div>
                     </div>
                   ))}
