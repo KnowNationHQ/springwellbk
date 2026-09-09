@@ -112,7 +112,7 @@ export default function AdminFrozenTransfersPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1 ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</span>
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1 ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</span>
                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{feeLabel}</span>
                     </div>
                   </div>

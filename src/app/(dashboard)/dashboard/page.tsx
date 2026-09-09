@@ -303,7 +303,7 @@ export default function DashboardPage() {
                   <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
                     {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
                   </span>
-                  <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</p>
+                  <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
                 </div>
               </div>
             ))}
@@ -332,7 +332,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-bold text-green-600 whitespace-nowrap">+{sym(t.currency)}{t.amount.toLocaleString()}</span>
-<p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</p>
+<p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
                   </div>
                 </div>
               ))}

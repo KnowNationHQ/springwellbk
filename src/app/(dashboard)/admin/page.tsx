@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1 ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</span>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1 ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</span>
                     <button onClick={() => openComplete(t._id)} className={btnPrimary + " text-xs"}>Complete</button>
                   </div>
                 </div>
@@ -478,7 +478,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="text-right shrink-0">
                         <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                        <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${(t.status === "completed" || t.status === "successful") ? "bg-green-100 text-green-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(t.status === "completed" || t.status === "successful") ? "Credited" : t.status === "pending" ? "Pending" : "Debited"}</p>
+                        <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
                       </div>
                     </div>
                   ))}

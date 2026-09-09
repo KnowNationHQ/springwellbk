@@ -152,7 +152,7 @@ export default function PendingVerificationPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-gray-900 m-0">{sym(tx.currency)}{tx.amount.toLocaleString()}</p>
-                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${(tx.status === "completed" || tx.status === "successful") ? "bg-green-100 text-green-700" : tx.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{(tx.status === "completed" || tx.status === "successful") ? "Credited" : tx.status === "pending" ? "Pending" : "Debited"}</span>
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${tx.type === "credit" ? "bg-green-100 text-green-700" : tx.type === "debit" ? "bg-red-100 text-red-700" : tx.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{tx.type === "credit" ? "Credited" : tx.type === "debit" ? "Debited" : tx.status === "pending" ? "Pending" : "Transfer"}</span>
                       </div>
                       <p className="text-[11px] text-gray-400 m-0 truncate">{tx.description || tx.type}</p>
                       <p className="text-[11px] text-gray-400 m-0">{displayDate(tx).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(tx).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
