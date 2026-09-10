@@ -38,8 +38,8 @@ Convex agent skills for common tasks can be installed by running
 - `/admin/transfer` — Admin transfer page (Domestic / International / Business)
 
 ## Test Credentials
-- **Customer:** `customer` / `Test123!@`
-- **Admin:** `admin` / `Admin123!@`
+- **Customer:** see seed.ts (set via Convex env vars in production)
+- **Admin:** see seed.ts (set via Convex env vars in production)
 
 ## Architecture
 - `convex/schema.ts` — DB schema (users, transactions, messages)

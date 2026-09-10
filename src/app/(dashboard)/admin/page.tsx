@@ -76,7 +76,6 @@ export default function AdminDashboard() {
   const [activationCode, setActivationCode] = useState("");
   const [backdateTxn, setBackdateTxn] = useState<any>(null);
   const [backdateValue, setBackdateValue] = useState("");
-  const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [completeLoading, setCompleteLoading] = useState(false);
   const [completePercent, setCompletePercent] = useState(0);
   const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
@@ -86,8 +85,6 @@ export default function AdminDashboard() {
   const [txnsUser, setTxnsUser] = useState<any>(null);
   const customerTxns = useQuery(api.transactions.getByUser, txnsUser ? { userId: txnsUser._id } : "skip");
   const [successPopup, setSuccessPopup] = useState<{ title: string; message: string; details?: { label: string; value: string }[] } | null>(null);
-  function togglePw(id: string) { setRevealed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
-
   useEffect(() => {
     if (!completeLoading) { setCompletePercent(0); return; }
     let pct = 0;
@@ -285,8 +282,8 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[11px] text-gray-500 font-semibold mr-1">{c.username}</span>
-                  <span className="text-[11px] text-gray-400 font-mono mr-1">{revealed.has(c._id) ? c.password : "••••••"}</span>
-                  <button onClick={() => togglePw(c._id)} className="text-[11px] text-[#426FB6] bg-transparent border-none cursor-pointer p-0">{revealed.has(c._id) ? "Hide" : "Show"}</button>
+                  <span className="text-[11px] text-gray-400 font-mono mr-1">••••••</span>
+                  <button className="text-[11px] text-gray-400 bg-transparent border-none cursor-default p-0" disabled>Show</button>
                   <div className="flex-1" />
                   <button title="View Transactions" onClick={() => openTxns(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><History className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Credit" onClick={() => openCredit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><ArrowUpDown className="w-3.5 h-3.5 text-gray-600" /></button>

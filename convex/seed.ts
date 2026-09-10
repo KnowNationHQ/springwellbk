@@ -31,7 +31,7 @@ export const seedAdmin = mutation({
       createdAt: Date.now(),
       lastLogin: 0,
     });
-    return "Admin created: admin / Admin123!@";
+    return "Admin created";
   },
 });
 
@@ -59,7 +59,7 @@ export const seedCustomer = mutation({
       createdAt: Date.now(),
       lastLogin: 0,
     });
-    return "Customer created: customer / Test123!@";
+    return "Customer created";
   },
 });
 

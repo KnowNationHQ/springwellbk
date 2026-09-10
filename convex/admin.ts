@@ -60,7 +60,7 @@ export const clearPendingTransactions = mutation({
 
 // Activation code required to release (complete) a pending transaction.
 // Override via Convex env var ACTIVATION_CODE in production.
-const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "SWB-ADMIN-2026";
+const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "";
 
 // Generate a fresh activation code for a pending transaction.
 export const generateActivationCode = mutation({

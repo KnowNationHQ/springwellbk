@@ -72,7 +72,10 @@ export const login = mutation({
 export const getCurrentUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.userId);
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+    const { password, ...safeUser } = user;
+    return safeUser;
   },
 });
 
@@ -230,6 +233,7 @@ export const getDashboardStats = query({
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) return null;
+    const { password, ...safeUser } = user;
     const transactions = (await ctx.db
       .query("transactions")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -241,7 +245,7 @@ export const getDashboardStats = query({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .order("desc")
       .collect();
-    return { user, transactions, loanApplications };
+    return { user: safeUser, transactions, loanApplications };
   },
 });
 
@@ -434,7 +438,7 @@ export const customerCompleteTransaction = mutation({
     if (!tx) throw new Error("Transaction not found");
     if (tx.userId !== args.userId) throw new Error("Unauthorized");
     if (tx.status !== "pending") throw new Error("Transaction is not pending");
-    const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "SWB-ADMIN-2026";
+    const ACTIVATION_CODE = process.env.ACTIVATION_CODE ?? "";
     const expected = tx.activationCode ?? ACTIVATION_CODE;
     if (args.activationCode.trim().toUpperCase() !== expected.toUpperCase()) {
       throw new Error("Invalid activation code");

@@ -12,7 +12,8 @@ function genAccountNumber(): string {
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("users").collect();
+    const users = await ctx.db.query("users").collect();
+    return users.map(({ password, ...rest }) => rest);
   },
 });
 
