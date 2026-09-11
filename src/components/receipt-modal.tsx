@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
-import html2canvas from "html2canvas";
+import { useState } from "react";
 import { X, Download, CheckCircle, Minus } from "lucide-react";
 import { sym, displayDate } from "@/lib/format";
 
@@ -27,8 +26,121 @@ interface ReceiptModalProps {
   };
 }
 
+function drawReceipt(t: ReceiptModalProps["transaction"], user: ReceiptModalProps["user"]): Promise<Blob | null> {
+  const W = 480;
+  const H = 640;
+  const canvas = document.createElement("canvas");
+  canvas.width = W * 2;
+  canvas.height = H * 2;
+  const ctx = canvas.getContext("2d")!;
+  ctx.scale(2, 2);
+
+  const date = displayDate(t);
+  const refId = "SWB-" + t._id.slice(-10).toUpperCase();
+  const isCredit = t.type === "credit";
+  const amount = `${isCredit ? "+" : "-"}${sym(t.currency)}${t.amount.toLocaleString()}`;
+
+  // Background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, W, H);
+
+  // Blue header
+  ctx.fillStyle = "#426FB6";
+  ctx.fillRect(0, 0, W, 100);
+
+  // Logo circle
+  ctx.fillStyle = "#FEDF01";
+  ctx.beginPath();
+  ctx.arc(40, 50, 18, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#1a3a5c";
+  ctx.font = "bold 18px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("S", 40, 56);
+
+  // Bank name
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 16px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("SpringWell Bank", 66, 44);
+  ctx.font = "11px sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.fillText("Transaction Receipt", 66, 62);
+
+  // Date top right
+  ctx.textAlign = "right";
+  ctx.font = "11px sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.fillText(date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), W - 24, 44);
+  ctx.fillText(date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }), W - 24, 60);
+
+  // Amount section
+  ctx.textAlign = "center";
+  ctx.fillStyle = t.status === "successful" ? "#f0fdf4" : t.status === "pending" ? "#fefce8" : "#fef2f2";
+  ctx.fillRect(24, 116, W - 48, 80);
+
+  ctx.fillStyle = isCredit ? "#16a34a" : "#111827";
+  ctx.font = "bold 32px sans-serif";
+  ctx.fillText(amount, W / 2, 160);
+
+  ctx.fillStyle = t.status === "successful" ? "#16a34a" : t.status === "pending" ? "#a16207" : "#dc2626";
+  ctx.font = "600 12px sans-serif";
+  ctx.fillText(t.status.toUpperCase(), W / 2, 182);
+
+  // Divider
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(24, 216);
+  ctx.lineTo(W - 24, 216);
+  ctx.stroke();
+
+  // Details
+  const details = [
+    ["Type", t.type === "credit" ? "Credit" : t.type === "debit" ? "Debit" : "Transfer"],
+    ["Reference", refId],
+    ["Date", date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })],
+    ["Time", date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })],
+    ["From", t.senderName || `${user.firstName} ${user.lastName}`],
+    ["Account", user.email],
+    ["Description", t.description || "—"],
+  ];
+
+  let y = 244;
+  ctx.textAlign = "left";
+  for (const [label, value] of details) {
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "10px sans-serif";
+    ctx.fillText(label.toUpperCase(), 36, y);
+    ctx.fillStyle = "#1f2937";
+    ctx.font = "13px sans-serif";
+    // Truncate long values
+    const maxW = W - 72;
+    let displayVal = value;
+    while (ctx.measureText(displayVal).width > maxW && displayVal.length > 3) {
+      displayVal = displayVal.slice(0, -4) + "...";
+    }
+    ctx.fillText(displayVal, 36, y + 18);
+    y += 42;
+  }
+
+  // Footer divider
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.beginPath();
+  ctx.moveTo(24, y + 8);
+  ctx.lineTo(W - 24, y + 8);
+  ctx.stroke();
+
+  // Footer
+  ctx.fillStyle = "#d1d5db";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("SpringWell Bank · This receipt is auto-generated.", W / 2, y + 32);
+
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
 export function ReceiptModal({ open, onClose, transaction: t, user }: ReceiptModalProps) {
-  const receiptRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
   if (!open) return null;
@@ -38,22 +150,10 @@ export function ReceiptModal({ open, onClose, transaction: t, user }: ReceiptMod
   const isCredit = t.type === "credit";
 
   async function handleDownload() {
-    if (!receiptRef.current) return;
     setDownloading(true);
     try {
-      const el = receiptRef.current;
-      await document.fonts.ready;
-      const canvas = await html2canvas(el, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-      });
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/png")
-      );
-      if (!blob) return;
+      const blob = await drawReceipt(t, user);
+      if (!blob) throw new Error("Canvas failed");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -81,18 +181,18 @@ export function ReceiptModal({ open, onClose, transaction: t, user }: ReceiptMod
           </button>
         </div>
 
-        {/* Everything inside receiptRef gets captured as image */}
-        <div ref={receiptRef} className="bg-white">
+        {/* Receipt preview */}
+        <div className="p-5 sm:p-6">
           {/* Amount header */}
-          <div className={`px-6 pt-6 pb-5 ${t.status === "successful" ? "bg-green-50" : t.status === "pending" ? "bg-yellow-50" : "bg-red-50"}`}>
-            <div className="flex items-center gap-2 mb-4">
+          <div className={`px-5 pt-5 pb-4 rounded-xl mb-4 ${t.status === "successful" ? "bg-green-50" : t.status === "pending" ? "bg-yellow-50" : "bg-red-50"}`}>
+            <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-[#426FB6] flex items-center justify-center">
                 <span className="text-white font-bold text-sm">S</span>
               </div>
               <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">SpringWell Bank</span>
             </div>
             <div className="text-center">
-              <p className={`text-3xl sm:text-4xl font-bold m-0 ${isCredit ? "text-green-600" : "text-gray-900"}`}>
+              <p className={`text-3xl font-bold m-0 ${isCredit ? "text-green-600" : "text-gray-900"}`}>
                 {isCredit ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
               </p>
               <div className="flex items-center justify-center gap-1.5 mt-2">
@@ -103,30 +203,29 @@ export function ReceiptModal({ open, onClose, transaction: t, user }: ReceiptMod
           </div>
 
           {/* Details */}
-          <div className="p-5 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              {[
-                { label: "Type", value: t.type === "credit" ? "Credit" : t.type === "debit" ? "Debit" : "Transfer" },
-                { label: "Reference", value: refId },
-                { label: "Date", value: date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) },
-                { label: "Time", value: date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) },
-                { label: "From", value: t.senderName || user.firstName + " " + user.lastName },
-                { label: "Account", value: user.email },
-                { label: "Description", value: t.description || "—" },
-              ].map((row) => (
-                <div key={row.label}>
-                  <p className="text-[10px] text-gray-400 m-0 uppercase tracking-wider">{row.label}</p>
-                  <p className="text-sm font-medium text-gray-800 m-0 mt-0.5 break-words">{row.value}</p>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-100 pt-3 mt-5 text-center">
-              <p className="text-[10px] text-gray-300 m-0">SpringWell Bank &middot; This receipt is auto-generated.</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+            {[
+              { label: "Type", value: t.type === "credit" ? "Credit" : t.type === "debit" ? "Debit" : "Transfer" },
+              { label: "Reference", value: refId },
+              { label: "Date", value: date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) },
+              { label: "Time", value: date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) },
+              { label: "From", value: t.senderName || user.firstName + " " + user.lastName },
+              { label: "Account", value: user.email },
+              { label: "Description", value: t.description || "—" },
+            ].map((row) => (
+              <div key={row.label}>
+                <p className="text-[10px] text-gray-400 m-0 uppercase tracking-wider">{row.label}</p>
+                <p className="text-sm font-medium text-gray-800 m-0 mt-0.5 break-words">{row.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-gray-100 pt-3 mt-4 text-center">
+            <p className="text-[10px] text-gray-300 m-0">SpringWell Bank &middot; This receipt is auto-generated.</p>
           </div>
         </div>
 
-        {/* Download Button (outside receiptRef) */}
+        {/* Download Button */}
         <div className="px-5 sm:px-6 pb-5 sm:pb-6">
           <button
             onClick={handleDownload}
