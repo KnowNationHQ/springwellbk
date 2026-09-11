@@ -289,10 +289,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
-                      {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
-                    </span>
-                    <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
+                    <div className="flex items-center gap-2 justify-end">
+                      <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
+                        {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
+                      </span>
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -320,8 +322,10 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold text-green-600 whitespace-nowrap">+{sym(t.currency)}{t.amount.toLocaleString()}</span>
-                      <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
+                      <div className="flex items-center gap-2 justify-end">
+                        <span className="text-sm font-bold text-green-600 whitespace-nowrap">+{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap bg-green-100 text-green-700">Credited</span>
+                      </div>
                     </div>
                   </div>
                 ))}

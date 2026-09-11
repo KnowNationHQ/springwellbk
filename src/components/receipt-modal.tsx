@@ -39,7 +39,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 async function drawReceipt(t: ReceiptModalProps["transaction"], user: ReceiptModalProps["user"]): Promise<Blob | null> {
   const W = 400;
-  const H = 580;
+  const H = 520;
   const canvas = document.createElement("canvas");
   canvas.width = W * 2;
   canvas.height = H * 2;
@@ -147,7 +147,14 @@ async function drawReceipt(t: ReceiptModalProps["transaction"], user: ReceiptMod
   ctx.fillStyle = "#d1d5db";
   ctx.font = "9px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("SpringWell Bank · This receipt is auto-generated.", W / 2, y + 26);
+  const footerY = y + 26;
+  ctx.fillText("SpringWell Bank · This receipt is auto-generated.", W / 2, footerY);
+
+  // Trim canvas to actual content
+  const trimmedH = Math.ceil(footerY + 16);
+  const imageData = ctx.getImageData(0, 0, W * 2, trimmedH * 2);
+  canvas.height = trimmedH * 2;
+  ctx.putImageData(imageData, 0, 0);
 
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
@@ -184,7 +191,7 @@ export function ReceiptModal({ open, onClose, transaction: t, user }: ReceiptMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-[400px] bg-white rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full bg-white rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto shadow-2xl" style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
           <h3 className="text-xs font-bold text-gray-900 m-0">Transaction Receipt</h3>
