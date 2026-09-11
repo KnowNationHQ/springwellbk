@@ -78,7 +78,7 @@ export default function AdminFrozenTransfersPage() {
     <div className="bg-gray-100 min-h-screen font-sans">
       {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} role="admin" />}
 
-      <main className="max-w-[800px] mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         <button onClick={() => router.push("/admin")} className="flex items-center gap-2 text-[#426FB6] text-sm font-semibold bg-transparent border-none cursor-pointer p-0">
           <ArrowLeft size={16} /> Back to Admin
         </button>

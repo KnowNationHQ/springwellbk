@@ -196,7 +196,7 @@ export default function AdminDashboard() {
     <div className="bg-gray-100 min-h-screen font-sans page-container">
       {adminUser && <BankNav user={{ firstName: adminUser.firstName, lastName: adminUser.lastName, email: adminUser.email, imageId: adminUser.imageId }} role="admin" onOpenProfile={openProfile} />}
 
-      <main className="max-w-[900px] mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Search */}
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">

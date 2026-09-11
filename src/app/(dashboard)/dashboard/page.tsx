@@ -217,7 +217,7 @@ export default function DashboardPage() {
       <BankNav user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, imageId: user.imageId }} onOpenProfile={() => setActiveModal("profile")} />
 
       {user.status === "pending" && (
-        <div className="max-w-[900px] mx-auto px-4 pt-2">
+        <div className="max-w-[1100px] mx-auto px-4 pt-2">
           <div style={{ backgroundColor: "#dbeafe", border: "1px solid #3b82f6", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 18 }}>⏳</span>
             <div>
@@ -229,7 +229,7 @@ export default function DashboardPage() {
       )}
 
       {user.status === "suspended" && (
-        <div className="max-w-[900px] mx-auto px-4 pt-2">
+        <div className="max-w-[1100px] mx-auto px-4 pt-2">
           <div style={{ backgroundColor: "#fef3c7", border: "1px solid #f59e0b", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 18 }}>⚠</span>
             <div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <main className="max-w-[900px] mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
         {/* Balance Card */}
         <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
           <p className="text-white/60 text-xs uppercase tracking-wider m-0">Available Balance</p>

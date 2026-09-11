@@ -64,7 +64,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
     <>
       {/* Desktop Top Bar */}
       <div className="hidden md:block bg-[#1a3a5c] text-white">
-        <div className="max-w-[900px] mx-auto px-5 flex items-center justify-between h-9">
+        <div className="max-w-[1100px] mx-auto px-5 flex items-center justify-between h-9">
           <div className="flex items-center gap-1">
             {navItems.map((item) => (
               <Link
@@ -88,7 +88,7 @@ export function BankNav({ user, onOpenProfile, role = "customer" }: BankNavProps
 
       {/* Desktop Main Bar: Logo + Profile */}
       <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-[900px] mx-auto px-5 flex items-center justify-between h-[68px]">
+        <div className="max-w-[1100px] mx-auto px-5 flex items-center justify-between h-[68px]">
           <Link href={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center no-underline shrink-0">
             <Image src="/logo.svg" alt="SpringWell Bank" width={130} height={25} priority style={{ height: "auto" }} />
           </Link>

@@ -41,13 +41,25 @@ export function ReceiptModal({ open, onClose, transaction: t, user }: ReceiptMod
     if (!receiptRef.current) return;
     setDownloading(true);
     try {
-      const canvas = await html2canvas(receiptRef.current, { backgroundColor: "#ffffff", scale: 2 });
+      const el = receiptRef.current;
+      const canvas = await html2canvas(el, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
+      link.href = dataUrl;
       link.download = `receipt-${refId}.png`;
-      link.href = canvas.toDataURL("image/png");
+      document.body.appendChild(link);
       link.click();
-    } catch {
-      // silent
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Receipt download failed:", err);
     } finally {
       setDownloading(false);
     }

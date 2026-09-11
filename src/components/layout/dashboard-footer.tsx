@@ -26,7 +26,7 @@ export function DashboardFooter({ lastLogin }: { lastLogin?: number }) {
 export function DashboardFullFooter() {
   return (
     <div className="bg-[#eee] border-t border-gray-300">
-      <div className="max-w-[600px] mx-auto py-10 px-5">
+      <div className="max-w-[1100px] mx-auto py-10 px-5">
         <div className="text-center text-[13px] text-[#426FB6] mb-2">
           <Link href="/" className="text-[#426FB6] no-underline">Contact Us</Link>
           <span className="mx-1.5 text-gray-400">/</span>
