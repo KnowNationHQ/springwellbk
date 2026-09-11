@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { LogoSpinner } from "@/components/logo-spinner";
-import { Search, ArrowUpDown, CheckCircle, XCircle, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban, History } from "lucide-react";
+import { Search, ArrowUpDown, CheckCircle, XCircle, Send, Pencil, Trash2, KeyRound, CalendarClock, ArrowRight, Globe, Shield, Ban, History, Eye, EyeOff } from "lucide-react";
 import { sym, displayDate } from "@/lib/format";
 import { UserAvatar } from "@/components/user-avatar";
 import { BankNav } from "@/components/layout/bank-nav";
@@ -80,6 +80,7 @@ export default function AdminDashboard() {
   const [completePercent, setCompletePercent] = useState(0);
   const [profileFields, setProfileFields] = useState({ firstName: "", lastName: "", phone: "", address: "" });
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+  const [showPw, setShowPw] = useState({ current: false, next: false, confirm: false });
   const [profileMsg, setProfileMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
   const [txnsUser, setTxnsUser] = useState<any>(null);
@@ -524,9 +525,14 @@ export default function AdminDashboard() {
           <h4 className="m-0 mb-2 text-sm font-bold">Security</h4>
           {pwMsg && <p className={`text-xs mb-2 ${pwMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{pwMsg}</p>}
           <form onSubmit={handlePasswordChange} className="space-y-2">
-            <Input type="password" placeholder="Current Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.current} onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })} />
-            <Input type="password" placeholder="New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.next} onChange={(e) => setPwForm({ ...pwForm, next: e.target.value })} />
-            <Input type="password" placeholder="Confirm New Password" className="w-full p-2.5 px-3 border border-gray-300 rounded-lg text-sm" value={pwForm.confirm} onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })} />
+            {([["current", "Current Password"], ["next", "New Password"], ["confirm", "Confirm New Password"]] as const).map(([key, ph]) => (
+              <div key={key} className="relative">
+                <Input type={showPw[key] ? "text" : "password"} placeholder={ph} className="w-full p-2.5 pr-10 border border-gray-300 rounded-lg text-sm" value={pwForm[key]} onChange={(e) => setPwForm({ ...pwForm, [key]: e.target.value })} />
+                <button type="button" tabIndex={-1} onClick={() => setShowPw(p => ({ ...p, [key]: !p[key] }))} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0">
+                  {showPw[key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            ))}
             <Button type="submit" className="py-2.5 bg-[#426FB6] text-white border-none rounded-lg text-sm font-bold cursor-pointer">Update Password</Button>
           </form>
         </div>
