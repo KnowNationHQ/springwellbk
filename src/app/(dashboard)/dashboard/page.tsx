@@ -15,6 +15,7 @@ import { ProfileImageUpload } from "@/components/profile-image-upload";
 import { Modal } from "@/components/ui/modal";
 import { Toast } from "@/components/ui/toast";
 import { DashboardFooter, DashboardFullFooter } from "@/components/layout/dashboard-footer";
+import { ReceiptModal } from "@/components/receipt-modal";
 
   type ModalName = "transfer" | "profile" | "alerts" | "offers" | "messages" | "spending" | "goals";
 
@@ -43,6 +44,8 @@ export default function DashboardPage() {
   const removeProfileImage = useMutation(api.auth.removeProfileImage);
   const verifyTransferCode = useMutation(api.auth.verifyTransferCode);
   const customerComplete = useMutation(api.auth.customerCompleteTransaction);
+
+  const [receiptTxn, setReceiptTxn] = useState<any>(null);
 
   const [frozenVerifyTxn, setFrozenVerifyTxn] = useState<any>(null);
   const [frozenStep, setFrozenStep] = useState<"cot" | "bsac" | "vat" | "completed">("cot");
@@ -288,7 +291,7 @@ export default function DashboardPage() {
             {transactions.length === 0 ? (
               <p className="text-gray-400 text-sm m-0">No transactions yet.</p>
             ) : transactions.slice(0, 10).map((t: any) => (
-              <div key={t._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={t._id} onClick={() => setReceiptTxn(t)} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.type === "credit" ? "bg-green-50" : "bg-red-50"}`}>
                     {t.type === "credit" ? <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" /> : <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />}
@@ -319,7 +322,7 @@ export default function DashboardPage() {
             </div>
             <div className="p-3 space-y-2">
               {transactions.filter((t: any) => t.type === "credit").slice(0, 10).map((t: any) => (
-                <div key={t._id} className="flex items-center justify-between p-3 bg-green-50/50 rounded-lg border-l-4 border-l-green-400">
+                <div key={t._id} onClick={() => setReceiptTxn(t)} className="flex items-center justify-between p-3 bg-green-50/50 rounded-lg border-l-4 border-l-green-400 cursor-pointer hover:bg-green-100/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                       <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" />
@@ -607,6 +610,15 @@ export default function DashboardPage() {
       )}
 
       {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
+
+      {receiptTxn && (
+        <ReceiptModal
+          open={!!receiptTxn}
+          onClose={() => setReceiptTxn(null)}
+          transaction={receiptTxn}
+          user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, accountNumber: user.accountNumber }}
+        />
+      )}
     </div>
   );
 }
