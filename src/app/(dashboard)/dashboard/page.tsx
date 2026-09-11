@@ -240,180 +240,186 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4">
-        {/* Balance Card */}
-        <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
-          <p className="text-white/60 text-xs uppercase tracking-wider m-0">Available Balance</p>
-          <p className="text-3xl font-bold m-0 mt-1">{sym(user.currency)}{user.balance.toLocaleString()}</p>
-          <p className="text-white/50 text-xs m-0 mt-2">SpringWell Bank Core checking · {cardNumber}</p>
-        </div>
-
-        {/* Quick Actions Row */}
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: "Transfer", icon: ArrowUpRight, action: () => router.push("/transfer") },
-            { label: "Pay Bill", icon: DollarSign, action: () => router.push("/transfer") },
-            { label: "Deposit", icon: Wallet, action: () => router.push("/transfer") },
-            { label: "More", icon: Target, action: () => {} },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <button key={item.label} onClick={() => item.action()} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
-                <Icon className="w-5 h-5 text-[#426FB6]" />
-                <span className="text-[11px] text-gray-600 font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Accounts */}
-        <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 m-0">Accounts</h3>
+      <main className="max-w-[1100px] mx-auto px-4 py-4 space-y-4 md:grid md:grid-cols-[1fr_340px] md:gap-4 md:space-y-0">
+        {/* Left Column */}
+        <div className="space-y-4">
+          {/* Balance Card */}
+          <div className="bg-[#1a3a5c] rounded-xl p-5 text-white">
+            <p className="text-white/60 text-xs uppercase tracking-wider m-0">Available Balance</p>
+            <p className="text-3xl font-bold m-0 mt-1">{sym(user.currency)}{user.balance.toLocaleString()}</p>
+            <p className="text-white/50 text-xs m-0 mt-2">SpringWell Bank Core checking · {cardNumber}</p>
           </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-800 m-0">Checking · 9080</p>
-                <p className="text-xs text-gray-400 m-0 mt-0.5">{cardNumber}</p>
-              </div>
-              <p className="text-xl font-bold text-gray-900 m-0">{sym(user.currency)}{user.balance.toLocaleString()}</p>
-            </div>
-          </div>
-        </section>
 
-        {/* Transactions */}
-        <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 m-0">Recent Transactions</h3>
+          {/* Quick Actions Row */}
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { label: "Transfer", icon: ArrowUpRight, action: () => router.push("/transfer") },
+              { label: "Pay Bill", icon: DollarSign, action: () => router.push("/transfer") },
+              { label: "Deposit", icon: Wallet, action: () => router.push("/transfer") },
+              { label: "More", icon: Target, action: () => {} },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button key={item.label} onClick={() => item.action()} className="flex flex-col items-center gap-1.5 py-3 bg-white rounded-lg border border-gray-200 cursor-pointer active:bg-gray-50 transition-colors">
+                  <Icon className="w-5 h-5 text-[#426FB6]" />
+                  <span className="text-[11px] text-gray-600 font-medium">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
-          <div className="p-3 space-y-2">
-            {transactions.length === 0 ? (
-              <p className="text-gray-400 text-sm m-0">No transactions yet.</p>
-            ) : transactions.slice(0, 10).map((t: any) => (
-              <div key={t._id} onClick={() => setReceiptTxn(t)} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.type === "credit" ? "bg-green-50" : "bg-red-50"}`}>
-                    {t.type === "credit" ? <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" /> : <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 m-0">{t.description || t.type}</p>
-                    {t.senderName && <p className="text-[11px] text-gray-500 m-0">From: {t.senderName}</p>}
-                    <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
-                    {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
-                  </span>
-                  <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Incoming Transactions */}
-        {transactions.some((t: any) => t.type === "credit") && (
+          {/* Transactions */}
           <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-gray-900 m-0">Incoming Transactions</h3>
-              <span className="text-[11px] text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full">{transactions.filter((t: any) => t.type === "credit").length} credits</span>
+            <div className="px-4 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-bold text-gray-900 m-0">Recent Transactions</h3>
             </div>
             <div className="p-3 space-y-2">
-              {transactions.filter((t: any) => t.type === "credit").slice(0, 10).map((t: any) => (
-                <div key={t._id} onClick={() => setReceiptTxn(t)} className="flex items-center justify-between p-3 bg-green-50/50 rounded-lg border-l-4 border-l-green-400 cursor-pointer hover:bg-green-100/50 transition-colors">
+              {transactions.length === 0 ? (
+                <p className="text-gray-400 text-sm m-0">No transactions yet.</p>
+              ) : transactions.slice(0, 10).map((t: any) => (
+                <div key={t._id} onClick={() => setReceiptTxn(t)} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                      <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.type === "credit" ? "bg-green-50" : "bg-red-50"}`}>
+                      {t.type === "credit" ? <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" /> : <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 m-0">{t.description || "Incoming transfer"}</p>
+                      <p className="text-sm font-bold text-gray-900 m-0">{t.description || t.type}</p>
                       {t.senderName && <p className="text-[11px] text-gray-500 m-0">From: {t.senderName}</p>}
                       <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-bold text-green-600 whitespace-nowrap">+{sym(t.currency)}{t.amount.toLocaleString()}</span>
-<p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
+                    <span className={`text-sm font-bold whitespace-nowrap ${t.type === "credit" ? "text-green-600" : "text-gray-900"}`}>
+                      {t.type === "credit" ? "+" : "-"}{sym(t.currency)}{t.amount.toLocaleString()}
+                    </span>
+                    <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
                   </div>
                 </div>
               ))}
             </div>
           </section>
-        )}
 
-        {/* Card */}
-        <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 m-0">My Card</h3>
-            <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Debit, {cardLast4}</p>
-          </div>
-          <div className="p-4">
-            <div className="w-full max-w-[360px] h-[220px] mx-auto [perspective:1000px] cursor-pointer group">
-              <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                {/* Front */}
-                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl [backface-visibility:hidden]">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
-                  <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 30% 20%, rgba(66,111,182,0.4) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(254,223,1,0.15) 0%, transparent 40%)" }} />
-                  <div className="absolute inset-0 p-5 flex flex-col justify-between text-white" style={{ position: "relative", zIndex: 1 }}>
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-7 rounded" style={{ background: "linear-gradient(135deg, #d4a843 0%, #f0d78c 40%, #c9952a 60%, #f0d78c 100%)", boxShadow: "inset 0 1px 2px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.3)" }}>
-                          <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-6 h-3 border border-[#b8860b]/40 rounded-sm" style={{ background: "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(184,134,11,0.15) 2px, rgba(184,134,11,0.15) 3px)" }} />
-                          </div>
-                        </div>
-                        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 1C5.34 1 4 2.34 4 4C4 5.66 5.34 7 7 7H3V1H7ZM3 8H7C7 9.66 5.66 11 4 11C2.34 11 1 9.66 1 8C1 6.34 2.34 5 4 5H3V8Z" fill="white" fillOpacity="0.5"/>
-                        </svg>
+          {/* Incoming Transactions */}
+          {transactions.some((t: any) => t.type === "credit") && (
+            <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-gray-900 m-0">Incoming Transactions</h3>
+                <span className="text-[11px] text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full">{transactions.filter((t: any) => t.type === "credit").length} credits</span>
+              </div>
+              <div className="p-3 space-y-2">
+                {transactions.filter((t: any) => t.type === "credit").slice(0, 10).map((t: any) => (
+                  <div key={t._id} onClick={() => setReceiptTxn(t)} className="flex items-center justify-between p-3 bg-green-50/50 rounded-lg border-l-4 border-l-green-400 cursor-pointer hover:bg-green-100/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" />
                       </div>
-                      <div className="flex items-center gap-0">
-                        <div className="w-8 h-8 rounded-full bg-[#EB001B] opacity-90" />
-                        <div className="w-8 h-8 rounded-full bg-[#F79E1B] opacity-90 -ml-3" />
+                      <div>
+                        <p className="text-sm font-bold text-gray-900 m-0">{t.description || "Incoming transfer"}</p>
+                        {t.senderName && <p className="text-[11px] text-gray-500 m-0">From: {t.senderName}</p>}
+                        <p className="text-[11px] text-gray-400 m-0">{displayDate(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · {displayDate(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-[17px] tracking-[0.2em] font-mono font-medium m-0 mb-4" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{cardNumber}</p>
-                      <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Card Holder</p>
-                          <p className="text-[13px] font-semibold m-0 tracking-wide uppercase">{user.firstName} {user.lastName}</p>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-green-600 whitespace-nowrap">+{sym(t.currency)}{t.amount.toLocaleString()}</span>
+                      <p className={`text-[11px] font-semibold m-0 mt-0.5 px-2 py-0.5 rounded-full inline-block ${t.type === "credit" ? "bg-green-100 text-green-700" : t.type === "debit" ? "bg-red-100 text-red-700" : t.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>{t.type === "credit" ? "Credited" : t.type === "debit" ? "Debited" : t.status === "pending" ? "Pending" : "Transfer"}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4">
+          {/* Accounts */}
+          <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-bold text-gray-900 m-0">Accounts</h3>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-800 m-0">Checking · 9080</p>
+                  <p className="text-xs text-gray-400 m-0 mt-0.5">{cardNumber}</p>
+                </div>
+                <p className="text-xl font-bold text-gray-900 m-0">{sym(user.currency)}{user.balance.toLocaleString()}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Card */}
+          <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-bold text-gray-900 m-0">My Card</h3>
+              <p className="text-[11px] text-gray-400 m-0 mt-0.5">SpringWell Bank Debit, {cardLast4}</p>
+            </div>
+            <div className="p-4">
+              <div className="w-full h-[220px] [perspective:1000px] cursor-pointer group">
+                <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                  {/* Front */}
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl [backface-visibility:hidden]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
+                    <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 30% 20%, rgba(66,111,182,0.4) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(254,223,1,0.15) 0%, transparent 40%)" }} />
+                    <div className="absolute inset-0 p-5 flex flex-col justify-between text-white" style={{ position: "relative", zIndex: 1 }}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2">
+                          <div className="w-10 h-7 rounded" style={{ background: "linear-gradient(135deg, #d4a843 0%, #f0d78c 40%, #c9952a 60%, #f0d78c 100%)", boxShadow: "inset 0 1px 2px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.3)" }}>
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-6 h-3 border border-[#b8860b]/40 rounded-sm" style={{ background: "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(184,134,11,0.15) 2px, rgba(184,134,11,0.15) 3px)" }} />
+                            </div>
+                          </div>
+                          <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 1C5.34 1 4 2.34 4 4C4 5.66 5.34 7 7 7H3V1H7ZM3 8H7C7 9.66 5.66 11 4 11C2.34 11 1 9.66 1 8C1 6.34 2.34 5 4 5H3V8Z" fill="white" fillOpacity="0.5"/>
+                          </svg>
                         </div>
-                        <div className="text-right">
-                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Expires</p>
-                          <p className="text-[13px] font-semibold m-0 tracking-wide">10/2028</p>
+                        <div className="flex items-center gap-0">
+                          <div className="w-8 h-8 rounded-full bg-[#EB001B] opacity-90" />
+                          <div className="w-8 h-8 rounded-full bg-[#F79E1B] opacity-90 -ml-3" />
                         </div>
-                        <div className="text-right">
-                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Network</p>
-                          <p className="text-[12px] font-bold m-0 tracking-wider text-[#FEDF01]">MASTERCARD</p>
+                      </div>
+                      <div>
+                        <p className="text-[17px] tracking-[0.2em] font-mono font-medium m-0 mb-4" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{cardNumber}</p>
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Card Holder</p>
+                            <p className="text-[13px] font-semibold m-0 tracking-wide uppercase">{user.firstName} {user.lastName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Expires</p>
+                            <p className="text-[13px] font-semibold m-0 tracking-wide">10/2028</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[8px] tracking-[0.15em] m-0 opacity-50 uppercase">Network</p>
+                            <p className="text-[12px] font-bold m-0 tracking-wider text-[#FEDF01]">MASTERCARD</p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                {/* Back */}
-                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#16213e] via-[#1a1a2e] to-[#0f3460]" />
-                  <div className="absolute inset-0" style={{ position: "relative" }}>
-                    <div className="w-full h-12 bg-black/60 mt-6" />
-                    <div className="px-6 mt-6">
-                      <div className="bg-white/15 backdrop-blur-sm rounded px-4 py-2.5 flex items-center justify-between border border-white/10">
-                        <div className="flex-1" />
-                        <div className="bg-white rounded px-4 py-1.5">
-                          <span className="text-[11px] font-bold tracking-[0.2em] text-[#1a1a2e] font-mono">{cardLast4}</span>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex justify-between items-center">
-                        <div>
-                          <p className="text-[8px] tracking-[0.15em] m-0 opacity-40 uppercase text-white">Customer Service</p>
-                          <p className="text-[11px] font-medium m-0 text-white/70">1-800-SPRWELL</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  {/* Back */}
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#16213e] via-[#1a1a2e] to-[#0f3460]" />
+                    <div className="absolute inset-0" style={{ position: "relative" }}>
+                      <div className="w-full h-12 bg-black/60 mt-6" />
+                      <div className="px-6 mt-6">
+                        <div className="bg-white/15 backdrop-blur-sm rounded px-4 py-2.5 flex items-center justify-between border border-white/10">
+                          <div className="flex-1" />
+                          <div className="bg-white rounded px-4 py-1.5">
+                            <span className="text-[11px] font-bold tracking-[0.2em] text-[#1a1a2e] font-mono">{cardLast4}</span>
                           </div>
-                          <span className="text-[9px] text-white/50">springwellbk.com</span>
+                        </div>
+                        <div className="mt-4 flex justify-between items-center">
+                          <div>
+                            <p className="text-[8px] tracking-[0.15em] m-0 opacity-40 uppercase text-white">Customer Service</p>
+                            <p className="text-[11px] font-medium m-0 text-white/70">1-800-SPRWELL</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            </div>
+                            <span className="text-[9px] text-white/50">springwellbk.com</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -421,28 +427,30 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Activity Grid */}
-        <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 m-0">Quick Actions</h3>
-          </div>
-          <div className="p-3 grid grid-cols-3 gap-2">
-            {activityItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button key={item.label} onClick={() => "route" in item && item.route ? router.push(item.route) : openModal(item.modal!)} className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-lg cursor-pointer active:bg-gray-50 transition-colors border-0 bg-transparent">
-                  <Icon className="w-5 h-5 text-[#426FB6]" />
-                  <span className="text-[10px] text-gray-600 font-medium text-center leading-tight">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+          {/* Quick Actions */}
+          <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-bold text-gray-900 m-0">Quick Actions</h3>
+            </div>
+            <div className="p-3 grid grid-cols-3 gap-2">
+              {activityItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button key={item.label} onClick={() => "route" in item && item.route ? router.push(item.route) : openModal(item.modal!)} className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-lg cursor-pointer active:bg-gray-50 transition-colors border-0 bg-transparent">
+                    <Icon className="w-5 h-5 text-[#426FB6]" />
+                    <span className="text-[10px] text-gray-600 font-medium text-center leading-tight">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </div>
 
-        <DashboardFooter lastLogin={user.lastLogin} />
+        <div className="md:col-span-2">
+          <DashboardFooter lastLogin={user.lastLogin} />
+        </div>
       </main>
 
       <DashboardFullFooter />
