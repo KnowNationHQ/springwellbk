@@ -7,11 +7,8 @@ export function SmartsuppChat() {
     if (typeof window === "undefined") return;
     if (document.getElementById("smartsupp-loader")) return;
 
-    const key = process.env.NEXT_PUBLIC_SMARTSUPP_KEY;
-    if (!key) return;
-
     (window as any)._smartsupp = (window as any)._smartsupp || {};
-    (window as any)._smartsupp.key = key;
+    (window as any)._smartsupp.key = "222e75a5a32a4becf57f4c7222d71f616c9e313a";
 
     (window as any).smartsupp = (window as any).smartsupp || function (...args: any[]) {
       ((window as any).smartsupp._ = (window as any).smartsupp._ || []).push(args);
