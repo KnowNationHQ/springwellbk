@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { T } from "@/lib/i18n";
 import {
   Landmark,
@@ -114,11 +115,12 @@ export function ServicesSection() {
               className="relative group overflow-hidden cursor-pointer h-screen min-h-[600px]"
             >
               {/* Background image */}
-              <img
+              <Image
                 src={svc.img}
                 alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                fill
+                sizes="100vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
               />
 
               {/* Gradient overlay */}

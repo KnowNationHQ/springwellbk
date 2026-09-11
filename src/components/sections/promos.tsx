@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { T } from "@/lib/i18n";
 
@@ -16,7 +17,9 @@ export function PromosSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {promos.map((p) => (
             <div key={p.titleKey} className="rounded-xl overflow-hidden bg-white border border-gray-200 flex flex-col">
-              <img src={p.img} alt="" aria-hidden="true" className="w-full h-40 object-cover" />
+              <div className="relative w-full h-40">
+                <Image src={p.img} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" />
+              </div>
               <div className="p-5 flex flex-col flex-1">
                 <p className="text-xs font-bold tracking-wide text-[#426FB6] mb-1"><T k={p.eyebrowKey} /></p>
                 <h2 className="font-bold text-base mb-2 leading-snug text-gray-900"><T k={p.titleKey} /></h2>
