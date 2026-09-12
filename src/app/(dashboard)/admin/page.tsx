@@ -526,9 +526,9 @@ export default function AdminDashboard() {
           {pwMsg && <p className={`text-xs mb-2 ${pwMsg.includes("success") ? "text-[#426FB6]" : "text-red-500"}`}>{pwMsg}</p>}
           <form onSubmit={handlePasswordChange} className="space-y-2">
             {([["current", "Current Password"], ["next", "New Password"], ["confirm", "Confirm New Password"]] as const).map(([key, ph]) => (
-              <div key={key} className="relative">
-                <input type={showPw[key] ? "text" : "password"} placeholder={ph} className="w-full h-9 pl-3 pr-10 border border-gray-300 rounded-lg text-sm bg-transparent outline-none focus:border-[#426FB6] transition-colors box-border" value={pwForm[key]} onChange={(e) => setPwForm({ ...pwForm, [key]: e.target.value })} />
-                <button type="button" tabIndex={-1} onClick={() => setShowPw(p => ({ ...p, [key]: !p[key] }))} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0 leading-none">
+              <div key={key} className="relative" style={{ overflow: "visible" }}>
+                <input type={showPw[key] ? "text" : "password"} placeholder={ph} className="w-full h-10 pl-3 pr-10 border border-gray-300 rounded-lg text-sm bg-transparent outline-none focus:border-[#426FB6] transition-colors box-border" value={pwForm[key]} onChange={(e) => setPwForm({ ...pwForm, [key]: e.target.value })} />
+                <button type="button" tabIndex={-1} onClick={() => setShowPw(p => ({ ...p, [key]: !p[key] }))} className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 bg-transparent border-none cursor-pointer z-10" aria-label={`Toggle ${ph}`}>
                   {showPw[key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
