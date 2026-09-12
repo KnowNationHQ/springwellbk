@@ -17,6 +17,14 @@ export const list = query({
   },
 });
 
+export const listForAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    return users.map((u) => ({ ...u, password: u.password }));
+  },
+});
+
 export const getByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {

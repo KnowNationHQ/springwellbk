@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     return () => document.removeEventListener("keydown", onKey);
   }, [modal]);
 
-  const users = useQuery(api.users.list);
+  const users = useQuery(api.users.listForAdmin);
   const transactions = useQuery(api.transactions.recent, { limit: 20 });
   const messages = useQuery(api.admin.listMessages);
   const pending = useQuery(api.admin.pendingTransactions);
@@ -84,6 +84,7 @@ export default function AdminDashboard() {
   const [profileMsg, setProfileMsg] = useState("");
   const [pwMsg, setPwMsg] = useState("");
   const [txnsUser, setTxnsUser] = useState<any>(null);
+  const [showUserPw, setShowUserPw] = useState<Record<string, boolean>>({});
   const customerTxns = useQuery(api.transactions.getByUser, txnsUser ? { userId: txnsUser._id } : "skip");
   const [successPopup, setSuccessPopup] = useState<{ title: string; message: string; details?: { label: string; value: string }[] } | null>(null);
   useEffect(() => {
@@ -283,8 +284,10 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[11px] text-gray-500 font-semibold mr-1">{c.username}</span>
-                  <span className="text-[11px] text-gray-400 font-mono mr-1">••••••</span>
-                  <button className="text-[11px] text-gray-400 bg-transparent border-none cursor-default p-0" disabled>Show</button>
+                  <span className="text-[11px] text-gray-400 font-mono mr-1">{showUserPw[c._id] ? (c as any).password : "••••••"}</span>
+                  <button type="button" onClick={() => setShowUserPw(p => ({ ...p, [c._id]: !p[c._id] }))} className="text-[11px] text-[#426FB6] hover:text-[#2d5a9e] bg-transparent border-none cursor-pointer p-0 font-semibold">
+                    {showUserPw[c._id] ? "Hide" : "Show"}
+                  </button>
                   <div className="flex-1" />
                   <button title="View Transactions" onClick={() => openTxns(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><History className="w-3.5 h-3.5 text-gray-600" /></button>
                   <button title="Credit" onClick={() => openCredit(c)} className="p-1.5 border border-gray-200 rounded-lg bg-white"><ArrowUpDown className="w-3.5 h-3.5 text-gray-600" /></button>
