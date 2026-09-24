@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+const SMARTSUPP_KEY = process.env.NEXT_PUBLIC_SMARTSUPP_KEY || "222e75a5a32a4becf57f4c7222d71f616c9e313a";
+
 export function SmartsuppChat() {
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -10,17 +12,14 @@ export function SmartsuppChat() {
     function loadSmartsupp() {
       if (document.getElementById("smartsupp-loader")) return;
       (window as any)._smartsupp = (window as any)._smartsupp || {};
-      (window as any)._smartsupp.key = "222e75a5a32a4becf57f4c7222d71f616c9e313a";
-      (window as any).smartsupp = (window as any).smartsupp || function (...args: any[]) {
-        ((window as any).smartsupp._ = (window as any).smartsupp._ || []).push(args);
-      };
-      (window as any).smartsupp._ = (window as any).smartsupp._ || [];
-      const s = document.createElement("script");
-      s.id = "smartsupp-loader";
-      s.type = "text/javascript";
-      s.async = true;
-      s.src = "https://www.smartsuppchat.com/loader.js";
-      document.head.appendChild(s);
+      (window as any)._smartsupp.key = SMARTSUPP_KEY;
+      (window as any).smartsupp||(function(d: Document) {
+        var s: HTMLScriptElement, c: HTMLScriptElement, o: any = (window as any).smartsupp = function() { o._.push(arguments) }; o._ = [];
+        s = d.getElementsByTagName("script")[0] as HTMLScriptElement;
+        c = d.createElement("script");
+        c.type = "text/javascript"; c.charset = "utf-8"; c.async = true;
+        c.src = "https://www.smartsuppchat.com/loader.js?"; s.parentNode!.insertBefore(c, s);
+      })(document);
     }
 
     const events = ["scroll", "mousemove", "touchstart", "keydown"];
